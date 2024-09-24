@@ -14,22 +14,18 @@ import (
 )
 
 func getGoldmark(style string) goldmark.Markdown {
-	ext := []goldmark.Extender{
-		extension.GFM,
-		emoji.Emoji,
-		meta.Meta,
-	}
-
+	opt := []highlighting.Option{}
 	if style != "" {
-		ext = append(ext,
-			highlighting.NewHighlighting(
-				highlighting.WithStyle(style),
-			),
-		)
+		opt = append(opt, highlighting.WithStyle(style))
 	}
 
 	return goldmark.New(
-		goldmark.WithExtensions(ext...),
+		goldmark.WithExtensions(
+			extension.GFM,
+			emoji.Emoji,
+			meta.Meta,
+			highlighting.NewHighlighting(opt...),
+		),
 		goldmark.WithParserOptions(
 			parser.WithAutoHeadingID(),
 		),
@@ -56,9 +52,8 @@ func GetMetadataProperty(f string, prop string, dflt interface{}) (interface{}, 
 		return nil, err
 	}
 
-	reader := text.NewReader(src)
 	context := parser.NewContext()
-	getGoldmark("").Parser().Parse(reader, parser.WithContext(context))
+	getGoldmark("").Parser().Parse(text.NewReader(src), parser.WithContext(context))
 
 	if m := meta.Get(context); m != nil {
 		if v, ok := m[prop]; ok {
