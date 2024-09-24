@@ -1,0 +1,127 @@
+{{ define "base" -}}
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="https://github.com/rafaelmartins/website">
+    <title>{{ template "title" . }}</title>
+    <link href="/assets/nunito/nunito.css" rel="stylesheet" type="text/css">
+    <link href="/assets/bulma/css/bulma.min.css" rel="stylesheet" type="text/css">
+    <link href="/assets/font-awesome/css/all.min.css" rel="stylesheet" type="text/css">
+    <style type="text/css">
+      body {
+        font-family: "Nunito", sans-serif;
+      }
+    </style>
+{{ template "extra_head" . }}
+  </head>
+  <body>
+    <nav class="navbar is-light" role="navigation" aria-label="Main Navigation">
+      <div class="container is-max-desktop">
+        <div class="navbar-brand">
+          <a class="navbar-item" href="/">
+            <h1 class="title is-4">{{ .Config.Title }}</h1>
+          </a>
+          {{- range .Config.SocialLinks }}
+          <a class="navbar-item is-hidden-desktop is-hidden-mobile" href="{{ .URL }}" aria-label="{{.Label}}">
+            <span class="icon">
+              <i class="fas fa-lg fa-brands fa-{{ .Icon }}"></i>
+            </span>
+          </a>
+          {{- end }}
+          <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navMenu">
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+          </a>
+        </div>
+        <div id="navMenu" class="navbar-menu">
+          <div class="navbar-start">
+            {{- if .Config.PostsDir }}
+            <a class="navbar-item" href="/blog/">Blog</a>
+            {{- end }}
+            {{- if .Config.Projects }}
+            <a class="navbar-item" href="/project/">Projects</a>
+            {{- end }}
+            {{- range .Config.Menu }}
+            <a class="navbar-item" href="{{ .URL }}">{{.Title}}</a>
+            {{- end }}
+          </div>
+          <div class="navbar-end">
+            {{- range .Config.SocialLinks }}
+            <a class="navbar-item is-hidden-touch" href="{{ .URL }}" aria-label="{{ .Label }}">
+              <span class="icon">
+                <i class="fas fa-lg fa-brands fa-{{ .Icon }}"></i>
+              </span>
+            </a>
+            {{- end }}
+          </div>
+        </div>
+      </div>
+    </nav>
+    <div class="mx-3 mt-5">
+      <div class="container is-max-desktop">
+        <div class="columns is-gapless">
+          <div class="mb-6 content column{{ if .Layout.WithSidebar }} is-7{{end}}">
+{{ template "main" . }}
+          </div>
+          {{- if .Layout.WithSidebar }}
+          <div class="column is-1"></div>
+          <div class="column">
+{{ template "sidebar" . }}
+          </div>
+          {{- end }}
+        </div>
+      </div>
+    </div>
+    <footer class="footer">
+      <div class="content has-text-centered">
+        <p>
+          {{- range .Config.SocialLinks }}
+          <a class="is-hidden-tablet" href="{{.URL}}" aria-label="{{.Label}}">
+            <span class="icon is-large has-text-grey-dark">
+              <i class="fas fa-2x fa-brands fa-{{.Icon}}"></i>
+            </span>
+          </a>
+          {{- end }}
+        </p>
+        <p>
+          {{ .Config.Footer }}
+        </p>
+      </div>
+    </footer>
+    <script src="https://rafaelmartins.eng.br/assets/anchor-js/anchor.min.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const projects = Array.prototype.slice.call(document.querySelectorAll('a.panel-block'), 0);
+        Array.prototype.slice.call(document.querySelectorAll('.panel-tabs a'), 0).forEach(tab => {
+          tab.addEventListener('click', () => {
+            Array.prototype.slice.call(document.querySelectorAll('.panel-tabs a.is-active'), 0).forEach(active_tab => {
+              active_tab.classList.toggle('is-active');
+            });
+            tab.classList.toggle('is-active');
+
+            const category = tab.getAttribute('data-tab');
+            projects.forEach(project => {
+              project.style.display = (category == 'all' || category == project.getAttribute('data-category')) ? '' : 'none';
+            });
+          });
+        });
+      });
+    </script>
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0).forEach(element => {
+          element.addEventListener('click', () => {
+            element.classList.toggle('is-active');
+            document.getElementById(element.dataset.target).classList.toggle('is-active');
+          });
+        });
+      });
+    </script>
+{{ template "extra_body" . }}
+  </body>
+</html>
+{{ end }}

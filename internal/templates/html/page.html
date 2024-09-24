@@ -1,0 +1,13 @@
+{{ define "title" }}{{ .Content.title }} - {{ .Config.Title }}{{ end }}
+
+{{ define "extra_head" }}{{ end }}
+{{ define "extra_body" }}{{ end }}
+
+{{ define "main" }}
+<article>
+  <h1 class="title">{{ .Content.title }}</h1>
+{{ .Content.body }}
+</article>
+{{ end }}
+
+{{ define "sidebar" }}{{ end }}

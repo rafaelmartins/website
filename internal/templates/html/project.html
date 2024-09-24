@@ -1,0 +1,27 @@
+{{ define "title" }}{{ .Content.Title }} - {{ .Config.Title }}{{ end }}
+
+{{ define "extra_head" }}
+<link href="/assets/github-markdown-css/github-markdown.min.css" rel="stylesheet" type="text/css">
+<style type="text/css">
+  .markdown-body {
+    font-family: "Nunito", sans-serif;
+  }
+  .markdown-body ul {
+    padding-left: 0;
+  }
+  .markdown-alert {
+    padding: 16px !important;
+  }
+</style>
+{{ end }}
+
+{{ define "extra_body" }}{{ end }}
+
+{{ define "main" }}
+<article class="markdown-body">
+  <h1 class="title">{{ .Content.Title }}</h1>
+{{ .Content.Body }}
+</article>
+{{ end }}
+
+{{ define "sidebar" }}{{ end }}
