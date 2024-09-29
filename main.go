@@ -136,6 +136,11 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 			sortReverse = false
 		}
 
+		ppp := 10
+		if ps.PostsPerPage != nil {
+			ppp = *ps.PostsPerPage
+		}
+
 		pppa := 10
 		if ps.PostsPerPageAtom != nil {
 			pppa = *ps.PostsPerPageAtom
@@ -156,7 +161,7 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 				&tasks.PostsPagination{
 					Title:           ps.Title,
 					SourceDir:       ps.SourceDir,
-					PostsPerPage:    ps.PostsPerPage,
+					PostsPerPage:    ppp,
 					SortReverse:     sortReverse,
 					HighlightStyle:  ps.HighlightStyle,
 					BaseDestination: ps.BaseDestination,

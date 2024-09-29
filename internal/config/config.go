@@ -67,7 +67,7 @@ type Config struct {
 	Posts []*struct {
 		Title              string                 `yaml:"title"`
 		SourceDir          string                 `yaml:"source-dir"`
-		PostsPerPage       int                    `yaml:"posts-per-page"`
+		PostsPerPage       *int                   `yaml:"posts-per-page"`
 		PostsPerPageAtom   *int                   `yaml:"posts-per-page-atom"`
 		SortReverse        *bool                  `yaml:"sort-reverse"`
 		HighlightStyle     string                 `yaml:"highlight-style"`
