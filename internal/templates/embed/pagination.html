@@ -10,7 +10,7 @@
     {{ range .Content.Entries }}
     {{ if not .Extra.unlisted }}
     <dt class="is-size-4 has-text-weight-bold">
-      <a class="has-text-link-dark" href="/{{ .Slug }}/">
+      <a class="has-text-link-dark" href="{{ .URL }}">
         {{ .Title }}
       </a>
     </dt>

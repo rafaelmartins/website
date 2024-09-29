@@ -33,7 +33,7 @@ type PostContentEntry struct {
 
 type ContentEntry struct {
 	File  string
-	Slug  string
+	URL   string
 	Title template.HTML
 	Body  template.HTML
 	Post  *PostContentEntry

@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"path"
 	"time"
 
 	"github.com/rafaelmartins/website/internal/runner"
@@ -130,7 +131,7 @@ func (h *Markdown) GetReader() (io.ReadCloser, error) {
 
 		entry := &templates.ContentEntry{
 			File: src.File,
-			Slug: src.Slug,
+			URL:  path.Join("/", src.Slug) + "/",
 			Body: template.HTML(body),
 		}
 

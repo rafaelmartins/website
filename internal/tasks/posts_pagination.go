@@ -143,10 +143,10 @@ func (p *PostsPagination) GetTasks() ([]*runner.Task, error) {
 			Total:   total,
 		}
 		if page > 1 {
-			pagination.LinkFirst = path.Join(pagination.Base, "1")
+			pagination.LinkFirst = path.Join(pagination.Base, "1") + "/"
 		}
 		if page < total {
-			pagination.LinkLast = path.Join(pagination.Base, strconv.FormatInt(int64(total), 10))
+			pagination.LinkLast = path.Join(pagination.Base, strconv.FormatInt(int64(total), 10)) + "/"
 		}
 
 		layoutCtx := &templates.LayoutContext{
@@ -174,7 +174,7 @@ func (p *PostsPagination) GetTasks() ([]*runner.Task, error) {
 				&postPaginationTaskImpl{
 					title:          p.Title,
 					sources:        srcs,
-					slug:           filepath.Join("page", strconv.FormatInt(int64(page), 10)),
+					slug:           path.Join("page", strconv.FormatInt(int64(page), 10)),
 					highlightStyle: style,
 					template:       tmpl,
 					templateCtx:    p.TemplateCtx,
