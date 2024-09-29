@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	//go:embed html/*.html
+	//go:embed embed/*
 	content embed.FS
 
 	ccfg *config.Config
@@ -71,7 +71,7 @@ func GetTimestamps(name string) ([]time.Time, error) {
 	if st, err := os.Stat(name); err == nil {
 		rv = append(rv, st.ModTime().UTC())
 	} else {
-		f, err := content.Open("html/" + name)
+		f, err := content.Open("embed/" + name)
 		if err != nil {
 			return nil, err
 		}
@@ -86,7 +86,7 @@ func GetTimestamps(name string) ([]time.Time, error) {
 }
 
 func Execute(wr io.Writer, name string, fm template.FuncMap, lctx *LayoutContext, cctx *ContentContext) error {
-	tmpl, err := template.New("base").Funcs(fm).ParseFS(content, "html/base.html")
+	tmpl, err := template.New("base").Funcs(fm).ParseFS(content, "embed/base.html")
 	if err != nil {
 		return err
 	}
@@ -97,7 +97,7 @@ func Execute(wr io.Writer, name string, fm template.FuncMap, lctx *LayoutContext
 			return err
 		}
 	} else {
-		tmpl, err = tmpl.ParseFS(content, "html/"+name)
+		tmpl, err = tmpl.ParseFS(content, "embed/"+name)
 		if err != nil {
 			return err
 		}
