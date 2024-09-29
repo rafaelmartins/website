@@ -2,6 +2,7 @@ package templates
 
 import (
 	"embed"
+	"fmt"
 	"io"
 	"os"
 	"text/template"
@@ -77,19 +78,16 @@ func GetTimestamps(name string) ([]time.Time, error) {
 	rv := []time.Time{}
 	if st, err := os.Stat(name); err == nil {
 		rv = append(rv, st.ModTime().UTC())
-	} else {
-		f, err := content.Open("embed/" + name)
+	} else if _, err := content.Open("embed/" + name); err == nil {
+		ts, err := utils.ExecutableTimestamp()
 		if err != nil {
 			return nil, err
 		}
-		f.Close()
+		rv = append(rv, ts)
+	} else {
+		return nil, fmt.Errorf("templates: failed to find template: %s", name)
 	}
-
-	ts, err := utils.ExecutableTimestamp()
-	if err != nil {
-		return nil, err
-	}
-	return append(rv, ts), nil
+	return rv, nil
 }
 
 func Execute(wr io.Writer, name string, fm template.FuncMap, lctx *LayoutContext, cctx *ContentContext) error {
@@ -103,11 +101,13 @@ func Execute(wr io.Writer, name string, fm template.FuncMap, lctx *LayoutContext
 		if err != nil {
 			return err
 		}
-	} else {
+	} else if _, err := content.Open("embed/" + name); err == nil {
 		tmpl, err = tmpl.ParseFS(content, "embed/"+name)
 		if err != nil {
 			return err
 		}
+	} else {
+		return fmt.Errorf("templates: failed to find template: %s", name)
 	}
 
 	llctx := lctx
