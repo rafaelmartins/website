@@ -1,6 +1,7 @@
 package tasks
 
 import (
+	"path"
 	"path/filepath"
 
 	"github.com/rafaelmartins/website/internal/generators"
@@ -9,11 +10,12 @@ import (
 )
 
 type projectTaskImpl struct {
-	owner     string
-	repo      string
-	template  string
-	immutable bool
-	layoutCtx *templates.LayoutContext
+	baseDestination string
+	owner           string
+	repo            string
+	template        string
+	immutable       bool
+	layoutCtx       *templates.LayoutContext
 }
 
 func (t *projectTaskImpl) GetDestination() string {
@@ -24,6 +26,7 @@ func (t *projectTaskImpl) GetGenerator() (runner.Generator, error) {
 	return &generators.Project{
 		Owner:     t.owner,
 		Repo:      t.repo,
+		URL:       path.Join("/", t.baseDestination, t.repo, "index.html"),
 		Template:  t.template,
 		Immutable: t.immutable,
 		LayoutCtx: t.layoutCtx,
@@ -55,10 +58,11 @@ func (p *Project) GetTasks() ([]*runner.Task, error) {
 	return []*runner.Task{
 		runner.NewTask(
 			&projectTaskImpl{
-				owner:     p.Owner,
-				repo:      p.Repo,
-				template:  tmpl,
-				immutable: p.Immutable,
+				baseDestination: p.GetBaseDestination(),
+				owner:           p.Owner,
+				repo:            p.Repo,
+				template:        tmpl,
+				immutable:       p.Immutable,
 				layoutCtx: &templates.LayoutContext{
 					WithSidebar: p.WithSidebar,
 				},

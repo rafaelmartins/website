@@ -22,6 +22,7 @@ import (
 type Project struct {
 	Owner     string
 	Repo      string
+	URL       string
 	Template  string
 	LayoutCtx *templates.LayoutContext
 	Immutable bool
@@ -58,6 +59,8 @@ func (p *Project) GetReader() (io.ReadCloser, error) {
 
 	buf := &bytes.Buffer{}
 	if err := templates.Execute(buf, p.Template, nil, p.LayoutCtx, &templates.ContentContext{
+		Title: title,
+		URL:   p.URL,
 		Entry: &templates.ContentEntry{
 			Title: title,
 			Body:  body,
