@@ -1,7 +1,6 @@
 package config
 
 import (
-	"html/template"
 	"os"
 	"time"
 
@@ -9,9 +8,9 @@ import (
 )
 
 type Config struct {
-	Title  string        `yaml:"title"`
-	Footer template.HTML `yaml:"footer"`
-	URL    string        `yaml:"url"`
+	Title  string `yaml:"title"`
+	Footer string `yaml:"footer"`
+	URL    string `yaml:"url"`
 
 	Author struct {
 		Name  string `yaml:"name"`
@@ -69,10 +68,12 @@ type Config struct {
 		Title              string                 `yaml:"title"`
 		SourceDir          string                 `yaml:"source-dir"`
 		PostsPerPage       int                    `yaml:"posts-per-page"`
+		PostsPerPageAtom   *int                   `yaml:"posts-per-page-atom"`
 		SortReverse        *bool                  `yaml:"sort-reverse"`
 		HighlightStyle     string                 `yaml:"highlight-style"`
 		BaseDestination    string                 `yaml:"base-destination"`
 		Template           string                 `yaml:"template"`
+		TemplateAtom       string                 `yaml:"template-atom"`
 		TemplatePagination string                 `yaml:"template-pagination"`
 		TemplateCtx        map[string]interface{} `yaml:"template-context"`
 		WithSidebar        bool                   `yaml:"with-sidebar"`

@@ -3,17 +3,17 @@
 {{ define "extra_head" }}{{ end }}
 {{ define "extra_body" }}{{ end }}
 
-{{ define "main" }}
+{{ define "main" -}}
 <article>
   <h1 class="title">{{ .Content.Entry.Title }}</h1>
 {{ .Content.Entry.Body }}
-  {{ if .Content.Entry.Post }}
+  {{- if .Content.Entry.Post }}
   <div class="has-text-grey-light mt-6">
-    <time>Posted by {{ if .Content.Entry.Post.Author.Name }}{{ .Content.Entry.Post.Author.Name }} {{
+    <time>Posted by {{ if .Content.Entry.Post.Author.Name }}{{ .Content.Entry.Post.Author.Name }}{{
       else }}{{ .Config.Author.Name }}{{ end }} on {{ .Content.Entry.Post.Date.Format "January 02, 2006" }}</time>
   </div>
-  {{ end }}
+  {{- end }}
 </article>
-{{ end }}
+{{- end }}
 
 {{ define "sidebar" }}{{ end }}

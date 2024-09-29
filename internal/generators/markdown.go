@@ -3,11 +3,11 @@ package generators
 import (
 	"bytes"
 	"fmt"
-	"html/template"
 	"io"
 	"log"
 	"os"
 	"path"
+	"text/template"
 	"time"
 
 	"github.com/rafaelmartins/website/internal/runner"
@@ -89,6 +89,7 @@ type MarkdownSource struct {
 
 type Markdown struct {
 	Title             string
+	URL               string
 	Sources           []*MarkdownSource
 	IsPost            bool
 	ExtraDependencies []string
@@ -100,15 +101,19 @@ type Markdown struct {
 }
 
 func (*Markdown) GetID() string {
-	return "HTML"
+	return "MARKDOWN"
 }
 
 func (h *Markdown) GetReader() (io.ReadCloser, error) {
 	ctx := &templates.ContentContext{
-		Title:      template.HTML(h.Title),
+		Title:      h.Title,
+		URL:        h.URL,
+		Atom:       &templates.AtomContentEntry{},
 		Pagination: h.Pagination,
 		Extra:      h.TemplateCtx,
 	}
+
+	atomUpdated := time.Time{}
 	entries := []*templates.ContentEntry{}
 
 	for _, src := range h.Sources {
@@ -132,12 +137,12 @@ func (h *Markdown) GetReader() (io.ReadCloser, error) {
 		entry := &templates.ContentEntry{
 			File: src.File,
 			URL:  path.Join("/", src.Slug) + "/",
-			Body: template.HTML(body),
+			Body: body,
 		}
 
 		if titleItf, ok := metadata["title"]; ok {
 			if title, ok := titleItf.(string); ok {
-				entry.Title = template.HTML(title)
+				entry.Title = title
 				delete(metadata, "title")
 			}
 		}
@@ -172,6 +177,13 @@ func (h *Markdown) GetReader() (io.ReadCloser, error) {
 				delete(metadata, "author")
 			}
 
+			if unlistedItf, ok := metadata["unlisted"]; ok {
+				if unlisted, ok := unlistedItf.(bool); ok {
+					post.Unlisted = unlisted
+				}
+				delete(metadata, "unlisted")
+			}
+
 			// if tagsItf, ok := metadata["tags"]; ok {
 			// 	if tagsSlice, ok := tagsItf.([]interface{}); ok {
 			// 		for _, tagItf := range tagsSlice {
@@ -184,6 +196,10 @@ func (h *Markdown) GetReader() (io.ReadCloser, error) {
 			// }
 
 			entry.Post = post
+
+			if atomUpdated.IsZero() && !post.Unlisted {
+				atomUpdated = post.Date
+			}
 		}
 
 		entry.Extra = metadata
@@ -201,6 +217,10 @@ func (h *Markdown) GetReader() (io.ReadCloser, error) {
 
 	if h.Pagination != nil {
 		ctx.Entries = entries
+		ctx.Atom.Updated = atomUpdated
+		if ctx.Atom.Updated.IsZero() {
+			ctx.Atom.Updated = time.Unix(0, 0)
+		}
 	}
 
 	funcMap := template.FuncMap{

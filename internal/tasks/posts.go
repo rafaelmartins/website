@@ -3,6 +3,7 @@ package tasks
 import (
 	"fmt"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 
@@ -12,12 +13,13 @@ import (
 )
 
 type postTaskImpl struct {
-	slug           string
-	source         string
-	highlightStyle string
-	template       string
-	templateCtx    map[string]interface{}
-	layoutCtx      *templates.LayoutContext
+	baseDestination string
+	slug            string
+	source          string
+	highlightStyle  string
+	template        string
+	templateCtx     map[string]interface{}
+	layoutCtx       *templates.LayoutContext
 }
 
 func (t *postTaskImpl) GetDestination() string {
@@ -26,6 +28,7 @@ func (t *postTaskImpl) GetDestination() string {
 
 func (t *postTaskImpl) GetGenerator() (runner.Generator, error) {
 	return &generators.Markdown{
+		URL: path.Join("/", t.baseDestination, t.slug, "index.html"),
 		Sources: []*generators.MarkdownSource{
 			{
 				File: t.source,
@@ -82,11 +85,12 @@ func (p *Posts) GetTasks() ([]*runner.Task, error) {
 		rv = append(rv,
 			runner.NewTask(
 				&postTaskImpl{
-					slug:           strings.TrimSuffix(src.Name(), ".md"),
-					source:         filepath.Join(p.SourceDir, src.Name()),
-					highlightStyle: style,
-					template:       tmpl,
-					templateCtx:    p.TemplateCtx,
+					baseDestination: p.BaseDestination,
+					slug:            strings.TrimSuffix(src.Name(), ".md"),
+					source:          filepath.Join(p.SourceDir, src.Name()),
+					highlightStyle:  style,
+					template:        tmpl,
+					templateCtx:     p.TemplateCtx,
 					layoutCtx: &templates.LayoutContext{
 						WithSidebar: p.WithSidebar,
 					},

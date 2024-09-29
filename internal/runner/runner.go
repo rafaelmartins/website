@@ -125,7 +125,7 @@ func Run(basedir string, cfg Config, groups []*TaskGroup) error {
 				}
 			}
 
-			log.Printf("  %-8s %s", gen.GetID(), dest)
+			log.Printf("  %-8s  %s", gen.GetID(), dest)
 
 			if err := func() error {
 				rd, err := gen.GetReader()
@@ -160,7 +160,7 @@ func Run(basedir string, cfg Config, groups []*TaskGroup) error {
 
 				dest := filepath.Join(basedir, group.impl.GetBaseDestination(), filepath.Dir(task.impl.GetDestination()), bp.Filename)
 
-				log.Printf("  %-8s %s", strings.Repeat("-", len(gen.GetID())), dest)
+				log.Printf("  %-8s  %s", strings.Repeat("-", len(gen.GetID())), dest)
 
 				if err := func() error {
 					defer bp.Reader.Close()

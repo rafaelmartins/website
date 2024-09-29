@@ -1,6 +1,7 @@
 package tasks
 
 import (
+	"path"
 	"path/filepath"
 
 	"github.com/rafaelmartins/website/internal/generators"
@@ -9,6 +10,7 @@ import (
 )
 
 type pageTaskImpl struct {
+	baseDestination   string
 	slug              string
 	source            string
 	extraDependencies []string
@@ -24,6 +26,7 @@ func (t *pageTaskImpl) GetDestination() string {
 
 func (t *pageTaskImpl) GetGenerator() (runner.Generator, error) {
 	return &generators.Markdown{
+		URL: path.Join("/", t.baseDestination, t.slug, "index.html"),
 		Sources: []*generators.MarkdownSource{
 			{
 				File: t.source,
@@ -77,6 +80,7 @@ func (p *Pages) GetTasks() ([]*runner.Task, error) {
 		rv = append(rv,
 			runner.NewTask(
 				&pageTaskImpl{
+					baseDestination:   p.BaseDestination,
 					slug:              k,
 					source:            v,
 					extraDependencies: deps,

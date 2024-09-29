@@ -1,0 +1,30 @@
+{{ define "base" -}}
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title type="text">{{ .Config.Title }}{{ if .Content.Title }} - {{ .Content.Title }}{{ end }}</title>
+  <id>{{ .Content.URL }}</id>
+  <updated>{{ .Content.Atom.Updated.Format "2006-01-02T15:04:05Z" }}</updated>
+  <link href="{{ .Config.URL }}" />
+  <link href="{{ .Config.URL }}{{ .Content.URL }}" rel="self" />
+  <author>
+    <name>{{ .Config.Author.Name }}</name>
+    <email>{{ .Config.Author.Email }}</email>
+  </author>
+  {{- range .Content.Entries }}
+  {{- if not .Post.Unlisted }}
+  <entry>
+    <title type="text">{{ .Title }}</title>
+    <id>{{ .URL }}</id>
+    <updated>{{ .Post.Date.Format "2006-01-02T15:04:05Z" }}</updated>
+    <published>{{ .Post.Date.Format "2006-01-02T15:04:05Z" }}</published>
+    <link href="{{ $.Config.URL }}{{ .URL }}" />
+    <author>
+      <name>{{ if .Post.Author.Name }}{{ .Post.Author.Name }}{{ else }}{{ $.Config.Author.Name }}{{ end }}</name>
+      <email>{{ if .Post.Author.Email }}{{ .Post.Author.Email }}{{ else }}{{ $.Config.Author.Email }}{{ end }}</email>
+    </author>
+    <content type="html"><![CDATA[{{ .Body }}]]></content>
+  </entry>
+  {{- end }}
+  {{- end }}
+</feed>
+{{- end }}

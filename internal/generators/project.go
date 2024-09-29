@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"html/template"
 	"io"
 	"net/http"
 	"net/url"
@@ -60,8 +59,8 @@ func (p *Project) GetReader() (io.ReadCloser, error) {
 	buf := &bytes.Buffer{}
 	if err := templates.Execute(buf, p.Template, nil, p.LayoutCtx, &templates.ContentContext{
 		Entry: &templates.ContentEntry{
-			Title: template.HTML(title),
-			Body:  template.HTML(body),
+			Title: title,
+			Body:  body,
 		},
 	}); err != nil {
 		return nil, err

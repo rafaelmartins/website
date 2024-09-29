@@ -136,6 +136,11 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 			sortReverse = false
 		}
 
+		pppa := 10
+		if ps.PostsPerPageAtom != nil {
+			pppa = *ps.PostsPerPageAtom
+		}
+
 		rv = append(rv,
 			runner.NewTaskGroup(
 				&tasks.Posts{
@@ -157,6 +162,16 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 					BaseDestination: ps.BaseDestination,
 					Template:        ps.TemplatePagination,
 					WithSidebar:     ps.WithSidebar,
+				},
+			),
+			runner.NewTaskGroup(
+				&tasks.Atom{
+					Title:           ps.Title,
+					SourceDir:       ps.SourceDir,
+					PostsPerPage:    pppa,
+					HighlightStyle:  ps.HighlightStyle,
+					BaseDestination: ps.BaseDestination,
+					Template:        ps.TemplateAtom,
 				},
 			),
 		)

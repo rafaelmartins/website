@@ -2,9 +2,9 @@ package templates
 
 import (
 	"embed"
-	"html/template"
 	"io"
 	"os"
+	"text/template"
 	"time"
 
 	"github.com/rafaelmartins/website/internal/config"
@@ -22,26 +22,31 @@ type LayoutContext struct {
 	WithSidebar bool
 }
 
+type AtomContentEntry struct {
+	Updated time.Time
+}
+
 type PostContentEntry struct {
 	Author struct {
 		Name  string
 		Email string
 	}
-	Date time.Time
+	Date     time.Time
+	Unlisted bool
 	// Tags []string
 }
 
 type ContentEntry struct {
 	File  string
 	URL   string
-	Title template.HTML
-	Body  template.HTML
+	Title string
+	Body  string
 	Post  *PostContentEntry
 	Extra map[string]interface{}
 }
 
 type ContentPagination struct {
-	Base      string
+	BaseURL   string
 	Current   int
 	Total     int
 	LinkFirst string
@@ -49,9 +54,11 @@ type ContentPagination struct {
 }
 
 type ContentContext struct {
-	Title      template.HTML
+	Title      string
+	URL        string
 	Entry      *ContentEntry
 	Entries    []*ContentEntry
+	Atom       *AtomContentEntry
 	Pagination *ContentPagination
 	Extra      map[string]interface{}
 }

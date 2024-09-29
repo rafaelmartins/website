@@ -1,6 +1,6 @@
 {{ define "title" }}{{ .Content.Title }} - {{ .Config.Title }}{{ end }}
 
-{{ define "extra_head" }}
+{{ define "extra_head" -}}
 <link href="/assets/github-markdown-css/github-markdown.min.css" rel="stylesheet" type="text/css">
 <style type="text/css">
   .markdown-body {
@@ -13,15 +13,15 @@
     padding: 16px !important;
   }
 </style>
-{{ end }}
+{{- end }}
 
 {{ define "extra_body" }}{{ end }}
 
-{{ define "main" }}
+{{ define "main" -}}
 <article class="markdown-body">
   <h1 class="title">{{ .Content.Entry.Title }}</h1>
 {{ .Content.Entry.Body }}
 </article>
-{{ end }}
+{{- end }}
 
 {{ define "sidebar" }}{{ end }}
