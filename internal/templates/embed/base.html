@@ -24,7 +24,7 @@
             <h1 class="title is-4">{{ .Config.Title }}</h1>
           </a>
           {{- range .Config.SocialLinks }}
-          <a class="navbar-item is-hidden-desktop is-hidden-mobile" href="{{ .URL }}" aria-label="{{.Label}}">
+          <a class="navbar-item is-hidden-desktop is-hidden-mobile" href="{{ .URL }}" aria-label="{{ .Label }}">
             <span class="icon">
               <i class="fas fa-lg fa-brands fa-{{ .Icon }}"></i>
             </span>
@@ -58,7 +58,7 @@
     <div class="mx-3 mt-5">
       <div class="container is-max-desktop">
         <div class="columns is-gapless">
-          <div class="mb-6 content column{{ if .Layout.WithSidebar }} is-7{{end}}">
+          <div class="mb-6 content column{{ if .Layout.WithSidebar }} is-7{{ end }}">
 {{ template "main" . }}
           </div>
           {{- if .Layout.WithSidebar }}
@@ -74,9 +74,9 @@
       <div class="content has-text-centered">
         <p>
           {{- range .Config.SocialLinks }}
-          <a class="is-hidden-tablet" href="{{.URL}}" aria-label="{{.Label}}">
+          <a class="is-hidden-tablet" href="{{ .URL }}" aria-label="{{ .Label }}">
             <span class="icon is-large has-text-grey-dark">
-              <i class="fas fa-2x fa-brands fa-{{.Icon}}"></i>
+              <i class="fas fa-2x fa-brands fa-{{ .Icon }}"></i>
             </span>
           </a>
           {{- end }}
