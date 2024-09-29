@@ -9,10 +9,14 @@ import (
 )
 
 type Config struct {
-	Title    string        `yaml:"title"`
-	Footer   template.HTML `yaml:"footer"`
-	URL      string        `yaml:"url"`
-	PostsDir string        `yaml:"posts-dir"`
+	Title  string        `yaml:"title"`
+	Footer template.HTML `yaml:"footer"`
+	URL    string        `yaml:"url"`
+
+	Author struct {
+		Name  string `yaml:"name"`
+		Email string `yaml:"email"`
+	} `yaml:"author"`
 
 	Assets struct {
 		BaseDestination string `yaml:"base-destination"`
@@ -60,6 +64,19 @@ type Config struct {
 		TemplateCtx       map[string]interface{} `yaml:"template-context"`
 		WithSidebar       bool                   `yaml:"with-sidebar"`
 	} `yaml:"pages"`
+
+	Posts []*struct {
+		Title              string                 `yaml:"title"`
+		SourceDir          string                 `yaml:"source-dir"`
+		PostsPerPage       int                    `yaml:"posts-per-page"`
+		SortReverse        *bool                  `yaml:"sort-reverse"`
+		HighlightStyle     string                 `yaml:"highlight-style"`
+		BaseDestination    string                 `yaml:"base-destination"`
+		Template           string                 `yaml:"template"`
+		TemplatePagination string                 `yaml:"template-pagination"`
+		TemplateCtx        map[string]interface{} `yaml:"template-context"`
+		WithSidebar        bool                   `yaml:"with-sidebar"`
+	} `yaml:"posts"`
 
 	file string
 	ts   time.Time

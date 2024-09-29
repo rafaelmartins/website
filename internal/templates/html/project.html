@@ -19,8 +19,8 @@
 
 {{ define "main" }}
 <article class="markdown-body">
-  <h1 class="title">{{ .Content.Title }}</h1>
-{{ .Content.Body }}
+  <h1 class="title">{{ .Content.Entry.Title }}</h1>
+{{ .Content.Entry.Body }}
 </article>
 {{ end }}
 

@@ -58,9 +58,11 @@ func (p *Project) GetReader() (io.ReadCloser, error) {
 	p.images = images
 
 	buf := &bytes.Buffer{}
-	if err := templates.Execute(buf, p.Template, p.LayoutCtx, map[string]interface{}{
-		"Title": title,
-		"Body":  template.HTML(body),
+	if err := templates.Execute(buf, p.Template, nil, p.LayoutCtx, &templates.ContentContext{
+		Entry: &templates.ContentEntry{
+			Title: template.HTML(title),
+			Body:  template.HTML(body),
+		},
 	}); err != nil {
 		return nil, err
 	}

@@ -109,8 +109,6 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 		)
 	}
 
-	// TODO: add a blog
-
 	for _, pg := range c.Pages {
 		src := map[string]string{}
 		for _, s := range pg.Sources {
@@ -127,6 +125,38 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 					Template:          pg.Template,
 					TemplateCtx:       pg.TemplateCtx,
 					WithSidebar:       pg.WithSidebar,
+				},
+			),
+		)
+	}
+
+	for _, ps := range c.Posts {
+		sortReverse := true
+		if ps.SortReverse != nil && !*ps.SortReverse {
+			sortReverse = false
+		}
+
+		rv = append(rv,
+			runner.NewTaskGroup(
+				&tasks.Posts{
+					SourceDir:       ps.SourceDir,
+					HighlightStyle:  ps.HighlightStyle,
+					BaseDestination: ps.BaseDestination,
+					Template:        ps.Template,
+					TemplateCtx:     ps.TemplateCtx,
+					WithSidebar:     ps.WithSidebar,
+				},
+			),
+			runner.NewTaskGroup(
+				&tasks.PostsPagination{
+					Title:           ps.Title,
+					SourceDir:       ps.SourceDir,
+					PostsPerPage:    ps.PostsPerPage,
+					SortReverse:     sortReverse,
+					HighlightStyle:  ps.HighlightStyle,
+					BaseDestination: ps.BaseDestination,
+					Template:        ps.TemplatePagination,
+					WithSidebar:     ps.WithSidebar,
 				},
 			),
 		)

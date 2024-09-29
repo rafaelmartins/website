@@ -39,14 +39,8 @@
         </div>
         <div id="navMenu" class="navbar-menu">
           <div class="navbar-start">
-            {{- if .Config.PostsDir }}
-            <a class="navbar-item" href="/blog/">Blog</a>
-            {{- end }}
-            {{- if .Config.Projects }}
-            <a class="navbar-item" href="/project/">Projects</a>
-            {{- end }}
             {{- range .Config.Menu }}
-            <a class="navbar-item" href="{{ .URL }}">{{.Title}}</a>
+            <a class="navbar-item" href="{{ .URL }}">{{ .Title }}</a>
             {{- end }}
           </div>
           <div class="navbar-end">

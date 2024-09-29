@@ -1,0 +1,30 @@
+{{ define "title" }}{{ .Content.Title }} - {{ .Config.Title }}{{ end }}
+
+{{ define "extra_head" }}{{ end }}
+{{ define "extra_body" }}{{ end }}
+
+{{ define "main" }}
+<article>
+  <h1 class="mb-5">{{ .Content.Title }}</h1>
+  <dl class="mb-6">
+    {{ range .Content.Entries }}
+    {{ if not .Extra.unlisted }}
+    <dt class="is-size-4 has-text-weight-bold">
+      <a class="has-text-link-dark" href="/{{ .Slug }}/">
+        {{ .Title }}
+      </a>
+    </dt>
+    <dd class="mb-4 is-size-5">
+      <time>{{ if .Post }}{{ .Post.Date.Format "January 02, 2006" }}{{ end }}</time>
+    </dd>
+    {{ end }}
+    {{ end }}
+  </dl>
+  <nav class="pagination" role="navigation" aria-label="pagination">
+    <a href="{{ .Content.Pagination.LinkFirst }}" class="pagination-previous{{ if not .Content.Pagination.LinkFirst }} is-disabled{{ end }}">Previous</a>
+    <a href="{{ .Content.Pagination.LinkLast }}" class="pagination-next{{ if not .Content.Pagination.LinkLast }} is-disabled{{ end }}">Next</a>
+  </nav>
+</article>
+{{ end }}
+
+{{ define "sidebar" }}{{ end }}

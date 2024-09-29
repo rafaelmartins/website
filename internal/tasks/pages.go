@@ -23,8 +23,13 @@ func (t *pageTaskImpl) GetDestination() string {
 }
 
 func (t *pageTaskImpl) GetGenerator() (runner.Generator, error) {
-	return &generators.HTML{
-		Source:            t.source,
+	return &generators.Markdown{
+		Sources: []*generators.MarkdownSource{
+			{
+				File: t.source,
+				Slug: t.slug,
+			},
+		},
 		ExtraDependencies: t.extraDependencies,
 		HighlightStyle:    t.highlightStyle,
 		Template:          t.template,
@@ -50,7 +55,7 @@ func (p *Pages) GetBaseDestination() string {
 func (p *Pages) GetTasks() ([]*runner.Task, error) {
 	tmpl := p.Template
 	if tmpl == "" {
-		tmpl = "page.html"
+		tmpl = "entry.html"
 	}
 
 	style := p.HighlightStyle
@@ -69,7 +74,6 @@ func (p *Pages) GetTasks() ([]*runner.Task, error) {
 
 	rv := []*runner.Task{}
 	for k, v := range p.Sources {
-
 		rv = append(rv,
 			runner.NewTask(
 				&pageTaskImpl{
