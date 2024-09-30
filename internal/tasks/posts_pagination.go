@@ -131,6 +131,24 @@ func (p *PostsPagination) GetTasks() ([]*runner.Task, error) {
 	page := 1
 	total := int(math.Ceil(float64(len(posts)) / float64(ppp)))
 
+	if len(posts) == 0 {
+		return []*runner.Task{
+			runner.NewTask(
+				&postPaginationTaskImpl{
+					baseDestination: p.BaseDestination,
+					title:           p.Title,
+					sources:         nil,
+					slug:            "",
+					highlightStyle:  style,
+					template:        tmpl,
+					templateCtx:     p.TemplateCtx,
+					pagination:      &templates.ContentPagination{},
+					layoutCtx:       layoutCtx,
+				},
+			),
+		}, nil
+	}
+
 	rv := []*runner.Task{}
 	for chk := range slices.Chunk(posts, ppp) {
 		srcs := []*generators.MarkdownSource{}
@@ -188,24 +206,6 @@ func (p *PostsPagination) GetTasks() ([]*runner.Task, error) {
 			),
 		)
 		page++
-	}
-
-	if len(rv) == 0 {
-		rv = append(rv,
-			runner.NewTask(
-				&postPaginationTaskImpl{
-					baseDestination: p.BaseDestination,
-					title:           p.Title,
-					sources:         nil,
-					slug:            "",
-					highlightStyle:  style,
-					template:        tmpl,
-					templateCtx:     p.TemplateCtx,
-					pagination:      &templates.ContentPagination{},
-					layoutCtx:       layoutCtx,
-				},
-			),
-		)
 	}
 
 	return rv, nil
