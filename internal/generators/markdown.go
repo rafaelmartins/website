@@ -186,13 +186,6 @@ func (h *Markdown) GetReader() (io.ReadCloser, error) {
 				delete(metadata, "author")
 			}
 
-			if unlistedItf, ok := metadata["unlisted"]; ok {
-				if unlisted, ok := unlistedItf.(bool); ok {
-					post.Unlisted = unlisted
-				}
-				delete(metadata, "unlisted")
-			}
-
 			// if tagsItf, ok := metadata["tags"]; ok {
 			// 	if tagsSlice, ok := tagsItf.([]interface{}); ok {
 			// 		for _, tagItf := range tagsSlice {
@@ -206,7 +199,7 @@ func (h *Markdown) GetReader() (io.ReadCloser, error) {
 
 			entry.Post = post
 
-			if atomUpdated.IsZero() && !post.Unlisted {
+			if atomUpdated.IsZero() {
 				atomUpdated = post.Date
 			}
 		}

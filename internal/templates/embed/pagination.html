@@ -34,7 +34,6 @@
   {{- end }}
   <dl class="mb-6">
     {{- range .Content.Entries }}
-    {{- if not .Post.Unlisted }}
     <dt class="is-size-4 has-text-weight-bold">
       <a class="has-text-link-dark" href="{{ .URL }}">
         {{ .Title }}
@@ -43,7 +42,6 @@
     <dd class="mb-4 is-size-5">
       <time>{{ if .Post }}{{ .Post.Date.Format "January 02, 2006" }}{{ end }}</time>
     </dd>
-    {{- end }}
     {{- else }}
     <dt class="is-size-4 has-text-weight-bold">No posts available yet!</dt>
     {{- end }}

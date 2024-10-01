@@ -36,8 +36,7 @@ type PostContentEntry struct {
 		Name  string
 		Email string
 	}
-	Date     time.Time
-	Unlisted bool
+	Date time.Time
 	// Tags []string
 }
 
