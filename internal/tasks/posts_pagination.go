@@ -150,8 +150,11 @@ func (p *PostsPagination) GetTasks() ([]*runner.Task, error) {
 					highlightStyle:  style,
 					template:        tmpl,
 					templateCtx:     p.TemplateCtx,
-					pagination:      &templates.ContentPagination{},
-					layoutCtx:       layoutCtx,
+					pagination: &templates.ContentPagination{
+						Enabled: p.PostsPerPage > 0,
+						AtomURL: path.Join("/", p.BaseDestination, "atom.xml"),
+					},
+					layoutCtx: layoutCtx,
 				},
 			),
 		}, nil
@@ -170,7 +173,9 @@ func (p *PostsPagination) GetTasks() ([]*runner.Task, error) {
 		}
 
 		pagination := &templates.ContentPagination{
+			Enabled: p.PostsPerPage > 0,
 			BaseURL: path.Join("/", p.BaseDestination, "page"),
+			AtomURL: path.Join("/", p.BaseDestination, "atom.xml"), // FIXME: avoid hardcoding
 			Current: page,
 			Total:   total,
 		}

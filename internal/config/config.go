@@ -77,7 +77,6 @@ type Config struct {
 		Template           string                 `yaml:"template"`
 		TemplateAtom       string                 `yaml:"template-atom"`
 		TemplatePagination string                 `yaml:"template-pagination"`
-		TemplateSeries     string                 `yaml:"template-series"`
 		TemplateCtx        map[string]interface{} `yaml:"template-context"`
 		WithSidebar        bool                   `yaml:"with-sidebar"`
 	} `yaml:"posts"`

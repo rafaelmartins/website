@@ -5,17 +5,32 @@
 
 {{ define "main" -}}
 <article>
-  <h1 class="mb-5">{{ .Content.Title }}</h1>
-  {{- if .Content.Series }}
-  <p>
+  <h1 class="mb-5">
+    {{- .Content.Title }}
+  </h1>
+  {{- if or .Content.Series .Content.Description }}
+  <div class="notification">
+    {{- if .Content.Description }}
+    <p>{{ .Content.Description }}</p>
+    {{- end }}
+    {{- if .Content.Series }}
     <div class="tags has-addons">
       <span class="tag is-dark">Series status</span>
-      <span class="tag">{{ .Content.Series.Status }}</span>
+      <span class="tag is-info is-light">{{ .Content.Series.Status }}</span>
     </div>
-  </p>
-  {{- end }}
-  {{- if .Content.Description }}
-  <p>{{ .Content.Description }}</p>
+    {{- end }}
+    <a class="button is-small" href="{{ .Content.Pagination.AtomURL }}">
+      <i class="fa fa-rss mr-2" aria-hidden="true"></i>
+      Atom feed
+    </a>
+  </div>
+  {{- else }}
+  <div class="block">
+    <a class="button is-small" href="{{ .Content.Pagination.AtomURL }}">
+      <i class="fa fa-rss mr-2" aria-hidden="true"></i>
+      Atom feed
+    </a>
+  </div>
   {{- end }}
   <dl class="mb-6">
     {{- range .Content.Entries }}
@@ -30,13 +45,15 @@
     </dd>
     {{- end }}
     {{- else }}
-    <p class="is-size-4 has-text-weight-bold">No posts available yet!</p>
+    <dt class="is-size-4 has-text-weight-bold">No posts available yet!</dt>
     {{- end }}
   </dl>
+  {{- if .Content.Pagination.Enabled }}
   <nav class="pagination" role="navigation" aria-label="pagination">
     <a href="{{ .Content.Pagination.LinkFirst }}" class="pagination-previous{{ if not .Content.Pagination.LinkFirst }} is-disabled{{ end }}">Previous</a>
     <a href="{{ .Content.Pagination.LinkLast }}" class="pagination-next{{ if not .Content.Pagination.LinkLast }} is-disabled{{ end }}">Next</a>
   </nav>
+  {{- end }}
 </article>
 {{- end }}
 
