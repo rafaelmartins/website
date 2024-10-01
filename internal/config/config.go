@@ -66,15 +66,18 @@ type Config struct {
 
 	Posts []*struct {
 		Title              string                 `yaml:"title"`
+		Description        string                 `yaml:"description"`
 		SourceDir          string                 `yaml:"source-dir"`
 		PostsPerPage       *int                   `yaml:"posts-per-page"`
 		PostsPerPageAtom   *int                   `yaml:"posts-per-page-atom"`
 		SortReverse        *bool                  `yaml:"sort-reverse"`
+		SeriesStatus       string                 `yaml:"series-status"`
 		HighlightStyle     string                 `yaml:"highlight-style"`
 		BaseDestination    string                 `yaml:"base-destination"`
 		Template           string                 `yaml:"template"`
 		TemplateAtom       string                 `yaml:"template-atom"`
 		TemplatePagination string                 `yaml:"template-pagination"`
+		TemplateSeries     string                 `yaml:"template-series"`
 		TemplateCtx        map[string]interface{} `yaml:"template-context"`
 		WithSidebar        bool                   `yaml:"with-sidebar"`
 	} `yaml:"posts"`

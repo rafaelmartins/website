@@ -25,6 +25,8 @@ type postForPagination struct {
 type postPaginationTaskImpl struct {
 	baseDestination string
 	title           string
+	description     string
+	seriesStatus    string
 	sources         []*generators.MarkdownSource
 	slug            string
 	highlightStyle  string
@@ -41,7 +43,9 @@ func (t *postPaginationTaskImpl) GetDestination() string {
 func (t *postPaginationTaskImpl) GetGenerator() (runner.Generator, error) {
 	return &generators.Markdown{
 		Title:          t.title,
+		Description:    t.description,
 		URL:            path.Join("/", t.baseDestination, t.slug, "index.html"),
+		SeriesStatus:   t.seriesStatus,
 		Sources:        t.sources,
 		IsPost:         true,
 		HighlightStyle: t.highlightStyle,
@@ -54,7 +58,9 @@ func (t *postPaginationTaskImpl) GetGenerator() (runner.Generator, error) {
 
 type PostsPagination struct {
 	Title           string
+	Description     string
 	SourceDir       string
+	SeriesStatus    string
 	PostsPerPage    int
 	SortReverse     bool
 	HighlightStyle  string
@@ -137,6 +143,8 @@ func (p *PostsPagination) GetTasks() ([]*runner.Task, error) {
 				&postPaginationTaskImpl{
 					baseDestination: p.BaseDestination,
 					title:           p.Title,
+					description:     p.Description,
+					seriesStatus:    p.SeriesStatus,
 					sources:         nil,
 					slug:            "",
 					highlightStyle:  style,
@@ -179,6 +187,8 @@ func (p *PostsPagination) GetTasks() ([]*runner.Task, error) {
 					&postPaginationTaskImpl{
 						baseDestination: p.BaseDestination,
 						title:           p.Title,
+						description:     p.Description,
+						seriesStatus:    p.SeriesStatus,
 						sources:         srcs,
 						slug:            "",
 						highlightStyle:  style,
@@ -195,6 +205,8 @@ func (p *PostsPagination) GetTasks() ([]*runner.Task, error) {
 				&postPaginationTaskImpl{
 					baseDestination: p.BaseDestination,
 					title:           p.Title,
+					description:     p.Description,
+					seriesStatus:    p.SeriesStatus,
 					sources:         srcs,
 					slug:            path.Join("page", strconv.FormatInt(int64(page), 10)),
 					highlightStyle:  style,

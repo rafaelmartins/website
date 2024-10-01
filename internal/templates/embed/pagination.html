@@ -6,6 +6,17 @@
 {{ define "main" -}}
 <article>
   <h1 class="mb-5">{{ .Content.Title }}</h1>
+  {{- if .Content.Series }}
+  <p>
+    <div class="tags has-addons">
+      <span class="tag is-dark">Series status</span>
+      <span class="tag">{{ .Content.Series.Status }}</span>
+    </div>
+  </p>
+  {{- end }}
+  {{- if .Content.Description }}
+  <p>{{ .Content.Description }}</p>
+  {{- end }}
   <dl class="mb-6">
     {{- range .Content.Entries }}
     {{- if not .Post.Unlisted }}

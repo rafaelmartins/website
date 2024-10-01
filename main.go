@@ -160,7 +160,9 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 			runner.NewTaskGroup(
 				&tasks.PostsPagination{
 					Title:           ps.Title,
+					Description:     ps.Description,
 					SourceDir:       ps.SourceDir,
+					SeriesStatus:    ps.SeriesStatus,
 					PostsPerPage:    ppp,
 					SortReverse:     sortReverse,
 					HighlightStyle:  ps.HighlightStyle,
