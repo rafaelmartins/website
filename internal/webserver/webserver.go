@@ -32,12 +32,6 @@ func ListenAndServeWithReloader(addr string, dir string, cb func() error) error 
 	exit := make(chan error)
 	reload := make(chan bool)
 
-	if cb != nil {
-		if err := cb(); err != nil {
-			return err
-		}
-	}
-
 	server := &http.Server{
 		Addr: addr,
 		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
