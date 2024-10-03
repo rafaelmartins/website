@@ -79,7 +79,7 @@ func (p *Project) GetTimeStamps() ([]time.Time, error) {
 		return []time.Time{p.ts}, nil
 	}
 
-	rv, err := templates.GetTimestamps(p.Template)
+	rv, err := templates.GetTimestamps(p.Template, !p.Immutable)
 	if err != nil {
 		return nil, err
 	}

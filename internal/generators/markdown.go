@@ -244,7 +244,7 @@ func (h *Markdown) GetReader() (io.ReadCloser, error) {
 }
 
 func (h *Markdown) GetTimeStamps() ([]time.Time, error) {
-	rv, err := templates.GetTimestamps(h.Template)
+	rv, err := templates.GetTimestamps(h.Template, true)
 	if err != nil {
 		return nil, err
 	}
