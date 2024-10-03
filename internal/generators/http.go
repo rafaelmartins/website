@@ -77,6 +77,10 @@ func (h *HTTP) GetTimeStamps() ([]time.Time, error) {
 	return []time.Time{h.ts}, nil
 }
 
+func (h *HTTP) GetImmutable() bool {
+	return h.Immutable
+}
+
 func (*HTTP) GetByProducts(ch chan *runner.GeneratorByProduct) {
 	if ch != nil {
 		close(ch)

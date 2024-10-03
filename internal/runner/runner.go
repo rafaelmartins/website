@@ -19,6 +19,7 @@ type Generator interface {
 	GetID() string
 	GetReader() (io.ReadCloser, error)
 	GetTimeStamps() ([]time.Time, error)
+	GetImmutable() bool
 	GetByProducts(chan *GeneratorByProduct)
 }
 
@@ -104,7 +105,7 @@ func Run(basedir string, cfg Config, groups []*TaskGroup, force bool) error {
 					return err
 				}
 
-				if cfg != nil {
+				if cfg != nil && !gen.GetImmutable() {
 					ctimestamp, err := cfg.GetTimeStamp()
 					if err != nil {
 						return err

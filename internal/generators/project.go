@@ -91,6 +91,10 @@ func (p *Project) GetTimeStamps() ([]time.Time, error) {
 	return append(rv, ts), nil
 }
 
+func (p *Project) GetImmutable() bool {
+	return p.Immutable
+}
+
 func (p *Project) GetByProducts(ch chan *runner.GeneratorByProduct) {
 	if ch == nil {
 		return

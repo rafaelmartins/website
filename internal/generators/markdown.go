@@ -272,6 +272,10 @@ func (h *Markdown) GetTimeStamps() ([]time.Time, error) {
 	return rv, nil
 }
 
+func (*Markdown) GetImmutable() bool {
+	return false
+}
+
 func (*Markdown) GetByProducts(ch chan *runner.GeneratorByProduct) {
 	if ch != nil {
 		close(ch)

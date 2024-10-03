@@ -26,6 +26,10 @@ func (s File) GetTimeStamps() ([]time.Time, error) {
 	return []time.Time{st.ModTime().UTC()}, nil
 }
 
+func (File) GetImmutable() bool {
+	return false
+}
+
 func (File) GetByProducts(ch chan *runner.GeneratorByProduct) {
 	if ch != nil {
 		close(ch)

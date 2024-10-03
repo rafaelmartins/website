@@ -32,6 +32,10 @@ func (s *Embed) GetTimeStamps() ([]time.Time, error) {
 	return utils.ExecutableTimestamps()
 }
 
+func (*Embed) GetImmutable() bool {
+	return false
+}
+
 func (*Embed) GetByProducts(ch chan *runner.GeneratorByProduct) {
 	if ch != nil {
 		close(ch)
