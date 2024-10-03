@@ -14,12 +14,15 @@ import (
 
 var (
 	fBuildDir   = flag.String("d", "_build", "build directory")
-	fConfigFile = flag.String("f", "config.yml", "configuration file")
+	fConfigFile = flag.String("c", "config.yml", "configuration file")
 	fListenAddr = flag.String("a", ":3000", "development web server listen address")
 	fRunServer  = flag.Bool("r", false, "run development server")
+	fForce      = flag.Bool("f", false, "force re-running all tasks")
 
 	cfg        *config.Config      = nil
 	taskGroups []*runner.TaskGroup = nil
+
+	force = false
 )
 
 func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
@@ -208,7 +211,7 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 }
 
 func build() error {
-	if cfg == nil || !cfg.IsUpToDate() {
+	if force || cfg == nil || !cfg.IsUpToDate() {
 		var err error
 		cfg, err = config.New(*fConfigFile)
 		if err != nil {
@@ -222,11 +225,17 @@ func build() error {
 		}
 		taskGroups = tg
 	}
-	return runner.Run(*fBuildDir, cfg, taskGroups)
+	err := runner.Run(*fBuildDir, cfg, taskGroups, force)
+	if force {
+		// force only first time
+		force = false
+	}
+	return err
 }
 
 func main() {
 	flag.Parse()
+	force = *fForce
 
 	if *fRunServer {
 		if err := webserver.ListenAndServeWithReloader(*fListenAddr, *fBuildDir, build); err != nil {

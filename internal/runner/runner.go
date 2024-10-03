@@ -58,7 +58,7 @@ type Config interface {
 	GetTimeStamp() (time.Time, error)
 }
 
-func Run(basedir string, cfg Config, groups []*TaskGroup) error {
+func Run(basedir string, cfg Config, groups []*TaskGroup, force bool) error {
 	for _, group := range groups {
 		if group == nil {
 			continue
@@ -97,31 +97,33 @@ func Run(basedir string, cfg Config, groups []*TaskGroup) error {
 				gen = task.gen
 			}
 
-			timestamps, err := gen.GetTimeStamps()
-			if err != nil {
-				return err
-			}
-
-			if cfg != nil {
-				ctimestamp, err := cfg.GetTimeStamp()
+			dest := filepath.Join(basedir, group.impl.GetBaseDestination(), task.impl.GetDestination())
+			if !force {
+				timestamps, err := gen.GetTimeStamps()
 				if err != nil {
 					return err
 				}
-				timestamps = append(timestamps, ctimestamp)
-			}
 
-			dest := filepath.Join(basedir, group.impl.GetBaseDestination(), task.impl.GetDestination())
-			if st, err := os.Stat(dest); err == nil {
-				destts := st.ModTime().UTC()
-				found := false
-				for _, ts := range timestamps {
-					if ts.Compare(destts) > 0 {
-						found = true
-						break
+				if cfg != nil {
+					ctimestamp, err := cfg.GetTimeStamp()
+					if err != nil {
+						return err
 					}
+					timestamps = append(timestamps, ctimestamp)
 				}
-				if !found {
-					continue
+
+				if st, err := os.Stat(dest); err == nil {
+					destts := st.ModTime().UTC()
+					found := false
+					for _, ts := range timestamps {
+						if ts.Compare(destts) > 0 {
+							found = true
+							break
+						}
+					}
+					if !found {
+						continue
+					}
 				}
 			}
 
