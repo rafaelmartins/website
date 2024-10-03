@@ -82,15 +82,18 @@ func SetConfig(cfg *config.Config) {
 }
 
 func GetTimestamps(name string) ([]time.Time, error) {
-	rv := []time.Time{}
+	// we always load the base.hml template, even if it is overwritten completely later
+	// then we must always include the executable timestamp, as this template is embedded.
+	ts, err := utils.ExecutableTimestamp()
+	if err != nil {
+		return nil, err
+	}
+
+	rv := []time.Time{ts}
 	if st, err := os.Stat(name); err == nil {
 		rv = append(rv, st.ModTime().UTC())
 	} else if _, err := content.Open("embed/" + name); err == nil {
-		ts, err := utils.ExecutableTimestamp()
-		if err != nil {
-			return nil, err
-		}
-		rv = append(rv, ts)
+		// do nothing, executable timestamp already included
 	} else {
 		return nil, fmt.Errorf("templates: failed to find template: %s", name)
 	}
