@@ -48,7 +48,7 @@ type Config struct {
 		BaseDestination string `yaml:"base-destination"`
 		Template        string `yaml:"template"`
 		Immutable       *bool  `yaml:"immutable"`
-		WithSidebar     bool   `yaml:"with-sidebar"`
+		WithSidebar     *bool  `yaml:"with-sidebar"`
 	} `yaml:"projects"`
 
 	Pages []*struct {

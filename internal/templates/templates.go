@@ -40,13 +40,43 @@ type PostContentEntry struct {
 	// Tags []string
 }
 
-type ContentEntry struct {
-	File  string
-	URL   string
-	Title string
+type ProjectContentLatestReleaseFile struct {
+	File string
+	URL  string
+}
+
+type ProjectContentLatestRelease struct {
+	Name  string
+	Tag   string
 	Body  string
-	Post  *PostContentEntry
-	Extra map[string]interface{}
+	URL   string
+	Files []*ProjectContentLatestReleaseFile
+}
+
+type ProjectContentEntry struct {
+	Owner       string
+	Repo        string
+	URL         string
+	Description string
+	Stars       int
+	Watching    int
+	Forks       int
+	License     struct {
+		SPDX string
+		URL  string
+	}
+	LatestRelease *ProjectContentLatestRelease
+	Date          time.Time
+}
+
+type ContentEntry struct {
+	File    string
+	URL     string
+	Title   string
+	Body    string
+	Post    *PostContentEntry
+	Project *ProjectContentEntry
+	Extra   map[string]interface{}
 }
 
 type ContentPagination struct {

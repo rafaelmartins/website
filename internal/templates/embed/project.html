@@ -24,4 +24,100 @@
 </article>
 {{- end }}
 
-{{ define "sidebar" }}{{ end }}
+{{ define "sidebar" -}}
+<div class="notification has-text-centered has-text-dark has-text-weight-bold">
+  <span class="icon">
+    <i class="fas fa-lg fa-brands fa-github"></i>
+  </span>
+  <a href="https://github.com/{{ .Content.Entry.Project.Owner }}/{{ .Content.Entry.Project.Repo }}">
+    {{ .Content.Entry.Project.Owner }}/{{ .Content.Entry.Project.Repo }}
+  </a>
+</div>
+<table class="table is-fullwidth">
+  <thead>
+    <tr>
+      <th colspan="2" class="has-text-centered">Project Metadata</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{- if .Content.Entry.Project.URL }}
+    <tr>
+      <th>Website:</th>
+      <td>
+        <a href="{{ .Content.Entry.Project.URL }}">{{ .Content.Entry.Project.URL }}</a>
+      </td>
+    </tr>
+    {{- end }}
+    <tr>
+      {{- if .Content.Entry.Project.License.SPDX }}
+      <th>Main License:</th>
+      <td>
+        <a href="https://spdx.org/licenses/{{ .Content.Entry.Project.License.SPDX }}.html">{{ .Content.Entry.Project.License.SPDX }}</a>
+      </td>
+      {{- else }}
+      <th>License:</th>
+      <td>
+        <a href="{{ .Content.Entry.Project.License.URL }}">Link</a>
+      </td>
+      {{- end }}
+    </tr>
+  </tbody>
+</table>
+<table class="table is-fullwidth">
+  <thead>
+    <tr>
+      <th colspan="2" class="has-text-centered">Project Statistics</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th><span class="icon"><i class="fa-regular fa-star"></i></span> Stars:</th>
+      <td>{{ .Content.Entry.Project.Stars }}</td>
+    </tr>
+    <tr>
+      <th><span class="icon"><i class="fa-regular fa-eye"></i></span> Watching:</th>
+      <td>{{ .Content.Entry.Project.Watching }}</td>
+    </tr>
+    <tr>
+      <th><span class="icon"><i class="fa-solid fa-code-fork"></i></span> Forks:</th>
+      <td>{{ .Content.Entry.Project.Forks }}</td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <th class="has-text-grey-light is-size-7">Updated:</th>
+      <td class="has-text-grey-light is-size-7"><time>{{ .Content.Entry.Project.Date.Format "2006-01-02 15:04:05" }} UTC</time></td>
+    </tr>
+  </tfoot>
+</table>
+{{- if .Content.Entry.Project.LatestRelease }}
+<table class="table is-fullwidth">
+  <thead>
+    <tr>
+      <th colspan="2" class="has-text-centered">Latest Release</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <a href="{{ .Content.Entry.Project.LatestRelease.URL }}">{{ .Content.Entry.Project.LatestRelease.Name }}</a>
+      </td>
+      <td>{{ .Content.Entry.Project.LatestRelease.Tag }}</td>
+    </tr>
+    {{- if .Content.Entry.Project.LatestRelease.Files }}
+    <tr>
+      <th>Files:</th>
+    </tr>
+    {{- end }}
+    {{- range .Content.Entry.Project.LatestRelease.Files }}
+    <tr>
+      <td colspan="2">
+        <span class="icon"><i class="fa-solid fa-box-archive"></i></span>
+        <a href="{{ .URL }}">{{ .File }}</a>
+      </td>
+    </tr>
+    {{- end }}
+  </tbody>
+</table>
+{{- end }}
+{{- end }}

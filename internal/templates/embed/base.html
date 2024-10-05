@@ -60,12 +60,11 @@
     </nav>
     <div class="mx-3 mt-5">
       <div class="container is-max-desktop">
-        <div class="columns is-gapless">
-          <div class="mb-6 content column{{ if .Layout.WithSidebar }} is-7{{ end }}">
+        <div class="columns">
+          <div class="mb-6 content column{{ if .Layout.WithSidebar }} is-8{{ end }}">
 {{ template "main" . }}
           </div>
           {{- if .Layout.WithSidebar }}
-          <div class="column is-1"></div>
           <div class="column">
 {{ template "sidebar" . }}
           </div>
@@ -84,9 +83,11 @@
           </a>
           {{- end }}
         </p>
+        {{- if .Config.Footer }}
         <p>
           {{ .Config.Footer }}
         </p>
+        {{- end }}
       </div>
     </footer>
     <script src="https://rafaelmartins.eng.br/assets/anchor-js/anchor.min.js"></script>

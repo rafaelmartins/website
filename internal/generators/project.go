@@ -57,13 +57,108 @@ func (p *Project) GetReader() (io.ReadCloser, error) {
 
 	p.images = images
 
+	proj := &templates.ProjectContentEntry{
+		Owner: p.Owner,
+		Repo:  p.Repo,
+	}
+
+	rbody, err := p.request("GET", "repos/"+p.Owner+"/"+p.Repo, nil)
+	if err != nil {
+		return nil, err
+	}
+	defer rbody.Close()
+
+	v := struct {
+		Description      string `json:"description"`
+		Homepage         string `json:"homepage"`
+		ForksCount       int    `json:"forks_count"`
+		StargazersCount  int    `json:"stargazers_count"`
+		SubscribersCount int    `json:"subscribers_count"`
+	}{}
+	if err := json.NewDecoder(rbody).Decode(&v); err != nil {
+		return nil, err
+	}
+
+	proj.URL = v.Homepage
+	proj.Description = v.Description
+	proj.Stars = v.StargazersCount
+	proj.Watching = v.SubscribersCount
+	proj.Forks = v.ForksCount
+
+	lbody, err := p.request("GET", "repos/"+p.Owner+"/"+p.Repo+"/license", nil)
+	if err != nil {
+		return nil, err
+	}
+	defer lbody.Close()
+
+	vl := struct {
+		HtmlUrl string `json:"html_url"`
+		License struct {
+			SpdxId string `json:"spdx_id"`
+		} `json:"license"`
+	}{}
+	if err := json.NewDecoder(lbody).Decode(&vl); err != nil {
+		return nil, err
+	}
+
+	if vl.License.SpdxId != "NOASSERTION" {
+		proj.License.SPDX = vl.License.SpdxId
+	}
+	proj.License.URL = vl.HtmlUrl
+
+	lrbody, err := p.request("GET", "repos/"+p.Owner+"/"+p.Repo+"/releases/latest", nil)
+	if err != nil {
+		return nil, err
+	}
+	defer lrbody.Close()
+
+	vlr := struct {
+		Status  string `json:"status"`
+		Name    string `json:"name"`
+		TagName string `json:"tag_name"`
+		HtmlUrl string `json:"html_url"`
+		Body    string `json:"body"`
+		Assets  []struct {
+			Name               string `json:"name"`
+			BrowserDownloadURL string `json:"browser_download_url"`
+		} `json:"assets"`
+	}{}
+	if err := json.NewDecoder(lrbody).Decode(&vlr); err != nil {
+		return nil, err
+	}
+
+	if vlr.Status == "" {
+		mkd, err := p.renderMarkdown(vlr.Body)
+		if err != nil {
+			return nil, err
+		}
+
+		proj.LatestRelease = &templates.ProjectContentLatestRelease{
+			Name: vlr.Name,
+			Tag:  vlr.TagName,
+			Body: mkd,
+			URL:  vlr.HtmlUrl,
+		}
+		for _, asset := range vlr.Assets {
+			proj.LatestRelease.Files = append(proj.LatestRelease.Files,
+				&templates.ProjectContentLatestReleaseFile{
+					File: asset.Name,
+					URL:  asset.BrowserDownloadURL,
+				},
+			)
+		}
+	}
+
+	proj.Date = time.Now().UTC()
+
 	buf := &bytes.Buffer{}
 	if err := templates.Execute(buf, p.Template, nil, p.LayoutCtx, &templates.ContentContext{
 		Title: title,
 		URL:   p.URL,
 		Entry: &templates.ContentEntry{
-			Title: title,
-			Body:  body,
+			Title:   title,
+			Body:    body,
+			Project: proj,
 		},
 	}); err != nil {
 		return nil, err

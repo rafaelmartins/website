@@ -194,6 +194,11 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 			immutable = false
 		}
 
+		sidebar := true
+		if pj.WithSidebar != nil && !*pj.WithSidebar {
+			sidebar = false
+		}
+
 		rv = append(rv,
 			runner.NewTaskGroup(
 				&tasks.Project{
@@ -202,7 +207,7 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 					BaseDestination: pj.BaseDestination,
 					Template:        pj.Template,
 					Immutable:       immutable,
-					WithSidebar:     pj.WithSidebar,
+					WithSidebar:     sidebar,
 				},
 			),
 		)
