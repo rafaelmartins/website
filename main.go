@@ -6,6 +6,7 @@ import (
 
 	"github.com/rafaelmartins/website/internal/assets"
 	"github.com/rafaelmartins/website/internal/config"
+	"github.com/rafaelmartins/website/internal/generators"
 	"github.com/rafaelmartins/website/internal/runner"
 	"github.com/rafaelmartins/website/internal/tasks"
 	"github.com/rafaelmartins/website/internal/templates"
@@ -133,20 +134,11 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 		)
 	}
 
-	for _, ps := range c.Posts {
+	globalPostSources := []*generators.MarkdownSource{}
+	for _, ps := range c.Posts.Groups {
 		sortReverse := true
 		if ps.SortReverse != nil && !*ps.SortReverse {
 			sortReverse = false
-		}
-
-		ppp := 10
-		if ps.PostsPerPage != nil {
-			ppp = *ps.PostsPerPage
-		}
-
-		pppa := 10
-		if ps.PostsPerPageAtom != nil {
-			pppa = *ps.PostsPerPageAtom
 		}
 
 		posts := &tasks.Posts{
@@ -161,6 +153,7 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 		if err != nil {
 			return nil, err
 		}
+		globalPostSources = append(globalPostSources, postsSources...)
 
 		rv = append(rv,
 			runner.NewTaskGroup(posts),
@@ -170,7 +163,7 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 					Description:     ps.Description,
 					Sources:         postsSources,
 					SeriesStatus:    ps.SeriesStatus,
-					PostsPerPage:    ppp,
+					PostsPerPage:    ps.PostsPerPage,
 					SortReverse:     sortReverse,
 					HighlightStyle:  ps.HighlightStyle,
 					BaseDestination: ps.BaseDestination,
@@ -184,7 +177,7 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 					Description:     ps.Description,
 					Sources:         postsSources,
 					SeriesStatus:    ps.SeriesStatus,
-					PostsPerPage:    pppa,
+					PostsPerPage:    ps.PostsPerPageAtom,
 					SortReverse:     true,
 					Atom:            true,
 					HighlightStyle:  ps.HighlightStyle,
@@ -194,6 +187,40 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 			),
 		)
 	}
+
+	sortReverse := true
+	if c.Posts.SortReverse != nil && !*c.Posts.SortReverse {
+		sortReverse = false
+	}
+
+	rv = append(rv,
+		runner.NewTaskGroup(
+			&tasks.Pagination{
+				Title:           c.Posts.Title,
+				Description:     c.Posts.Description,
+				Sources:         globalPostSources,
+				PostsPerPage:    c.Posts.PostsPerPage,
+				SortReverse:     sortReverse,
+				HighlightStyle:  c.Posts.HighlightStyle,
+				BaseDestination: c.Posts.BaseDestination,
+				Template:        c.Posts.TemplatePagination,
+				WithSidebar:     c.Posts.WithSidebar,
+			},
+		),
+		runner.NewTaskGroup(
+			&tasks.Pagination{
+				Title:           c.Posts.Title,
+				Description:     c.Posts.Description,
+				Sources:         globalPostSources,
+				PostsPerPage:    c.Posts.PostsPerPageAtom,
+				SortReverse:     true,
+				Atom:            true,
+				HighlightStyle:  c.Posts.HighlightStyle,
+				BaseDestination: c.Posts.BaseDestination,
+				Template:        c.Posts.TemplateAtom,
+			},
+		),
+	)
 
 	for _, pj := range c.Projects {
 		// immutable by default, only disable manually for development
