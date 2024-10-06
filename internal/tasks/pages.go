@@ -26,11 +26,11 @@ func (t *pageTaskImpl) GetDestination() string {
 
 func (t *pageTaskImpl) GetGenerator() (runner.Generator, error) {
 	return &generators.Markdown{
-		URL: path.Join("/", t.baseDestination, t.slug, "index.html"),
+		URL: path.Join("/", t.baseDestination, t.slug) + "/",
 		Sources: []*generators.MarkdownSource{
 			{
 				File: t.source,
-				Slug: t.slug,
+				URL:  path.Join("/", t.baseDestination, t.slug) + "/",
 			},
 		},
 		ExtraDependencies: t.extraDependencies,

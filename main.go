@@ -149,22 +149,26 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 			pppa = *ps.PostsPerPageAtom
 		}
 
+		posts := &tasks.Posts{
+			SourceDir:       ps.SourceDir,
+			HighlightStyle:  ps.HighlightStyle,
+			BaseDestination: ps.BaseDestination,
+			Template:        ps.Template,
+			TemplateCtx:     ps.TemplateCtx,
+			WithSidebar:     ps.WithSidebar,
+		}
+		postsSources, err := posts.GetSources()
+		if err != nil {
+			return nil, err
+		}
+
 		rv = append(rv,
-			runner.NewTaskGroup(
-				&tasks.Posts{
-					SourceDir:       ps.SourceDir,
-					HighlightStyle:  ps.HighlightStyle,
-					BaseDestination: ps.BaseDestination,
-					Template:        ps.Template,
-					TemplateCtx:     ps.TemplateCtx,
-					WithSidebar:     ps.WithSidebar,
-				},
-			),
+			runner.NewTaskGroup(posts),
 			runner.NewTaskGroup(
 				&tasks.PostsPagination{
 					Title:           ps.Title,
 					Description:     ps.Description,
-					SourceDir:       ps.SourceDir,
+					Sources:         postsSources,
 					SeriesStatus:    ps.SeriesStatus,
 					PostsPerPage:    ppp,
 					SortReverse:     sortReverse,
@@ -177,7 +181,7 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 			runner.NewTaskGroup(
 				&tasks.Atom{
 					Title:           ps.Title,
-					SourceDir:       ps.SourceDir,
+					Sources:         postsSources,
 					PostsPerPage:    pppa,
 					HighlightStyle:  ps.HighlightStyle,
 					BaseDestination: ps.BaseDestination,

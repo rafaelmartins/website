@@ -12,10 +12,15 @@ import (
 	"github.com/rafaelmartins/website/internal/templates"
 )
 
+type postSource struct {
+	source *generators.MarkdownSource
+	slug   string
+}
+
 type postTaskImpl struct {
 	baseDestination string
 	slug            string
-	source          string
+	source          *generators.MarkdownSource
 	highlightStyle  string
 	template        string
 	templateCtx     map[string]interface{}
@@ -28,13 +33,8 @@ func (t *postTaskImpl) GetDestination() string {
 
 func (t *postTaskImpl) GetGenerator() (runner.Generator, error) {
 	return &generators.Markdown{
-		URL: path.Join("/", t.baseDestination, t.slug, "index.html"),
-		Sources: []*generators.MarkdownSource{
-			{
-				File: t.source,
-				Slug: t.slug,
-			},
-		},
+		URL:            path.Join("/", t.baseDestination, t.slug, "index.html"),
+		Sources:        []*generators.MarkdownSource{t.source},
 		IsPost:         true,
 		HighlightStyle: t.highlightStyle,
 		Template:       t.template,
@@ -56,6 +56,45 @@ func (p *Posts) GetBaseDestination() string {
 	return p.BaseDestination
 }
 
+func (p *Posts) getSources() ([]*postSource, error) {
+	srcs, err := os.ReadDir(p.SourceDir)
+	if err != nil {
+		return nil, err
+	}
+
+	rv := []*postSource{}
+	for _, src := range srcs {
+		if filepath.Ext(src.Name()) != ".md" {
+			continue
+		}
+
+		slug := strings.TrimSuffix(src.Name(), ".md")
+		rv = append(rv,
+			&postSource{
+				source: &generators.MarkdownSource{
+					File: filepath.Join(p.SourceDir, src.Name()),
+					URL:  path.Join("/", p.BaseDestination, slug) + "/",
+				},
+				slug: slug,
+			},
+		)
+	}
+	return rv, nil
+}
+
+func (p *Posts) GetSources() ([]*generators.MarkdownSource, error) {
+	srcs, err := p.getSources()
+	if err != nil {
+		return nil, err
+	}
+
+	rv := []*generators.MarkdownSource{}
+	for _, src := range srcs {
+		rv = append(rv, src.source)
+	}
+	return rv, nil
+}
+
 func (p *Posts) GetTasks() ([]*runner.Task, error) {
 	if p.SourceDir == "" {
 		return nil, fmt.Errorf("posts: source dir not defined")
@@ -71,23 +110,19 @@ func (p *Posts) GetTasks() ([]*runner.Task, error) {
 		style = "github"
 	}
 
-	srcs, err := os.ReadDir(p.SourceDir)
+	srcs, err := p.getSources()
 	if err != nil {
 		return nil, err
 	}
 
 	rv := []*runner.Task{}
 	for _, src := range srcs {
-		if filepath.Ext(src.Name()) != ".md" {
-			continue
-		}
-
 		rv = append(rv,
 			runner.NewTask(
 				&postTaskImpl{
 					baseDestination: p.BaseDestination,
-					slug:            strings.TrimSuffix(src.Name(), ".md"),
-					source:          filepath.Join(p.SourceDir, src.Name()),
+					slug:            src.slug,
+					source:          src.source,
 					highlightStyle:  style,
 					template:        tmpl,
 					templateCtx:     p.TemplateCtx,

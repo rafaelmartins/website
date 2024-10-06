@@ -1,12 +1,9 @@
 package tasks
 
 import (
-	"fmt"
-	"os"
 	"path"
 	"path/filepath"
 	"slices"
-	"strings"
 	"time"
 
 	"github.com/rafaelmartins/website/internal/generators"
@@ -15,9 +12,8 @@ import (
 )
 
 type postForAtom struct {
-	Slug string
-	File string
-	Date time.Time
+	Source *generators.MarkdownSource
+	Date   time.Time
 }
 
 type atomTaskImpl struct {
@@ -49,7 +45,7 @@ func (t *atomTaskImpl) GetGenerator() (runner.Generator, error) {
 
 type Atom struct {
 	Title           string
-	SourceDir       string
+	Sources         []*generators.MarkdownSource
 	PostsPerPage    int
 	HighlightStyle  string
 	BaseDestination string
@@ -62,8 +58,8 @@ func (p *Atom) GetBaseDestination() string {
 }
 
 func (p *Atom) GetTasks() ([]*runner.Task, error) {
-	if p.SourceDir == "" {
-		return nil, fmt.Errorf("atom: source dir not defined")
+	if len(p.Sources) == 0 {
+		return nil, nil
 	}
 
 	if p.PostsPerPage == 0 {
@@ -80,23 +76,13 @@ func (p *Atom) GetTasks() ([]*runner.Task, error) {
 		style = "github"
 	}
 
-	srcs, err := os.ReadDir(p.SourceDir)
-	if err != nil {
-		return nil, err
-	}
-
 	posts := []*postForAtom{}
-	for _, src := range srcs {
-		if filepath.Ext(src.Name()) != ".md" {
-			continue
-		}
-
+	for _, src := range p.Sources {
 		post := &postForAtom{
-			Slug: strings.TrimSuffix(src.Name(), ".md"),
-			File: filepath.Join(p.SourceDir, src.Name()),
+			Source: src,
 		}
 
-		dt, err := generators.MarkdownParseDate(post.File)
+		dt, err := generators.MarkdownParseDate(post.Source.File)
 		if err != nil {
 			return nil, err
 		}
@@ -118,12 +104,7 @@ func (p *Atom) GetTasks() ([]*runner.Task, error) {
 	for chk := range slices.Chunk(posts, ppp) {
 		srcs := []*generators.MarkdownSource{}
 		for _, s := range chk {
-			srcs = append(srcs,
-				&generators.MarkdownSource{
-					File: s.File,
-					Slug: path.Join(p.BaseDestination, s.Slug),
-				},
-			)
+			srcs = append(srcs, s.Source)
 		}
 
 		rv = append(rv,

@@ -6,7 +6,6 @@ import (
 	"io"
 	"log"
 	"os"
-	"path"
 	"text/template"
 	"time"
 
@@ -84,7 +83,7 @@ func MarkdownParseDate(f string) (time.Time, error) {
 
 type MarkdownSource struct {
 	File string
-	Slug string
+	URL  string
 }
 
 type Markdown struct {
@@ -145,7 +144,7 @@ func (h *Markdown) GetReader() (io.ReadCloser, error) {
 
 		entry := &templates.ContentEntry{
 			File: src.File,
-			URL:  path.Join("/", src.Slug) + "/",
+			URL:  src.URL,
 			Body: body,
 		}
 

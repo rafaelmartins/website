@@ -1,14 +1,11 @@
 package tasks
 
 import (
-	"fmt"
 	"math"
-	"os"
 	"path"
 	"path/filepath"
 	"slices"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/rafaelmartins/website/internal/generators"
@@ -17,9 +14,8 @@ import (
 )
 
 type postForPagination struct {
-	Slug string
-	File string
-	Date time.Time
+	Source *generators.MarkdownSource
+	Date   time.Time
 }
 
 type postPaginationTaskImpl struct {
@@ -44,7 +40,7 @@ func (t *postPaginationTaskImpl) GetGenerator() (runner.Generator, error) {
 	return &generators.Markdown{
 		Title:          t.title,
 		Description:    t.description,
-		URL:            path.Join("/", t.baseDestination, t.slug, "index.html"),
+		URL:            path.Join("/", t.baseDestination, t.slug) + "/",
 		SeriesStatus:   t.seriesStatus,
 		Sources:        t.sources,
 		IsPost:         true,
@@ -59,7 +55,7 @@ func (t *postPaginationTaskImpl) GetGenerator() (runner.Generator, error) {
 type PostsPagination struct {
 	Title           string
 	Description     string
-	SourceDir       string
+	Sources         []*generators.MarkdownSource
 	SeriesStatus    string
 	PostsPerPage    int
 	SortReverse     bool
@@ -75,8 +71,8 @@ func (p *PostsPagination) GetBaseDestination() string {
 }
 
 func (p *PostsPagination) GetTasks() ([]*runner.Task, error) {
-	if p.SourceDir == "" {
-		return nil, fmt.Errorf("posts: source dir not defined")
+	if len(p.Sources) == 0 {
+		return nil, nil
 	}
 
 	if p.PostsPerPage == 0 {
@@ -93,23 +89,13 @@ func (p *PostsPagination) GetTasks() ([]*runner.Task, error) {
 		style = "github"
 	}
 
-	srcs, err := os.ReadDir(p.SourceDir)
-	if err != nil {
-		return nil, err
-	}
-
 	posts := []*postForPagination{}
-	for _, src := range srcs {
-		if filepath.Ext(src.Name()) != ".md" {
-			continue
-		}
-
+	for _, src := range p.Sources {
 		post := &postForPagination{
-			Slug: strings.TrimSuffix(src.Name(), ".md"),
-			File: filepath.Join(p.SourceDir, src.Name()),
+			Source: src,
 		}
 
-		dt, err := generators.MarkdownParseDate(post.File)
+		dt, err := generators.MarkdownParseDate(post.Source.File)
 		if err != nil {
 			return nil, err
 		}
@@ -164,12 +150,7 @@ func (p *PostsPagination) GetTasks() ([]*runner.Task, error) {
 	for chk := range slices.Chunk(posts, ppp) {
 		srcs := []*generators.MarkdownSource{}
 		for _, s := range chk {
-			srcs = append(srcs,
-				&generators.MarkdownSource{
-					File: s.File,
-					Slug: path.Join(p.BaseDestination, s.Slug),
-				},
-			)
+			srcs = append(srcs, s.Source)
 		}
 
 		pagination := &templates.ContentPagination{
