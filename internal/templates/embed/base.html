@@ -9,6 +9,18 @@
     <link href="/assets/nunito/nunito.css" rel="stylesheet" type="text/css">
     <link href="/assets/bulma/css/bulma.min.css" rel="stylesheet" type="text/css">
     <link href="/assets/font-awesome/css/all.min.css" rel="stylesheet" type="text/css">
+    {{- if .Config.Posts.PostsPerPageAtom }}
+    <link href="{{ if .Config.Posts.BaseDestination }}/{{ .Config.Posts.BaseDestination }}{{
+      end }}/atom.xml" rel="alternate" type="application/atom+xml" title="{{
+      if .Config.Posts.Title }}{{ .Config.Posts.Title }} - {{ end }}{{ $.Config.Title }}">
+    {{- end }}
+    {{- range .Config.Posts.Groups }}
+    {{- if .PostsPerPageAtom }}
+    <link href="{{ if .BaseDestination }}/{{ .BaseDestination }}{{
+      end }}/atom.xml" rel="alternate" type="application/atom+xml" title="{{
+      if .Title }}{{ .Title }} - {{ end }}{{ $.Config.Title }}">
+    {{- end }}
+    {{- end }}
     <style type="text/css">
       body {
         font-family: "Nunito", sans-serif;
