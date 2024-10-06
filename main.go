@@ -165,7 +165,7 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 		rv = append(rv,
 			runner.NewTaskGroup(posts),
 			runner.NewTaskGroup(
-				&tasks.PostsPagination{
+				&tasks.Pagination{
 					Title:           ps.Title,
 					Description:     ps.Description,
 					Sources:         postsSources,
@@ -179,10 +179,14 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 				},
 			),
 			runner.NewTaskGroup(
-				&tasks.Atom{
+				&tasks.Pagination{
 					Title:           ps.Title,
+					Description:     ps.Description,
 					Sources:         postsSources,
+					SeriesStatus:    ps.SeriesStatus,
 					PostsPerPage:    pppa,
+					SortReverse:     true,
+					Atom:            true,
 					HighlightStyle:  ps.HighlightStyle,
 					BaseDestination: ps.BaseDestination,
 					Template:        ps.TemplateAtom,

@@ -4,8 +4,8 @@
   <title type="text">{{ .Config.Title }}{{ if .Content.Title }} - {{ .Content.Title }}{{ end }}</title>
   <id>{{ .Content.URL }}</id>
   <updated>{{ .Content.Atom.Updated.Format "2006-01-02T15:04:05Z" }}</updated>
-  <link href="{{ .Config.URL }}" />
-  <link href="{{ .Config.URL }}{{ .Content.URL }}" rel="self" />
+  <link href="{{ .Config.URL }}{{ .Content.URL }}" />
+  <link href="{{ .Config.URL }}{{ .Content.Pagination.AtomURL }}" rel="self" />
   <author>
     <name>{{ .Config.Author.Name }}</name>
     <email>{{ .Config.Author.Email }}</email>

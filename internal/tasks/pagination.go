@@ -13,12 +13,13 @@ import (
 	"github.com/rafaelmartins/website/internal/templates"
 )
 
-type postForPagination struct {
+type paginationPost struct {
 	Source *generators.MarkdownSource
 	Date   time.Time
 }
 
-type postPaginationTaskImpl struct {
+type paginationTaskImpl struct {
+	atom            bool
 	baseDestination string
 	title           string
 	description     string
@@ -32,11 +33,14 @@ type postPaginationTaskImpl struct {
 	layoutCtx       *templates.LayoutContext
 }
 
-func (t *postPaginationTaskImpl) GetDestination() string {
+func (t *paginationTaskImpl) GetDestination() string {
+	if t.atom {
+		return filepath.Join(t.slug, "atom.xml")
+	}
 	return filepath.Join(t.slug, "index.html")
 }
 
-func (t *postPaginationTaskImpl) GetGenerator() (runner.Generator, error) {
+func (t *paginationTaskImpl) GetGenerator() (runner.Generator, error) {
 	return &generators.Markdown{
 		Title:          t.title,
 		Description:    t.description,
@@ -52,7 +56,8 @@ func (t *postPaginationTaskImpl) GetGenerator() (runner.Generator, error) {
 	}, nil
 }
 
-type PostsPagination struct {
+type Pagination struct {
+	Atom            bool
 	Title           string
 	Description     string
 	Sources         []*generators.MarkdownSource
@@ -66,11 +71,11 @@ type PostsPagination struct {
 	WithSidebar     bool
 }
 
-func (p *PostsPagination) GetBaseDestination() string {
+func (p *Pagination) GetBaseDestination() string {
 	return p.BaseDestination
 }
 
-func (p *PostsPagination) GetTasks() ([]*runner.Task, error) {
+func (p *Pagination) GetTasks() ([]*runner.Task, error) {
 	if len(p.Sources) == 0 {
 		return nil, nil
 	}
@@ -82,6 +87,9 @@ func (p *PostsPagination) GetTasks() ([]*runner.Task, error) {
 	tmpl := p.Template
 	if tmpl == "" {
 		tmpl = "pagination.html"
+		if p.Atom {
+			tmpl = "atom.xml"
+		}
 	}
 
 	style := p.HighlightStyle
@@ -89,9 +97,9 @@ func (p *PostsPagination) GetTasks() ([]*runner.Task, error) {
 		style = "github"
 	}
 
-	posts := []*postForPagination{}
+	posts := []*paginationPost{}
 	for _, src := range p.Sources {
-		post := &postForPagination{
+		post := &paginationPost{
 			Source: src,
 		}
 
@@ -104,7 +112,7 @@ func (p *PostsPagination) GetTasks() ([]*runner.Task, error) {
 		posts = append(posts, post)
 	}
 
-	slices.SortStableFunc(posts, func(a *postForPagination, b *postForPagination) int {
+	slices.SortStableFunc(posts, func(a *paginationPost, b *paginationPost) int {
 		if p.SortReverse {
 			return b.Date.Compare(a.Date)
 		}
@@ -126,7 +134,8 @@ func (p *PostsPagination) GetTasks() ([]*runner.Task, error) {
 	if len(posts) == 0 {
 		return []*runner.Task{
 			runner.NewTask(
-				&postPaginationTaskImpl{
+				&paginationTaskImpl{
+					atom:            p.Atom,
 					baseDestination: p.BaseDestination,
 					title:           p.Title,
 					description:     p.Description,
@@ -156,7 +165,7 @@ func (p *PostsPagination) GetTasks() ([]*runner.Task, error) {
 		pagination := &templates.ContentPagination{
 			Enabled: p.PostsPerPage > 0,
 			BaseURL: path.Join("/", p.BaseDestination, "page"),
-			AtomURL: path.Join("/", p.BaseDestination, "atom.xml"), // FIXME: avoid hardcoding
+			AtomURL: path.Join("/", p.BaseDestination, "atom.xml"),
 			Current: page,
 			Total:   total,
 		}
@@ -170,7 +179,8 @@ func (p *PostsPagination) GetTasks() ([]*runner.Task, error) {
 		if page == 1 {
 			rv = append(rv,
 				runner.NewTask(
-					&postPaginationTaskImpl{
+					&paginationTaskImpl{
+						atom:            p.Atom,
 						baseDestination: p.BaseDestination,
 						title:           p.Title,
 						description:     p.Description,
@@ -185,10 +195,14 @@ func (p *PostsPagination) GetTasks() ([]*runner.Task, error) {
 					},
 				),
 			)
+			if p.Atom {
+				break
+			}
 		}
 		rv = append(rv,
 			runner.NewTask(
-				&postPaginationTaskImpl{
+				&paginationTaskImpl{
+					atom:            p.Atom,
 					baseDestination: p.BaseDestination,
 					title:           p.Title,
 					description:     p.Description,
