@@ -22,10 +22,10 @@
     {{- end }}
     {{- end }}
     <style type="text/css">
-      body {
-        font-family: "Nunito", sans-serif;
+      :root {
+        --bulma-body-family: "Nunito", sans-serif;
       }
-      .navbar-burger {
+      .navbar {
         --bulma-navbar-burger-color: var(--bulma-navbar-item-color);
       }
     </style>
@@ -77,14 +77,14 @@
 {{ template "main" . }}
           </div>
           {{- if .Layout.WithSidebar }}
-          <div class="column">
+          <div class="mb-6 column">
 {{ template "sidebar" . }}
           </div>
           {{- end }}
         </div>
       </div>
     </div>
-    <footer class="footer">
+    <footer class="footer has-background-light">
       <div class="content has-text-centered">
         <p>
           {{- range .Config.SocialLinks }}
