@@ -10,7 +10,7 @@ import (
 type fileTaskImpl string
 
 func (t fileTaskImpl) GetDestination() string {
-	return string(t)
+	return filepath.Base(string(t))
 }
 
 func (t fileTaskImpl) GetGenerator() (runner.Generator, error) {
