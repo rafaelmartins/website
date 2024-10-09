@@ -238,6 +238,12 @@ func (p *Project) getReadme() (string, string, time.Time, error) {
 	}
 
 	if resp.StatusCode != 200 {
+		v := &struct {
+			Message string `json:"message"`
+		}{}
+		if err := json.NewDecoder(resp.Body).Decode(v); err == nil && v.Message != "" {
+			return "", "", time.Time{}, fmt.Errorf("project: github error: %s", v.Message)
+		}
 		return "", "", time.Time{}, fmt.Errorf("project: http error: %s", resp.Status)
 	}
 
