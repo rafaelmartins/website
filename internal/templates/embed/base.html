@@ -105,24 +105,6 @@
     <script src="https://rafaelmartins.eng.br/assets/anchor-js/anchor.min.js"></script>
     <script>
       document.addEventListener('DOMContentLoaded', () => {
-        const projects = Array.prototype.slice.call(document.querySelectorAll('a.panel-block'), 0);
-        Array.prototype.slice.call(document.querySelectorAll('.panel-tabs a'), 0).forEach(tab => {
-          tab.addEventListener('click', () => {
-            Array.prototype.slice.call(document.querySelectorAll('.panel-tabs a.is-active'), 0).forEach(active_tab => {
-              active_tab.classList.toggle('is-active');
-            });
-            tab.classList.toggle('is-active');
-
-            const category = tab.getAttribute('data-tab');
-            projects.forEach(project => {
-              project.style.display = (category == 'all' || category == project.getAttribute('data-category')) ? '' : 'none';
-            });
-          });
-        });
-      });
-    </script>
-    <script>
-      document.addEventListener('DOMContentLoaded', () => {
         Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0).forEach(element => {
           element.addEventListener('click', () => {
             element.classList.toggle('is-active');
