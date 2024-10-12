@@ -5,9 +5,7 @@
 
 {{ define "main" -}}
 <article>
-  <h1 class="mb-5">
-    {{- .Content.Title }}
-  </h1>
+  <h1 class="mb-5">{{ .Content.Title }}</h1>
   {{- if or .Content.Series .Content.Description }}
   <div class="notification">
     {{- if .Content.Description }}
