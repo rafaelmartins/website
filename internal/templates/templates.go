@@ -37,7 +37,6 @@ type PostContentEntry struct {
 		Email string
 	}
 	Date time.Time
-	// Tags []string
 }
 
 type ProjectContentLatestReleaseFile struct {

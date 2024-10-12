@@ -185,17 +185,6 @@ func (h *Markdown) GetReader() (io.ReadCloser, error) {
 				delete(metadata, "author")
 			}
 
-			// if tagsItf, ok := metadata["tags"]; ok {
-			// 	if tagsSlice, ok := tagsItf.([]interface{}); ok {
-			// 		for _, tagItf := range tagsSlice {
-			// 			if tag, ok := tagItf.(string); ok {
-			// 				post.Tags = append(post.Tags, tag)
-			// 			}
-			// 		}
-			// 		delete(metadata, "tags")
-			// 	}
-			// }
-
 			entry.Post = post
 
 			if atomUpdated.IsZero() {
