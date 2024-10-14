@@ -78,7 +78,7 @@ func (p *Pages) GetTasks() ([]*runner.Task, error) {
 	rv := []*runner.Task{}
 	for k, v := range p.Sources {
 		rv = append(rv,
-			runner.NewTask(
+			runner.NewTask(p,
 				&pageTaskImpl{
 					baseDestination:   p.BaseDestination,
 					slug:              k,

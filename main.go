@@ -265,7 +265,7 @@ func build() error {
 		}
 		taskGroups = tg
 	}
-	err := runner.Run(*fBuildDir, cfg, taskGroups, force)
+	err := runner.Run(taskGroups, *fBuildDir, cfg, force)
 	if force {
 		// force only first time
 		force = false

@@ -40,7 +40,7 @@ func (l *CdnjsLibrary) GetTasks() ([]*runner.Task, error) {
 	rv := []*runner.Task{}
 	for _, f := range l.Files {
 		rv = append(rv,
-			runner.NewTask(
+			runner.NewTask(l,
 				&cdnjsTask{
 					name:    l.Name,
 					version: l.Version,

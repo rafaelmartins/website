@@ -38,8 +38,8 @@ func (f *NunitoFont) GetTasks() ([]*runner.Task, error) {
 	}
 
 	rv := []*runner.Task{}
-	for _, f := range files {
-		rv = append(rv, runner.NewTask(nunitoFontTask(f)))
+	for _, fl := range files {
+		rv = append(rv, runner.NewTask(f, nunitoFontTask(fl)))
 	}
 	return rv, nil
 }

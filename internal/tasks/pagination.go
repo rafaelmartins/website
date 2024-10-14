@@ -133,7 +133,7 @@ func (p *Pagination) GetTasks() ([]*runner.Task, error) {
 
 	if len(posts) == 0 {
 		return []*runner.Task{
-			runner.NewTask(
+			runner.NewTask(p,
 				&paginationTaskImpl{
 					atom:            p.Atom,
 					baseDestination: p.BaseDestination,
@@ -178,7 +178,7 @@ func (p *Pagination) GetTasks() ([]*runner.Task, error) {
 
 		if page == 1 {
 			rv = append(rv,
-				runner.NewTask(
+				runner.NewTask(p,
 					&paginationTaskImpl{
 						atom:            p.Atom,
 						baseDestination: p.BaseDestination,
@@ -200,7 +200,7 @@ func (p *Pagination) GetTasks() ([]*runner.Task, error) {
 			}
 		}
 		rv = append(rv,
-			runner.NewTask(
+			runner.NewTask(p,
 				&paginationTaskImpl{
 					atom:            p.Atom,
 					baseDestination: p.BaseDestination,

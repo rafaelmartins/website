@@ -118,7 +118,7 @@ func (p *Posts) GetTasks() ([]*runner.Task, error) {
 	rv := []*runner.Task{}
 	for _, src := range srcs {
 		rv = append(rv,
-			runner.NewTask(
+			runner.NewTask(p,
 				&postTaskImpl{
 					baseDestination: p.BaseDestination,
 					slug:            src.slug,

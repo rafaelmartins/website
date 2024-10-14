@@ -56,7 +56,7 @@ func (p *Project) GetTasks() ([]*runner.Task, error) {
 	}
 
 	return []*runner.Task{
-		runner.NewTask(
+		runner.NewTask(p,
 			&projectTaskImpl{
 				baseDestination: p.GetBaseDestination(),
 				owner:           p.Owner,
