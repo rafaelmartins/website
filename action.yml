@@ -1,0 +1,84 @@
+name: 'Setup github.com/rafaelmartins/website'
+description: 'Setup github.com/rafaelmartins/website and add it to the PATH'
+
+inputs:
+  website-ref:
+    description: 'The github.com/rafaelmartins/website Git ref to checkout'
+    required: true
+    default: 'main'
+
+outputs:
+  cache-hit:
+    description: 'A boolean value to indicate if a cache was hit'
+    value: ${{ steps.cache-restore.outputs.cache-hit }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Check runner OS
+      if: ${{ runner.os != 'Linux' }}
+      run: |
+        echo "::error title=Error hint::This action supports only linux"
+        exit 1
+      shell: bash
+
+    - name: Resolve git reference
+      id: gitref
+      run: |
+        ref="${{ inputs.website-ref }}"
+        if git ls-remote --exit-code https://github.com/rafaelmartins/website.git "${ref}" > /dev/null; then
+          echo "ref=$(git ls-remote https://github.com/rafaelmartins/website.git "${ref}" | cut -d$'\t' -f1)" >> $GITHUB_OUTPUT
+          exit 0
+        fi
+        echo "ref=${ref}" >> $GITHUB_OUTPUT
+      shell: bash
+
+    - name: Restore build from cache, if exists
+      id: cache-restore
+      uses: actions/cache/restore@v4
+      with:
+        path: /opt/website
+        key: ${{ runner.os }}-build-website-${{ steps.gitref.outputs.ref }}
+
+    - name: Check out code
+      if: steps.cache-restore.outputs.cache-hit != 'true'
+      uses: actions/checkout@v4
+      with:
+        repository: rafaelmartins/website
+        ref: ${{ steps.gitref.outputs.ref }}
+        path: .build/website
+        fetch-depth: 0
+
+    - name: Setup Go
+      if: steps.cache-restore.outputs.cache-hit != 'true'
+      uses: actions/setup-go@v5
+      with:
+        go-version-file: .build/website/go.mod
+        cache-dependency-path: .build/website/go.sum
+
+    - name: Build binary
+      run: go build -o /opt/website/website
+      working-directory: .build/website
+      shell: bash
+
+    - name: Delete build directory
+      if: steps.cache-restore.outputs.cache-hit != 'true'
+      run: rm -rf .build/website
+      shell: bash
+
+    - name: Add binary to PATH
+      run: echo "/opt/website" >> $GITHUB_PATH
+      shell: bash
+
+    - name: Check if binary works
+      id: version
+      run: website -v
+      shell: bash
+
+    - name: Save build to cache, if needed
+      if: steps.cache-restore.outputs.cache-hit != 'true'
+      uses: actions/cache/save@v4
+      id: cache-save
+      with:
+        path: /opt/website
+        key: ${{ runner.os }}-build-website-${{ steps.gitref.outputs.ref }}
