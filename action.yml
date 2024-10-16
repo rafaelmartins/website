@@ -44,7 +44,6 @@ runs:
       if: steps.cache-restore.outputs.cache-hit != 'true'
       uses: actions/checkout@v4
       with:
-        repository: rafaelmartins/website
         ref: ${{ steps.gitref.outputs.ref }}
         path: .build/website
         fetch-depth: 0
@@ -57,7 +56,10 @@ runs:
         cache-dependency-path: .build/website/go.sum
 
     - name: Build binary
-      run: go build -o /opt/website/website
+      run: |
+        go build \
+          -ldflags "-X github.com/rafaelmartins/website/internal/version.Version=$(date -u +%Y%m%d%H)-$(git rev-parse --short "${{ steps.gitref.outputs.ref }}")$(git diff --quiet || echo -dirty)" \
+          -o /opt/website/website
       working-directory: .build/website
       shell: bash
 

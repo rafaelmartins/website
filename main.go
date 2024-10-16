@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 
 	"github.com/rafaelmartins/website/internal/assets"
@@ -10,6 +11,7 @@ import (
 	"github.com/rafaelmartins/website/internal/runner"
 	"github.com/rafaelmartins/website/internal/tasks"
 	"github.com/rafaelmartins/website/internal/templates"
+	"github.com/rafaelmartins/website/internal/version"
 	"github.com/rafaelmartins/website/internal/webserver"
 )
 
@@ -19,6 +21,7 @@ var (
 	fListenAddr = flag.String("a", ":3000", "development web server listen address")
 	fRunServer  = flag.Bool("r", false, "run development server")
 	fForce      = flag.Bool("f", false, "force re-running all tasks")
+	fVersion    = flag.Bool("v", false, "show version and exit")
 
 	cfg        *config.Config      = nil
 	taskGroups []*runner.TaskGroup = nil
@@ -281,6 +284,12 @@ func build() error {
 
 func main() {
 	flag.Parse()
+
+	if *fVersion {
+		fmt.Printf("github.com/rafaelmartins/website %s\n", version.Version)
+		return
+	}
+
 	force = *fForce
 
 	if *fRunServer {
