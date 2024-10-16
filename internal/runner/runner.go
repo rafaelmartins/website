@@ -52,7 +52,7 @@ func (t *Task) destination(basedir string) string {
 	return filepath.Join(basedir, t.group.GetBaseDestination(), t.impl.GetDestination())
 }
 
-func (t *Task) Run(basedir string, cfg Config, force bool) error {
+func (t *Task) run(basedir string, cfg Config, force bool) error {
 	if t.impl == nil {
 		return errors.New("task missing implementation")
 	}
@@ -220,7 +220,7 @@ func Run(groups []*TaskGroup, basedir string, cfg Config, force bool) error {
 		go func(task *Task) {
 			defer sem.Release(1)
 
-			if err := task.Run(basedir, cfg, force); err != nil {
+			if err := task.run(basedir, cfg, force); err != nil {
 				failures.Add(1)
 				log.Printf("  ERROR     %s", task.destination(basedir))
 				log.Printf("  -----     error: %s", err)
