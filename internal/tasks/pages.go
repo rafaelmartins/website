@@ -15,13 +15,17 @@ type pageTaskImpl struct {
 	source            string
 	extraDependencies []string
 	highlightStyle    string
+	prettyURL         bool
 	template          string
 	templateCtx       map[string]interface{}
 	layoutCtx         *templates.LayoutContext
 }
 
 func (t *pageTaskImpl) GetDestination() string {
-	return filepath.Join(t.slug, "index.html")
+	if t.prettyURL {
+		return filepath.Join(t.slug, "index.html")
+	}
+	return t.slug + ".html"
 }
 
 func (t *pageTaskImpl) GetGenerator() (runner.Generator, error) {
@@ -45,6 +49,7 @@ type Pages struct {
 	Sources           map[string]string
 	ExtraDependencies []string
 	HighlightStyle    string
+	PrettyURL         bool
 	BaseDestination   string
 	Template          string
 	TemplateCtx       map[string]interface{}
@@ -85,6 +90,7 @@ func (p *Pages) GetTasks() ([]*runner.Task, error) {
 					source:            v,
 					extraDependencies: deps,
 					highlightStyle:    style,
+					prettyURL:         p.PrettyURL,
 					template:          tmpl,
 					templateCtx:       p.TemplateCtx,
 					layoutCtx: &templates.LayoutContext{

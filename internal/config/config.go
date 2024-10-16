@@ -58,6 +58,7 @@ type Config struct {
 		} `yaml:"sources"`
 		ExtraDependencies []string               `yaml:"extra-dependencies"`
 		HighlightStyle    string                 `yaml:"highlight-style"`
+		PrettyURL         *bool                  `yaml:"pretty-url"`
 		BaseDestination   string                 `yaml:"base-destination"`
 		Template          string                 `yaml:"template"`
 		TemplateCtx       map[string]interface{} `yaml:"template-context"`

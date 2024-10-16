@@ -119,12 +119,18 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 			src[s.Slug] = s.File
 		}
 
+		prettyURL := true
+		if pg.PrettyURL != nil && !*pg.PrettyURL {
+			prettyURL = false
+		}
+
 		rv = append(rv,
 			runner.NewTaskGroup(
 				&tasks.Pages{
 					Sources:           src,
 					ExtraDependencies: pg.ExtraDependencies,
 					HighlightStyle:    pg.HighlightStyle,
+					PrettyURL:         prettyURL,
 					BaseDestination:   pg.BaseDestination,
 					Template:          pg.Template,
 					TemplateCtx:       pg.TemplateCtx,
