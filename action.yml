@@ -59,7 +59,7 @@ runs:
       if: steps.cache-restore.outputs.cache-hit != 'true'
       run: |
         go build \
-          -ldflags "-X github.com/rafaelmartins/website/internal/version.Version=$(date -u +%Y%m%d%H)-$(git rev-parse --short "${{ steps.gitref.outputs.ref }}")$(git diff --quiet || echo -dirty)" \
+          -ldflags "-X github.com/rafaelmartins/website/internal/version.Version=$(TZ=UTC git show -s --format="%cd-%h" --date="format-local:%Y%m%d%H" "${{ steps.gitref.outputs.ref }}")" \
           -o /opt/website/website
       working-directory: .build/website
       shell: bash
