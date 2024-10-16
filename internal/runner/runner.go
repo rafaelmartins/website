@@ -1,6 +1,7 @@
 package runner
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -9,9 +10,10 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
-	"sync"
 	"sync/atomic"
 	"time"
+
+	"golang.org/x/sync/semaphore"
 )
 
 type GeneratorByProduct struct {
@@ -205,33 +207,30 @@ func Run(groups []*TaskGroup, basedir string, cfg Config, force bool) error {
 		allTasks = append(allTasks, tasks...)
 	}
 
-	wg := sync.WaitGroup{}
-	wg.Add(len(allTasks))
-
-	taskCh := []chan *Task{}
+	ctx := context.Background()
+	nworkers := int64(runtime.NumCPU())
+	sem := semaphore.NewWeighted(nworkers)
 	failures := atomic.Int32{}
 
-	for i := 0; i < runtime.NumCPU(); i++ {
-		ch := make(chan *Task)
-		taskCh = append(taskCh, ch)
+	for _, t := range allTasks {
+		if err := sem.Acquire(ctx, 1); err != nil {
+			return err
+		}
 
-		go func(c chan *Task) {
-			for task := range c {
-				if err := task.Run(basedir, cfg, force); err != nil {
-					failures.Add(1)
-					log.Printf("  ERROR     %s", task.destination(basedir))
-					log.Printf("  -----     error: %s", err)
-				}
-				wg.Done()
+		go func(task *Task) {
+			defer sem.Release(1)
+
+			if err := task.Run(basedir, cfg, force); err != nil {
+				failures.Add(1)
+				log.Printf("  ERROR     %s", task.destination(basedir))
+				log.Printf("  -----     error: %s", err)
 			}
-		}(ch)
+		}(t)
 	}
 
-	for idx, task := range allTasks {
-		taskCh[idx%len(taskCh)] <- task
+	if err := sem.Acquire(ctx, nworkers); err != nil {
+		return err
 	}
-
-	wg.Wait()
 
 	if f := failures.Load(); f > 0 {
 		return fmt.Errorf("runner: %d tasks failed", f)
