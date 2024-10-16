@@ -25,6 +25,12 @@ jobs:
     runs-on: ubuntu-latest
     needs: clear-cache
 
+    strategy:
+      matrix:
+        version:
+          - main
+          - "69738e628ca3dadd296a05ed023691e83aa8f479"
+
     steps:
       - name: Check out code
         uses: actions/checkout@v4
@@ -33,7 +39,7 @@ jobs:
         id: test
         uses: ./
         with:
-          website-ref: main
+          website-ref: ${{ matrix.version }}
 
       - name: Dump outputs
         run: |
@@ -45,6 +51,12 @@ jobs:
     runs-on: ubuntu-latest
     needs: test-check
 
+    strategy:
+      matrix:
+        version:
+          - main
+          - "69738e628ca3dadd296a05ed023691e83aa8f479"
+
     steps:
       - name: Check out code
         uses: actions/checkout@v4
@@ -53,7 +65,7 @@ jobs:
         id: test
         uses: ./
         with:
-          website-ref: main
+          website-ref: ${{ matrix.version }}
 
       - name: Dump outputs
         run: |
