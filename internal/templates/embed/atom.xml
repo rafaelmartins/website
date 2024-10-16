@@ -2,7 +2,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title type="text">{{ .Config.Title }}{{ if .Content.Title }} - {{ .Content.Title }}{{ end }}</title>
-  <id>{{ .Content.URL }}</id>
+  <id>{{ .Config.URL }}{{ .Content.URL }}</id>
   <updated>{{ .Content.Atom.Updated.Format "2006-01-02T15:04:05Z" }}</updated>
   <link href="{{ .Config.URL }}{{ .Content.URL }}" />
   <link href="{{ .Config.URL }}{{ .Content.Pagination.AtomURL }}" rel="self" />
@@ -13,7 +13,7 @@
   {{- range .Content.Entries }}
   <entry>
     <title type="text">{{ .Title }}</title>
-    <id>{{ .URL }}</id>
+    <id>{{ .Config.URL }}{{ .URL }}</id>
     <updated>{{ .Post.Date.Format "2006-01-02T15:04:05Z" }}</updated>
     <published>{{ .Post.Date.Format "2006-01-02T15:04:05Z" }}</published>
     <link href="{{ $.Config.URL }}{{ .URL }}" />
