@@ -13,7 +13,7 @@
   {{- range .Content.Entries }}
   <entry>
     <title type="text">{{ .Title }}</title>
-    <id>{{ .Config.URL }}{{ .URL }}</id>
+    <id>{{ $.Config.URL }}{{ .URL }}</id>
     <updated>{{ .Post.Date.Format "2006-01-02T15:04:05Z" }}</updated>
     <published>{{ .Post.Date.Format "2006-01-02T15:04:05Z" }}</published>
     <link href="{{ $.Config.URL }}{{ .URL }}" />
