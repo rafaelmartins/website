@@ -241,29 +241,31 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 	)
 
 	for _, pj := range c.Projects {
-		// immutable by default, only disable manually for development
-		immutable := true
-		if pj.Immutable != nil && !*pj.Immutable {
-			immutable = false
-		}
-
 		sidebar := true
 		if pj.WithSidebar != nil && !*pj.WithSidebar {
 			sidebar = false
 		}
 
-		rv = append(rv,
-			runner.NewTaskGroup(
-				&tasks.Project{
-					Owner:           pj.Owner,
-					Repo:            pj.Repo,
-					BaseDestination: pj.BaseDestination,
-					Template:        pj.Template,
-					Immutable:       immutable,
-					WithSidebar:     sidebar,
-				},
-			),
-		)
+		for _, repo := range pj.Repositories {
+			// immutable by default, only disable manually for development
+			immutable := true
+			if repo.Immutable != nil && !*repo.Immutable {
+				immutable = false
+			}
+
+			rv = append(rv,
+				runner.NewTaskGroup(
+					&tasks.Project{
+						Owner:           repo.Owner,
+						Repo:            repo.Repo,
+						BaseDestination: pj.BaseDestination,
+						Template:        pj.Template,
+						Immutable:       immutable,
+						WithSidebar:     sidebar,
+					},
+				),
+			)
+		}
 	}
 	return rv, nil
 }

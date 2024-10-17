@@ -45,11 +45,13 @@ type Config struct {
 	} `yaml:"social-links"`
 
 	Projects []*struct {
-		Owner           string `yaml:"owner"`
-		Repo            string `yaml:"repo"`
+		Repositories []*struct {
+			Owner     string `yaml:"owner"`
+			Repo      string `yaml:"repo"`
+			Immutable *bool  `yaml:"immutable"`
+		} `yaml:"repositories"`
 		BaseDestination string `yaml:"base-destination"`
 		Template        string `yaml:"template"`
-		Immutable       *bool  `yaml:"immutable"`
 		WithSidebar     *bool  `yaml:"with-sidebar"`
 	} `yaml:"projects"`
 

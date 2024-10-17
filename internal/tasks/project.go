@@ -44,7 +44,7 @@ type Project struct {
 
 func (p *Project) GetBaseDestination() string {
 	if p.BaseDestination == "" {
-		return "project"
+		return "projects"
 	}
 	return p.BaseDestination
 }
