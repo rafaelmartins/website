@@ -17,6 +17,8 @@ type Config struct {
 		Email string `yaml:"email"`
 	} `yaml:"author"`
 
+	TemplatePartials []string `yaml:"template-partials"`
+
 	Assets struct {
 		BaseDestination string `yaml:"base-destination"`
 		Npm             []*struct {

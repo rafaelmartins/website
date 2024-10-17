@@ -123,6 +123,16 @@ func GetTimestamps(name string, withEmbed bool) ([]time.Time, error) {
 		rv = append(rv, ts)
 	}
 
+	if ccfg != nil {
+		for _, tmpl := range ccfg.TemplatePartials {
+			st, err := os.Stat(tmpl)
+			if err != nil {
+				return nil, err
+			}
+			rv = append(rv, st.ModTime().UTC())
+		}
+	}
+
 	if st, err := os.Stat(name); err == nil {
 		rv = append(rv, st.ModTime().UTC())
 	} else if _, err := content.Open("embed/" + name); err == nil {
@@ -138,6 +148,13 @@ func Execute(wr io.Writer, name string, fm template.FuncMap, lctx *LayoutContext
 	tmpl, err := template.New("base").Funcs(fm).ParseFS(content, "embed/base.html")
 	if err != nil {
 		return err
+	}
+
+	if ccfg != nil && len(ccfg.TemplatePartials) > 0 {
+		tmpl, err = tmpl.ParseFiles(ccfg.TemplatePartials...)
+		if err != nil {
+			return err
+		}
 	}
 
 	if _, err := os.Stat(name); err == nil {
