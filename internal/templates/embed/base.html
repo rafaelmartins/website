@@ -94,9 +94,9 @@
     </div>
     <footer class="footer has-background-light">
       <div class="content has-text-centered">
-        <p>
+        <p class="mb-6 is-hidden-tablet">
           {{- range .Config.SocialLinks }}
-          <a class="is-hidden-tablet" href="{{ .URL }}" aria-label="{{ .Label }}">
+          <a href="{{ .URL }}" aria-label="{{ .Label }}">
             <span class="icon is-large has-text-grey-dark">
               <i class="fas fa-2x fa-brands fa-{{ .Icon }}"></i>
             </span>
