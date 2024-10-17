@@ -29,8 +29,8 @@ func (h *HTTP) GetReader() (io.ReadCloser, error) {
 }
 
 func (h *HTTP) GetTimeStamps() ([]time.Time, error) {
-	if h.Immutable && !h.ts.IsZero() {
-		return []time.Time{h.ts}, nil
+	if h.Immutable {
+		return nil, nil
 	}
 
 	r, err := http.NewRequest("HEAD", h.Url, nil)

@@ -170,8 +170,8 @@ func (p *Project) GetTimeStamps() ([]time.Time, error) {
 	// we would be safe to just run this method frequently, as we support cache with
 	// etag/last-modified, but it is easier to just disable this manually when adding
 	// a new project than spam github servers for no good reason.
-	if p.Immutable && !p.ts.IsZero() {
-		return []time.Time{p.ts}, nil
+	if p.Immutable {
+		return nil, nil
 	}
 
 	rv, err := templates.GetTimestamps(p.Template, !p.Immutable)
