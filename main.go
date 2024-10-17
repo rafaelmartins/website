@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/rafaelmartins/website/internal/assets"
 	"github.com/rafaelmartins/website/internal/config"
 	"github.com/rafaelmartins/website/internal/generators"
 	"github.com/rafaelmartins/website/internal/runner"
@@ -38,7 +37,7 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 	rv := []*runner.TaskGroup{
 		// assets required by embedded templates
 		runner.NewTaskGroup(
-			&assets.CdnjsLibrary{
+			&tasks.NpmPackage{
 				Name:    "anchor-js",
 				Version: "5.0.0",
 				Files: []string{
@@ -48,7 +47,7 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 			},
 		),
 		runner.NewTaskGroup(
-			&assets.CdnjsLibrary{
+			&tasks.NpmPackage{
 				Name:    "bulma",
 				Version: "1.0.2",
 				Files: []string{
@@ -58,8 +57,8 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 			},
 		),
 		runner.NewTaskGroup(
-			&assets.CdnjsLibrary{
-				Name:    "font-awesome",
+			&tasks.NpmPackage{
+				Name:    "@fortawesome/fontawesome-free",
 				Version: "6.6.0",
 				Files: []string{
 					"css/all.min.css",
@@ -76,9 +75,9 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 			},
 		),
 		runner.NewTaskGroup(
-			&assets.CdnjsLibrary{
+			&tasks.NpmPackage{
 				Name:    "github-markdown-css",
-				Version: "5.6.1",
+				Version: "5.7.0",
 				Files: []string{
 					"github-markdown.min.css",
 				},
@@ -86,16 +85,26 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 			},
 		),
 		runner.NewTaskGroup(
-			&assets.NunitoFont{
+			&tasks.NpmPackage{
+				Name:    "@fontsource-variable/nunito",
+				Version: "5.1.0",
+				Files: []string{
+					"wght.min.css",
+					"files/nunito-cyrillic-ext-wght-normal.woff2",
+					"files/nunito-cyrillic-wght-normal.woff2",
+					"files/nunito-vietnamese-wght-normal.woff2",
+					"files/nunito-latin-ext-wght-normal.woff2",
+					"files/nunito-latin-wght-normal.woff2",
+				},
 				BaseDestination: assetsDir,
 			},
 		),
 	}
 
-	for _, js := range c.Assets.Cdnjs {
+	for _, js := range c.Assets.Npm {
 		rv = append(rv,
 			runner.NewTaskGroup(
-				&assets.CdnjsLibrary{
+				&tasks.NpmPackage{
 					Name:            js.Name,
 					Version:         js.Version,
 					Files:           js.Files,

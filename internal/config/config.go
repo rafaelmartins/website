@@ -19,11 +19,11 @@ type Config struct {
 
 	Assets struct {
 		BaseDestination string `yaml:"base-destination"`
-		Cdnjs           []*struct {
+		Npm             []*struct {
 			Name    string   `yaml:"name"`
 			Version string   `yaml:"version"`
 			Files   []string `yaml:"files"`
-		} `yaml:"cdnjs"`
+		} `yaml:"npm"`
 	} `yaml:"assets"`
 
 	Files []*struct {

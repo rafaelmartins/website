@@ -6,9 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="generator" content="https://github.com/rafaelmartins/website">
     <title>{{ template "title" . }}</title>
-    <link href="/assets/nunito/nunito.css" rel="stylesheet" type="text/css">
     <link href="/assets/bulma/css/bulma.min.css" rel="stylesheet" type="text/css">
-    <link href="/assets/font-awesome/css/all.min.css" rel="stylesheet" type="text/css">
+    <link href="/assets/@fontsource-variable/nunito/wght.min.css" rel="stylesheet" type="text/css">
+    <link href="/assets/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
     {{- if .Config.Posts.PostsPerPageAtom }}
     <link href="{{ if .Config.Posts.BaseDestination }}/{{ .Config.Posts.BaseDestination }}{{
       end }}/atom.xml" rel="alternate" type="application/atom+xml" title="{{
@@ -23,7 +23,7 @@
     {{- end }}
     <style type="text/css">
       :root {
-        --bulma-body-family: "Nunito", sans-serif;
+        --bulma-body-family: "Nunito Variable", sans-serif;
       }
       .navbar {
         --bulma-navbar-burger-color: var(--bulma-navbar-item-color);
