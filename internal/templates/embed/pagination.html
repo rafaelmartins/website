@@ -1,8 +1,5 @@
 {{ define "title" }}{{ .Content.Title }} - {{ .Config.Title }}{{ end }}
 
-{{ define "extra_head" }}{{ end }}
-{{ define "extra_body" }}{{ end }}
-
 {{ define "main" -}}
 <article>
   <h1 class="mb-5">{{ .Content.Title }}</h1>
@@ -54,5 +51,3 @@
   {{- end }}
 </article>
 {{- end }}
-
-{{ define "sidebar" }}{{ end }}

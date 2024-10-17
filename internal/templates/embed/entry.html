@@ -1,8 +1,5 @@
 {{ define "title" }}{{ .Content.Entry.Title }} - {{ .Config.Title }}{{ end }}
 
-{{ define "extra_head" }}{{ end }}
-{{ define "extra_body" }}{{ end }}
-
 {{ define "main" -}}
 <article class="anchor">
   <h1 class="title">{{ .Content.Entry.Title }}</h1>
@@ -15,5 +12,3 @@
   {{- end }}
 </article>
 {{- end }}
-
-{{ define "sidebar" }}{{ end }}

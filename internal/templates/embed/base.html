@@ -101,17 +101,12 @@
           </a>
           {{- end }}
         </p>
-        {{- if .Config.Footer }}
-        <p>
-          {{ .Config.Footer }}
-        </p>
-        {{- end }}
+{{ template "footer" . }}
       </div>
     </footer>
     <script src="/assets/anchor-js/anchor.min.js"></script>
     <script>
       anchors.add('.anchor h2, .anchor h3, .anchor h4, .anchor h5, .anchor h6');
-
       document.addEventListener('DOMContentLoaded', () => {
         Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0).forEach(element => {
           element.addEventListener('click', () => {
@@ -125,3 +120,13 @@
   </body>
 </html>
 {{- end }}
+
+{{ define "title" }}{{ .Config.Title }}{{ end }}
+
+{{ define "extra_head" }}{{ end }}
+
+{{ define "extra_body" }}{{ end }}
+
+{{ define "sidebar" }}{{ end }}
+
+{{ define "footer" }}{{ .Config.Footer }}{{ end }}
