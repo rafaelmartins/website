@@ -5,11 +5,14 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"runtime/debug"
+	"strings"
 	"text/template"
 	"time"
 
 	"github.com/rafaelmartins/website/internal/config"
 	"github.com/rafaelmartins/website/internal/utils"
+	"github.com/rafaelmartins/website/internal/version"
 )
 
 var (
@@ -100,10 +103,40 @@ type ContentContext struct {
 	Extra       map[string]interface{}
 }
 
+type generator struct {
+	Name       string
+	NameURL    string
+	Version    string
+	VersionURL string
+}
+
+var gen = func() *generator {
+	bi, ok := debug.ReadBuildInfo()
+	if !ok {
+		return nil
+	}
+
+	nameUrl := "https://" + bi.Path
+	versionUrl := nameUrl
+
+	parts := strings.Split(version.Version, "-")
+	if len(parts) == 2 {
+		versionUrl += "/commit/" + parts[1]
+	}
+
+	return &generator{
+		Name:       bi.Path,
+		NameURL:    nameUrl,
+		Version:    version.Version,
+		VersionURL: versionUrl,
+	}
+}()
+
 type context struct {
-	Config  *config.Config
-	Layout  *LayoutContext
-	Content *ContentContext
+	Config    *config.Config
+	Generator *generator
+	Layout    *LayoutContext
+	Content   *ContentContext
 }
 
 func SetConfig(cfg *config.Config) {
@@ -182,8 +215,9 @@ func Execute(wr io.Writer, name string, fm template.FuncMap, lctx *LayoutContext
 	}
 
 	return tmpl.ExecuteTemplate(wr, "base", &context{
-		Config:  ccfg,
-		Layout:  llctx,
-		Content: lcctx,
+		Config:    ccfg,
+		Generator: gen,
+		Layout:    llctx,
+		Content:   lcctx,
 	})
 }

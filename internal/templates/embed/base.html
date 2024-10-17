@@ -4,7 +4,9 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="generator" content="https://github.com/rafaelmartins/website">
+    {{- if .Generator }}
+    <meta name="generator" content="{{ .Generator.Name }} {{ .Generator.Version }}">
+    {{- end }}
     <title>{{ template "title" . }}</title>
     <link href="/assets/bulma/css/bulma.min.css" rel="stylesheet" type="text/css">
     <link href="/assets/@fontsource-variable/nunito/wght.min.css" rel="stylesheet" type="text/css">
