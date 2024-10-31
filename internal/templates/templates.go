@@ -5,14 +5,12 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"runtime/debug"
-	"strings"
 	"text/template"
 	"time"
 
 	"github.com/rafaelmartins/website/internal/config"
+	"github.com/rafaelmartins/website/internal/meta"
 	"github.com/rafaelmartins/website/internal/utils"
-	"github.com/rafaelmartins/website/internal/version"
 )
 
 var (
@@ -103,38 +101,11 @@ type ContentContext struct {
 	Extra       map[string]interface{}
 }
 
-type generator struct {
-	Name       string
-	NameURL    string
-	Version    string
-	VersionURL string
-}
-
-var gen = func() *generator {
-	bi, ok := debug.ReadBuildInfo()
-	if !ok {
-		return nil
-	}
-
-	nameUrl := "https://" + bi.Path
-	versionUrl := nameUrl
-
-	parts := strings.Split(version.Version, "-")
-	if len(parts) == 2 {
-		versionUrl += "/commit/" + parts[1]
-	}
-
-	return &generator{
-		Name:       bi.Path,
-		NameURL:    nameUrl,
-		Version:    version.Version,
-		VersionURL: versionUrl,
-	}
-}()
+var gen *meta.Metadata
 
 type context struct {
 	Config    *config.Config
-	Generator *generator
+	Generator *meta.Metadata
 	Layout    *LayoutContext
 	Content   *ContentContext
 }
@@ -212,6 +183,14 @@ func Execute(wr io.Writer, name string, fm template.FuncMap, lctx *LayoutContext
 	lcctx := cctx
 	if lcctx == nil {
 		lcctx = &ContentContext{}
+	}
+
+	if gen == nil {
+		m, err := meta.GetMetadata()
+		if err != nil {
+			return err
+		}
+		gen = m
 	}
 
 	return tmpl.ExecuteTemplate(wr, "base", &context{

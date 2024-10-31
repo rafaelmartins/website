@@ -7,10 +7,10 @@ import (
 
 	"github.com/rafaelmartins/website/internal/config"
 	"github.com/rafaelmartins/website/internal/generators"
+	"github.com/rafaelmartins/website/internal/meta"
 	"github.com/rafaelmartins/website/internal/runner"
 	"github.com/rafaelmartins/website/internal/tasks"
 	"github.com/rafaelmartins/website/internal/templates"
-	"github.com/rafaelmartins/website/internal/version"
 	"github.com/rafaelmartins/website/internal/webserver"
 )
 
@@ -297,7 +297,11 @@ func main() {
 	flag.Parse()
 
 	if *fVersion {
-		fmt.Printf("github.com/rafaelmartins/website %s\n", version.Version)
+		md, err := meta.GetMetadata()
+		if err != nil {
+			log.Fatalf("error: %s", err)
+		}
+		fmt.Printf("%s\n", md)
 		return
 	}
 
