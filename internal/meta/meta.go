@@ -47,10 +47,19 @@ func GetMetadata() (*Metadata, error) {
 		return nil, errors.New("version: build info not available")
 	}
 
+	isGit := false
 	rv := &Metadata{}
 
 	for _, s := range bi.Settings {
 		switch s.Key {
+
+		case "vcs":
+			if s.Value == "git" {
+				isGit = true
+			} else {
+				return nil, errors.New("meta: vcs is not git")
+			}
+
 		case "vcs.revision":
 			rv.Git.Revision = s.Value
 
@@ -83,20 +92,26 @@ func GetMetadata() (*Metadata, error) {
 		}
 	}
 
-	rv.Name = bi.Path
-	rv.Version = "unknown"
-	rv.Go.Version = bi.GoVersion
-
-	pathp := strings.Split(rv.Name, "/")
-	if len(rv.Git.Revision) < 7 || len(pathp) < 3 || pathp[0] != "github.com" {
-		return rv, nil
+	if !isGit || len(rv.Git.Revision) < 7 || rv.Git.Date.IsZero() {
+		return nil, errors.New("meta: required git metadata not found")
+	}
+	if !strings.HasPrefix(bi.Path, "github.com/") {
+		return nil, errors.New("meta: module not from github, unsupported")
 	}
 
-	rv.URL = fmt.Sprintf("https://%s/%s/%s", pathp[0], pathp[1], pathp[2])
-	rv.Git.URL = fmt.Sprintf("%s/commit/%s", rv.URL, rv.Git.Revision)
+	pathp := strings.Split(bi.Path, "/")
+	if len(pathp) < 2 {
+		return nil, errors.New("meta: bad module format")
+	}
+
+	rv.Name = bi.Path
 	rv.Version = rv.Git.Date.Format("2006010215") + "-" + rv.Git.Revision[:7]
 	if rv.Git.Dirty {
 		rv.Version += "-dirty"
 	}
+	rv.URL = fmt.Sprintf("https://%s/%s/%s", pathp[0], pathp[1], pathp[2])
+	rv.Git.URL = fmt.Sprintf("%s/commit/%s", rv.URL, rv.Git.Revision)
+	rv.Go.Version = bi.GoVersion
+
 	return rv, nil
 }

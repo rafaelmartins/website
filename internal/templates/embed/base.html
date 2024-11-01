@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     {{- if .Generator }}
-    <meta name="generator" content="{{ .Generator.Name }} {{ .Generator.Version }}">
+    <meta name="generator" content="{{ .Generator }}">
     {{- end }}
     <title>{{ template "title" . }}</title>
     <link href="/assets/bulma/css/bulma.min.css" rel="stylesheet" type="text/css">
