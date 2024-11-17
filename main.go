@@ -51,7 +51,7 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 				Name:    "bulma",
 				Version: "1.0.2",
 				Files: []string{
-					"css/bulma.min.css",
+					"css/versions/bulma-no-dark-mode.min.css",
 				},
 				BaseDestination: assetsDir,
 			},
