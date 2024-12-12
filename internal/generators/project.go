@@ -2,18 +2,15 @@ package generators
 
 import (
 	"bytes"
-	"encoding/base64"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
-	"net/http"
 	"net/url"
-	"os"
 	"path/filepath"
 	"strings"
 	"time"
 
+	"github.com/rafaelmartins/website/internal/github"
 	"github.com/rafaelmartins/website/internal/runner"
 	"github.com/rafaelmartins/website/internal/templates"
 	"golang.org/x/net/html"
@@ -27,12 +24,8 @@ type Project struct {
 	LayoutCtx *templates.LayoutContext
 	Immutable bool
 
-	ts           time.Time
-	etag         string
-	lastmodified string
-	readme       string
-	baseurl      string
-	images       []string
+	readmeCtx github.RequestContext
+	images    []string
 }
 
 func (*Project) GetID() string {
@@ -40,12 +33,12 @@ func (*Project) GetID() string {
 }
 
 func (p *Project) GetReader() (io.ReadCloser, error) {
-	mks, baseurl, _, err := p.getReadme()
+	mks, baseurl, err := github.Readme(&p.readmeCtx, p.Owner, p.Repo)
 	if err != nil {
 		return nil, err
 	}
 
-	mkr, err := p.renderMarkdown(mks)
+	mkr, err := github.Markdown(nil, p.Owner, p.Repo, mks)
 	if err != nil {
 		return nil, err
 	}
@@ -62,11 +55,10 @@ func (p *Project) GetReader() (io.ReadCloser, error) {
 		Repo:  p.Repo,
 	}
 
-	rbody, err := p.request("GET", "repos/"+p.Owner+"/"+p.Repo, nil)
+	rbody, err := github.Request(nil, "GET", "repos/"+p.Owner+"/"+p.Repo, nil)
 	if err != nil {
 		return nil, err
 	}
-	defer rbody.Close()
 
 	v := struct {
 		Description      string `json:"description"`
@@ -75,7 +67,7 @@ func (p *Project) GetReader() (io.ReadCloser, error) {
 		StargazersCount  int    `json:"stargazers_count"`
 		SubscribersCount int    `json:"subscribers_count"`
 	}{}
-	if err := json.NewDecoder(rbody).Decode(&v); err != nil {
+	if err := json.Unmarshal(rbody, &v); err != nil {
 		return nil, err
 	}
 
@@ -85,11 +77,10 @@ func (p *Project) GetReader() (io.ReadCloser, error) {
 	proj.Watching = v.SubscribersCount
 	proj.Forks = v.ForksCount
 
-	lbody, err := p.request("GET", "repos/"+p.Owner+"/"+p.Repo+"/license", nil)
+	lbody, err := github.Request(nil, "GET", "repos/"+p.Owner+"/"+p.Repo+"/license", nil)
 	if err != nil {
 		return nil, err
 	}
-	defer lbody.Close()
 
 	vl := struct {
 		HtmlUrl string `json:"html_url"`
@@ -97,7 +88,7 @@ func (p *Project) GetReader() (io.ReadCloser, error) {
 			SpdxId string `json:"spdx_id"`
 		} `json:"license"`
 	}{}
-	if err := json.NewDecoder(lbody).Decode(&vl); err != nil {
+	if err := json.Unmarshal(lbody, &vl); err != nil {
 		return nil, err
 	}
 
@@ -106,46 +97,55 @@ func (p *Project) GetReader() (io.ReadCloser, error) {
 	}
 	proj.License.URL = vl.HtmlUrl
 
-	lrbody, err := p.request("GET", "repos/"+p.Owner+"/"+p.Repo+"/releases/latest", nil)
+	withRelease := true
+	lrbody, err := github.Request(nil, "GET", "repos/"+p.Owner+"/"+p.Repo+"/releases/latest", nil)
 	if err != nil {
-		return nil, err
-	}
-	defer lrbody.Close()
-
-	vlr := struct {
-		Status  string `json:"status"`
-		Name    string `json:"name"`
-		TagName string `json:"tag_name"`
-		HtmlUrl string `json:"html_url"`
-		Body    string `json:"body"`
-		Assets  []struct {
-			Name               string `json:"name"`
-			BrowserDownloadURL string `json:"browser_download_url"`
-		} `json:"assets"`
-	}{}
-	if err := json.NewDecoder(lrbody).Decode(&vlr); err != nil {
-		return nil, err
+		herr, ok := err.(*github.HttpError)
+		if !ok {
+			return nil, err
+		}
+		if herr.StatusCode != 404 {
+			return nil, err
+		}
+		withRelease = false
 	}
 
-	if vlr.Status == "" {
-		mkd, err := p.renderMarkdown(vlr.Body)
-		if err != nil {
+	if withRelease {
+		vlr := struct {
+			Status  string `json:"status"`
+			Name    string `json:"name"`
+			TagName string `json:"tag_name"`
+			HtmlUrl string `json:"html_url"`
+			Body    string `json:"body"`
+			Assets  []struct {
+				Name               string `json:"name"`
+				BrowserDownloadURL string `json:"browser_download_url"`
+			} `json:"assets"`
+		}{}
+		if err := json.Unmarshal(lrbody, &vlr); err != nil {
 			return nil, err
 		}
 
-		proj.LatestRelease = &templates.ProjectContentLatestRelease{
-			Name: vlr.Name,
-			Tag:  vlr.TagName,
-			Body: mkd,
-			URL:  vlr.HtmlUrl,
-		}
-		for _, asset := range vlr.Assets {
-			proj.LatestRelease.Files = append(proj.LatestRelease.Files,
-				&templates.ProjectContentLatestReleaseFile{
-					File: asset.Name,
-					URL:  asset.BrowserDownloadURL,
-				},
-			)
+		if vlr.Status == "" {
+			mkd, err := github.Markdown(nil, p.Owner, p.Repo, vlr.Body)
+			if err != nil {
+				return nil, err
+			}
+
+			proj.LatestRelease = &templates.ProjectContentLatestRelease{
+				Name: vlr.Name,
+				Tag:  vlr.TagName,
+				Body: mkd,
+				URL:  vlr.HtmlUrl,
+			}
+			for _, asset := range vlr.Assets {
+				proj.LatestRelease.Files = append(proj.LatestRelease.Files,
+					&templates.ProjectContentLatestReleaseFile{
+						File: asset.Name,
+						URL:  asset.BrowserDownloadURL,
+					},
+				)
+			}
 		}
 	}
 
@@ -179,11 +179,10 @@ func (p *Project) GetTimeStamps() ([]time.Time, error) {
 		return nil, err
 	}
 
-	_, _, ts, err := p.getReadme()
-	if err != nil {
+	if _, _, err := github.Readme(&p.readmeCtx, p.Owner, p.Repo); err != nil {
 		return nil, err
 	}
-	return append(rv, ts), nil
+	return append(rv, p.readmeCtx.LastModifiedTime), nil
 }
 
 func (p *Project) GetImmutable() bool {
@@ -196,7 +195,7 @@ func (p *Project) GetByProducts(ch chan *runner.GeneratorByProduct) {
 	}
 
 	for _, img := range p.images {
-		rd, err := p.getContents(img)
+		rd, err := github.Contents(nil, p.Owner, p.Repo, img)
 		if err != nil {
 			ch <- &runner.GeneratorByProduct{Err: err}
 			break
@@ -208,174 +207,6 @@ func (p *Project) GetByProducts(ch chan *runner.GeneratorByProduct) {
 		}
 	}
 	close(ch)
-}
-
-func (p *Project) getReadme() (string, string, time.Time, error) {
-	req, err := http.NewRequest("GET", "https://api.github.com/repos/"+p.Owner+"/"+p.Repo+"/readme", nil)
-	if err != nil {
-		return "", "", time.Time{}, err
-	}
-
-	if token, ok := os.LookupEnv("GITHUB_TOKEN"); ok {
-		req.Header.Add("authorization", "Bearer "+token)
-	}
-	req.Header.Add("accept", "application/vnd.github+json")
-	req.Header.Add("x-github-api-version", "2022-11-28")
-	if p.etag != "" {
-		req.Header.Set("if-none-match", p.etag)
-	}
-	if p.lastmodified != "" {
-		req.Header.Set("if-modified-since", p.lastmodified)
-	}
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return "", "", time.Time{}, err
-	}
-
-	if resp.StatusCode == 304 {
-		return p.readme, p.baseurl, p.ts, nil
-	}
-
-	if resp.StatusCode != 200 {
-		v := &struct {
-			Message string `json:"message"`
-		}{}
-		if err := json.NewDecoder(resp.Body).Decode(v); err == nil && v.Message != "" {
-			return "", "", time.Time{}, fmt.Errorf("project: github error: %s", v.Message)
-		}
-		return "", "", time.Time{}, fmt.Errorf("project: http error: %s", resp.Status)
-	}
-
-	body, baseurl, err := p.readContents(resp.Body)
-	if err != nil {
-		return "", "", time.Time{}, err
-	}
-	defer body.Close()
-
-	readme, err := io.ReadAll(body)
-	if err != nil {
-		return "", "", time.Time{}, err
-	}
-
-	p.readme = string(readme)
-	p.baseurl = baseurl
-
-	if etag := resp.Header.Get("etag"); etag != "" {
-		p.etag = strings.TrimPrefix(etag, "W/")
-	}
-
-	if lastmodified := resp.Header.Get("last-modified"); lastmodified != "" {
-		t, err := time.Parse(time.RFC1123, lastmodified)
-		if err != nil {
-			return "", "", time.Time{}, err
-		}
-
-		p.lastmodified = lastmodified
-		p.ts = t.UTC()
-	}
-
-	return p.readme, p.baseurl, p.ts, nil
-}
-
-func (p *Project) request(method string, path string, body io.Reader) (io.ReadCloser, error) {
-	req, err := http.NewRequest(method, "https://api.github.com/"+path, body)
-	if err != nil {
-		return nil, err
-	}
-
-	if token, ok := os.LookupEnv("GITHUB_TOKEN"); ok {
-		req.Header.Add("authorization", "Bearer "+token)
-	}
-	req.Header.Add("Accept", "application/vnd.github+json")
-	req.Header.Add("X-GitHub-Api-Version", "2022-11-28")
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	return resp.Body, nil
-}
-
-func (p *Project) getContents(path string) (io.ReadCloser, error) {
-	jbody, err := p.request("GET", "repos/"+p.Owner+"/"+p.Repo+"/contents/"+path, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	body, _, err := p.readContents(jbody)
-	return body, err
-}
-
-func (p *Project) readContents(body io.ReadCloser) (io.ReadCloser, string, error) {
-	defer body.Close()
-
-	v := struct {
-		Message     string `json:"message"`
-		Type        string `json:"type"`
-		Encoding    string `json:"encoding"`
-		Content     string `json:"content"`
-		HtmlUrl     string `json:"html_url"`
-		DownloadUrl string `json:"download_url"`
-	}{}
-	if err := json.NewDecoder(body).Decode(&v); err != nil {
-		return nil, "", err
-	}
-
-	if v.Type != "file" {
-		if v.Message != "" {
-			return nil, "", fmt.Errorf("project: response error: %s", v.Message)
-		}
-		return nil, "", errors.New("project: response is not a file")
-	}
-	if v.HtmlUrl == "" {
-		return nil, "", errors.New("project: invalid response html url")
-	}
-
-	switch v.Encoding {
-	case "base64":
-		if v.Content == "" {
-			return nil, "", errors.New("project: invalid response base64 data")
-		}
-		content, err := base64.StdEncoding.DecodeString(v.Content)
-		return io.NopCloser(bytes.NewBuffer(content)), v.HtmlUrl, err
-
-	case "none":
-		rsp, err := http.Get(v.DownloadUrl)
-		if err != nil {
-			return nil, "", err
-		}
-		return rsp.Body, v.HtmlUrl, err
-
-	case "":
-		return io.NopCloser(bytes.NewBufferString(v.Content)), v.HtmlUrl, nil
-
-	default:
-		return nil, "", errors.New("project: invalid response encoding")
-	}
-}
-
-func (p *Project) renderMarkdown(src string) (string, error) {
-	in := &bytes.Buffer{}
-	if err := json.NewEncoder(in).Encode(map[string]string{
-		"text":    src,
-		"mode":    "gfm",
-		"context": p.Owner + "/" + p.Repo,
-	}); err != nil {
-		return "", err
-	}
-
-	body, err := p.request("POST", "markdown", in)
-	if err != nil {
-		return "", err
-	}
-	defer body.Close()
-
-	rv, err := io.ReadAll(body)
-	if err != nil {
-		return "", err
-	}
-	return string(rv), nil
 }
 
 func (p *Project) processHtml(baseUrl string, data string) (string, string, []string, error) {

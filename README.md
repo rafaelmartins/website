@@ -11,7 +11,5 @@ The code is kinda generic (writing code that way is just stronger than me...), b
 ## Versioning
 This software won't ever get a formal release, but there's a version string generated from the latest Git commit timestamp and hash, as available when building the binary. Example: `2024110110-a1b2c3d`.
 
- It fails to run if the required metadata is not available.
-
 ## License
 This code is released under a [BSD 3-Clause License](LICENSE).

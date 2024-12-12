@@ -92,7 +92,13 @@ func GetMetadata() (*Metadata, error) {
 		}
 	}
 
-	if !isGit || len(rv.Git.Revision) < 7 || rv.Git.Date.IsZero() {
+	if !isGit {
+		// assume that we are on a different worktree during development
+		rv.Git.Revision = "0000000"
+		rv.Git.Date = time.Now().UTC()
+	}
+
+	if len(rv.Git.Revision) < 7 || rv.Git.Date.IsZero() {
 		return nil, errors.New("meta: required git metadata not found")
 	}
 	if !strings.HasPrefix(bi.Path, "github.com/") {
