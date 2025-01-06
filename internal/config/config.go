@@ -49,6 +49,13 @@ type Config struct {
 			Owner     string `yaml:"owner"`
 			Repo      string `yaml:"repo"`
 			Immutable *bool  `yaml:"immutable"`
+			CDocs     struct {
+				Destination   string   `yaml:"destination"`
+				Headers       []string `yaml:"headers"`
+				BaseDirectory string   `yaml:"base-directory"`
+				Template      string   `yaml:"template"`
+				WithSidebar   *bool    `yaml:"with-sidebar"`
+			} `yaml:"c-docs"`
 		} `yaml:"repositories"`
 		BaseDestination string `yaml:"base-destination"`
 		Template        string `yaml:"template"`

@@ -100,11 +100,7 @@ func (p *Project) GetReader() (io.ReadCloser, error) {
 	withRelease := true
 	lrbody, err := github.Request(nil, "GET", "repos/"+p.Owner+"/"+p.Repo+"/releases/latest", nil)
 	if err != nil {
-		herr, ok := err.(*github.HttpError)
-		if !ok {
-			return nil, err
-		}
-		if herr.StatusCode != 404 {
+		if herr, ok := err.(*github.HttpError); !ok || herr.StatusCode != 404 {
 			return nil, err
 		}
 		withRelease = false
@@ -195,7 +191,7 @@ func (p *Project) GetByProducts(ch chan *runner.GeneratorByProduct) {
 	}
 
 	for _, img := range p.images {
-		rd, err := github.Contents(nil, p.Owner, p.Repo, img)
+		rd, _, err := github.Contents(nil, p.Owner, p.Repo, img, true)
 		if err != nil {
 			ch <- &runner.GeneratorByProduct{Err: err}
 			break

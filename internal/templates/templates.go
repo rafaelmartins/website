@@ -8,6 +8,7 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/rafaelmartins/website/internal/cdocs"
 	"github.com/rafaelmartins/website/internal/config"
 	"github.com/rafaelmartins/website/internal/meta"
 	"github.com/rafaelmartins/website/internal/utils"
@@ -76,6 +77,7 @@ type ContentEntry struct {
 	Body    string
 	Post    *PostContentEntry
 	Project *ProjectContentEntry
+	CDocs   *cdocs.TemplateCtx
 	Extra   map[string]interface{}
 }
 

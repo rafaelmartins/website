@@ -4,7 +4,9 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"os"
 
+	"github.com/rafaelmartins/website/internal/cdocs"
 	"github.com/rafaelmartins/website/internal/config"
 	"github.com/rafaelmartins/website/internal/generators"
 	"github.com/rafaelmartins/website/internal/meta"
@@ -18,6 +20,7 @@ var (
 	fBuildDir   = flag.String("d", "_build", "build directory")
 	fConfigFile = flag.String("c", "config.yml", "configuration file")
 	fListenAddr = flag.String("a", ":3000", "development web server listen address")
+	fCDocs      = flag.String("x", "", "dump cdocs ast and template context for given header and exit")
 	fRunServer  = flag.Bool("r", false, "run development server")
 	fForce      = flag.Bool("f", false, "force re-running all tasks")
 	fVersion    = flag.Bool("v", false, "show version and exit")
@@ -253,15 +256,25 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 				immutable = false
 			}
 
+			dsidebar := true
+			if repo.CDocs.WithSidebar != nil && !*repo.CDocs.WithSidebar {
+				dsidebar = false
+			}
+
 			rv = append(rv,
 				runner.NewTaskGroup(
 					&tasks.Project{
-						Owner:           repo.Owner,
-						Repo:            repo.Repo,
-						BaseDestination: pj.BaseDestination,
-						Template:        pj.Template,
-						Immutable:       immutable,
-						WithSidebar:     sidebar,
+						Owner:              repo.Owner,
+						Repo:               repo.Repo,
+						CDocsDestination:   repo.CDocs.Destination,
+						CDocsHeaders:       repo.CDocs.Headers,
+						CDocsBaseDirectory: repo.CDocs.BaseDirectory,
+						CDocsTemplate:      repo.CDocs.Template,
+						CDocsWithSidebar:   dsidebar,
+						BaseDestination:    pj.BaseDestination,
+						Template:           pj.Template,
+						Immutable:          immutable,
+						WithSidebar:        sidebar,
 					},
 				),
 			)
@@ -302,6 +315,28 @@ func main() {
 			log.Fatalf("error: %s", err)
 		}
 		fmt.Printf("%s\n", md)
+		return
+	}
+
+	if *fCDocs != "" {
+		fp, err := os.Open(*fCDocs)
+		if err != nil {
+			log.Fatalf("error: %s", err)
+		}
+
+		hdr, err := cdocs.Parse(*fCDocs, fp)
+		if hdr != nil {
+			hdr.Dump(os.Stdout)
+		}
+		if err != nil {
+			log.Fatalf("error: %s", err)
+		}
+
+		ctx, err := cdocs.NewTemplateCtx([]*cdocs.TemplateCtxHeader{{Filename: *fCDocs, Header: hdr}})
+		if err != nil {
+			log.Fatalf("error: %s", err)
+		}
+		ctx.Dump(os.Stdout)
 		return
 	}
 

@@ -1,0 +1,97 @@
+{{ define "title" }}{{ .Content.Title }} - {{ .Config.Title }}{{ end }}
+
+{{ define "extra_head" -}}
+<style type="text/css">
+  .card-content th {
+    white-space: nowrap;
+  }
+  .card-content pre {
+    background-color: var(--bulma-background) !important;
+  }
+</style>
+{{- end }}
+
+{{ define "cdocs-includes" -}}
+{{ if . -}}
+<pre>{{ range $i, $v := . }}
+  {{- if $i }}
+{{ end -}}
+{{ $v }}{{ end -}}
+</pre>
+{{- end }}
+{{- end }}
+
+{{ define "cdocs-entry" -}}
+<div id="{{ .ID }}" class="card">
+  <header class="card-header">
+    <a id="{{ .ID }}" href="{{ .Link }}"><p class="card-header-title">{{ .Type }} <code>{{ .Name }}</code></p></a>
+  </header>
+  <div class="card-content">
+    {{ .Proto }}
+    {{ .Description }}
+  </div>
+</div>
+{{- end }}
+
+{{ define "main" -}}
+<article>
+  <h1 class="mb-5">{{ .Content.Title }}</h1>
+  {{- range .Content.Entry.CDocs.Headers }}
+  <div class="box">
+    <h2 id="{{ .ID }}">Header: {{ .Name }}</h2>
+    {{ .Description}}
+    <h3>Included Headers</h3>
+    {{ template "cdocs-includes" .Includes }}
+    {{ range .Sections -}}
+    <h3 id="{{ .ID }}">{{ .Name }}</h3>
+    {{ .Description }}
+    {{- range .Structs }}
+    {{ template "cdocs-entry" . }}
+    {{- end }}
+    {{- range .Enums }}
+    {{ template "cdocs-entry" . }}
+    {{- end }}
+    {{- range .Defines }}
+    {{ template "cdocs-entry" . }}
+    {{- end }}
+    {{- range .Functions }}
+    {{ template "cdocs-entry" . }}
+    {{- end }}
+    {{- range .FunctionTypes }}
+    {{ template "cdocs-entry" . }}
+    {{- end }}
+    {{- end }}
+    {{- if .Structs }}
+    <h3>Struct Definitions</h3>
+    {{- range .Structs }}
+    {{ template "cdocs-entry" . }}
+    {{- end }}
+    {{- end }}
+    {{- if .Enums }}
+    <h3>Enumeration Definitions</h3>
+    {{- range .Enums }}
+    {{ template "cdocs-entry" . }}
+    {{- end }}
+    {{- end }}
+    {{- if .Defines }}
+    <h3>Macro Definitions</h3>
+    {{- range .Defines }}
+    {{ template "cdocs-entry" . }}
+    {{- end }}
+    {{- end }}
+    {{- if .Functions }}
+    <h3>Function Definitions</h3>
+    {{- range .Functions }}
+    {{ template "cdocs-entry" . }}
+    {{- end }}
+    {{- end }}
+    {{- if .FunctionTypes }}
+    <h3>Function Type Definitions</h3>
+    {{- range .FunctionTypes }}
+    {{ template "cdocs-entry" . }}
+    {{- end }}
+    {{- end }}
+  </div>
+  {{- end }}
+</article>
+{{- end }}

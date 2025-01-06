@@ -185,12 +185,15 @@ func Readme(ctx *RequestContext, owner string, repo string) (string, string, err
 	return string(rv), u, nil
 }
 
-func Contents(ctx *RequestContext, owner string, repo string, path string) (io.ReadCloser, error) {
+func Contents(ctx *RequestContext, owner string, repo string, path string, read bool) (io.ReadCloser, string, error) {
 	body, err := Request(ctx, "GET", "repos/"+owner+"/"+repo+"/contents/"+path, nil)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
-	rv, _, err := readContents(body)
-	return rv, err
+	if read {
+		return readContents(body)
+	} else {
+		return nil, "", nil
+	}
 }
