@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"strings"
+	"time"
 
 	"github.com/alecthomas/participle/v2/lexer"
 	"github.com/alecthomas/repr"
@@ -238,6 +239,8 @@ func newCommentLine(vtoks []string, pos lexer.Position) (*commentLine, error) {
 
 type TemplateCtx struct {
 	Headers []HeaderCtx
+
+	Date time.Time
 }
 
 func (t *TemplateCtx) Dump(w io.Writer) {
@@ -288,7 +291,9 @@ type TemplateCtxHeader struct {
 }
 
 func NewTemplateCtx(headers []*TemplateCtxHeader) (*TemplateCtx, error) {
-	rv := &TemplateCtx{}
+	rv := &TemplateCtx{
+		Date: time.Now().UTC(),
+	}
 
 	for _, hdr := range headers {
 		hctx := HeaderCtx{
