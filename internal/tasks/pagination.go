@@ -76,10 +76,6 @@ func (p *Pagination) GetBaseDestination() string {
 }
 
 func (p *Pagination) GetTasks() ([]*runner.Task, error) {
-	if len(p.Sources) == 0 {
-		return nil, nil
-	}
-
 	if p.PostsPerPage == 0 {
 		return nil, nil
 	}

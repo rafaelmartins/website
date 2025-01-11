@@ -1,6 +1,7 @@
 package tasks
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path"
@@ -57,9 +58,15 @@ func (p *Posts) GetBaseDestination() string {
 }
 
 func (p *Posts) getSources() ([]*postSource, error) {
+	if p.SourceDir == "" {
+		return nil, fmt.Errorf("posts: source dir not defined")
+	}
+
 	srcs, err := os.ReadDir(p.SourceDir)
 	if err != nil {
-		return nil, err
+		if !errors.Is(err, os.ErrNotExist) {
+			return nil, err
+		}
 	}
 
 	rv := []*postSource{}

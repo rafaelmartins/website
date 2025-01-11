@@ -129,6 +129,14 @@ func GetTimestamps(name string, withEmbed bool) ([]time.Time, error) {
 		rv = append(rv, ts)
 	}
 
+	if st, err := os.Stat(name); err == nil {
+		rv = append(rv, st.ModTime().UTC())
+	} else if _, err := content.Open("embed/" + name); err == nil {
+		// do nothing, executable timestamp already included
+	} else {
+		return nil, fmt.Errorf("templates: failed to find template: %s", name)
+	}
+
 	if ccfg != nil {
 		for _, tmpl := range ccfg.TemplatePartials {
 			st, err := os.Stat(tmpl)
@@ -139,14 +147,6 @@ func GetTimestamps(name string, withEmbed bool) ([]time.Time, error) {
 		}
 	}
 
-	if st, err := os.Stat(name); err == nil {
-		rv = append(rv, st.ModTime().UTC())
-	} else if _, err := content.Open("embed/" + name); err == nil {
-		// do nothing, executable timestamp already included
-	} else {
-		return nil, fmt.Errorf("templates: failed to find template: %s", name)
-	}
-
 	return rv, nil
 }
 
@@ -154,13 +154,6 @@ func Execute(wr io.Writer, name string, fm template.FuncMap, lctx *LayoutContext
 	tmpl, err := template.New("base").Funcs(fm).ParseFS(content, "embed/base.html")
 	if err != nil {
 		return err
-	}
-
-	if ccfg != nil && len(ccfg.TemplatePartials) > 0 {
-		tmpl, err = tmpl.ParseFiles(ccfg.TemplatePartials...)
-		if err != nil {
-			return err
-		}
 	}
 
 	if _, err := os.Stat(name); err == nil {
@@ -175,6 +168,13 @@ func Execute(wr io.Writer, name string, fm template.FuncMap, lctx *LayoutContext
 		}
 	} else {
 		return fmt.Errorf("templates: failed to find template: %s", name)
+	}
+
+	if ccfg != nil && len(ccfg.TemplatePartials) > 0 {
+		tmpl, err = tmpl.ParseFiles(ccfg.TemplatePartials...)
+		if err != nil {
+			return err
+		}
 	}
 
 	llctx := lctx

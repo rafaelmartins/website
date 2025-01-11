@@ -3,17 +3,9 @@
 {{ define "main" -}}
 <article>
   <h1 class="mb-5">{{ .Content.Title }}</h1>
-  {{- if or .Content.Series .Content.Description }}
+  {{- if .Content.Description }}
   <div class="notification">
-    {{- if .Content.Description }}
-    <p>{{ .Content.Description }}</p>
-    {{- end }}
-    {{- if .Content.Series }}
-    <div class="tags has-addons">
-      <span class="tag is-dark">Series status</span>
-      <span class="tag is-info is-light">{{ .Content.Series.Status }}</span>
-    </div>
-    {{- end }}
+{{ template "pagination-description" . }}
     <a class="button is-small" href="{{ .Content.Pagination.AtomURL }}">
       <i class="fa fa-rss mr-2" aria-hidden="true"></i>
       Atom feed
@@ -50,4 +42,8 @@
   </nav>
   {{- end }}
 </article>
+{{- end }}
+
+{{ define "pagination-description" -}}
+<p>{{ .Content.Description }}</p>
 {{- end }}
