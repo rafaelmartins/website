@@ -96,7 +96,6 @@ type Config struct {
 			PostsPerPage       int                    `yaml:"posts-per-page"`
 			PostsPerPageAtom   int                    `yaml:"posts-per-page-atom"`
 			SortReverse        *bool                  `yaml:"sort-reverse"`
-			SeriesStatus       string                 `yaml:"series-status"`
 			HighlightStyle     string                 `yaml:"highlight-style"`
 			BaseDestination    string                 `yaml:"base-destination"`
 			Template           string                 `yaml:"template"`

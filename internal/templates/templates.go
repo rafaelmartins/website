@@ -29,10 +29,6 @@ type AtomContentEntry struct {
 	Updated time.Time
 }
 
-type SeriesContentEntry struct {
-	Status string
-}
-
 type PostContentEntry struct {
 	Author struct {
 		Name  string
@@ -98,7 +94,6 @@ type ContentContext struct {
 	Entry       *ContentEntry
 	Entries     []*ContentEntry
 	Atom        *AtomContentEntry
-	Series      *SeriesContentEntry
 	Pagination  *ContentPagination
 	Extra       map[string]interface{}
 }

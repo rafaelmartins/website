@@ -23,7 +23,6 @@ type paginationTaskImpl struct {
 	baseDestination string
 	title           string
 	description     string
-	seriesStatus    string
 	sources         []*generators.MarkdownSource
 	slug            string
 	highlightStyle  string
@@ -45,7 +44,6 @@ func (t *paginationTaskImpl) GetGenerator() (runner.Generator, error) {
 		Title:          t.title,
 		Description:    t.description,
 		URL:            path.Join("/", t.baseDestination, t.slug) + "/",
-		SeriesStatus:   t.seriesStatus,
 		Sources:        t.sources,
 		IsPost:         true,
 		HighlightStyle: t.highlightStyle,
@@ -61,7 +59,6 @@ type Pagination struct {
 	Title           string
 	Description     string
 	Sources         []*generators.MarkdownSource
-	SeriesStatus    string
 	PostsPerPage    int
 	SortReverse     bool
 	HighlightStyle  string
@@ -135,7 +132,6 @@ func (p *Pagination) GetTasks() ([]*runner.Task, error) {
 					baseDestination: p.BaseDestination,
 					title:           p.Title,
 					description:     p.Description,
-					seriesStatus:    p.SeriesStatus,
 					sources:         nil,
 					slug:            "",
 					highlightStyle:  style,
@@ -180,7 +176,6 @@ func (p *Pagination) GetTasks() ([]*runner.Task, error) {
 						baseDestination: p.BaseDestination,
 						title:           p.Title,
 						description:     p.Description,
-						seriesStatus:    p.SeriesStatus,
 						sources:         srcs,
 						slug:            "",
 						highlightStyle:  style,
@@ -202,7 +197,6 @@ func (p *Pagination) GetTasks() ([]*runner.Task, error) {
 					baseDestination: p.BaseDestination,
 					title:           p.Title,
 					description:     p.Description,
-					seriesStatus:    p.SeriesStatus,
 					sources:         srcs,
 					slug:            path.Join("page", strconv.FormatInt(int64(page), 10)),
 					highlightStyle:  style,

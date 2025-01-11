@@ -90,7 +90,6 @@ type Markdown struct {
 	Title             string
 	Description       string
 	URL               string
-	SeriesStatus      string
 	Sources           []*MarkdownSource
 	IsPost            bool
 	ExtraDependencies []string
@@ -113,12 +112,6 @@ func (h *Markdown) GetReader() (io.ReadCloser, error) {
 		Atom:        &templates.AtomContentEntry{},
 		Pagination:  h.Pagination,
 		Extra:       h.TemplateCtx,
-	}
-
-	if h.SeriesStatus != "" {
-		ctx.Series = &templates.SeriesContentEntry{
-			Status: h.SeriesStatus,
-		}
 	}
 
 	atomUpdated := time.Time{}
