@@ -80,9 +80,9 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 		runner.NewTaskGroup(
 			&tasks.NpmPackage{
 				Name:    "github-markdown-css",
-				Version: "5.7.0",
+				Version: "5.8.1",
 				Files: []string{
-					"github-markdown.min.css",
+					"github-markdown-light.min.css",
 				},
 				BaseDestination: assetsDir,
 			},
