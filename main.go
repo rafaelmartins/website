@@ -52,7 +52,7 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 		runner.NewTaskGroup(
 			&tasks.NpmPackage{
 				Name:    "bulma",
-				Version: "1.0.2",
+				Version: "1.0.3",
 				Files: []string{
 					"css/versions/bulma-no-dark-mode.min.css",
 				},
@@ -62,7 +62,7 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 		runner.NewTaskGroup(
 			&tasks.NpmPackage{
 				Name:    "@fortawesome/fontawesome-free",
-				Version: "6.6.0",
+				Version: "6.7.2",
 				Files: []string{
 					"css/all.min.css",
 					"webfonts/fa-brands-400.ttf",
@@ -90,7 +90,7 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 		runner.NewTaskGroup(
 			&tasks.NpmPackage{
 				Name:    "@fontsource-variable/nunito",
-				Version: "5.1.0",
+				Version: "5.1.1",
 				Files: []string{
 					"wght.min.css",
 					"files/nunito-cyrillic-ext-wght-normal.woff2",
