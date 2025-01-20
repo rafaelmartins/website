@@ -24,7 +24,7 @@
 {{ define "cdocs-entry" -}}
 <div id="{{ .ID }}" class="card">
   <header class="card-header">
-    <a id="{{ .ID }}" href="{{ .Link }}"><p class="card-header-title">{{ .Type }} <code>{{ .Name }}</code></p></a>
+    <a href="{{ .Link }}"><p class="card-header-title">{{ .Type }} <code>{{ .Name }}</code></p></a>
   </header>
   <div class="card-content">
     {{ .Proto }}
