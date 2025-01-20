@@ -16,6 +16,13 @@ type projectTaskImpl struct {
 	template        string
 	immutable       bool
 	layoutCtx       *templates.LayoutContext
+
+	openGraphTitle         string
+	openGraphDescription   string
+	openGraphImage         string
+	openGraphImageGenColor *uint32
+	openGraphImageGenDPI   *float64
+	openGraphImageGenSize  *float64
 }
 
 func (t *projectTaskImpl) GetDestination() string {
@@ -23,13 +30,25 @@ func (t *projectTaskImpl) GetDestination() string {
 }
 
 func (t *projectTaskImpl) GetGenerator() (runner.Generator, error) {
+	url := path.Join("/", t.baseDestination, t.repo)
+	if url != "/" {
+		url += "/"
+	}
+
 	return &generators.Project{
 		Owner:     t.owner,
 		Repo:      t.repo,
-		URL:       path.Join("/", t.baseDestination, t.repo, "index.html"),
+		URL:       url,
 		Template:  t.template,
 		Immutable: t.immutable,
 		LayoutCtx: t.layoutCtx,
+
+		OpenGraphTitle:         t.openGraphTitle,
+		OpenGraphDescription:   t.openGraphDescription,
+		OpenGraphImage:         t.openGraphImage,
+		OpenGraphImageGenColor: t.openGraphImageGenColor,
+		OpenGraphImageGenDPI:   t.openGraphImageGenDPI,
+		OpenGraphImageGenSize:  t.openGraphImageGenSize,
 	}, nil
 }
 
@@ -43,6 +62,13 @@ type cdocsTaskImpl struct {
 	template        string
 	immutable       bool
 	layoutCtx       *templates.LayoutContext
+
+	openGraphTitle         string
+	openGraphDescription   string
+	openGraphImage         string
+	openGraphImageGenColor *uint32
+	openGraphImageGenDPI   *float64
+	openGraphImageGenSize  *float64
 }
 
 func (t *cdocsTaskImpl) GetDestination() string {
@@ -58,15 +84,23 @@ func (t *cdocsTaskImpl) GetGenerator() (runner.Generator, error) {
 	if dest == "" {
 		dest = "api"
 	}
+
 	return &generators.CDocs{
 		Owner:         t.owner,
 		Repo:          t.repo,
 		Headers:       t.headers,
 		BaseDirectory: t.basedir,
-		URL:           path.Join("/", t.baseDestination, t.repo, dest, "index.html"),
+		URL:           path.Join("/", t.baseDestination, t.repo, dest) + "/",
 		Template:      t.template,
 		LayoutCtx:     t.layoutCtx,
 		Immutable:     t.immutable,
+
+		OpenGraphTitle:         t.openGraphTitle,
+		OpenGraphDescription:   t.openGraphDescription,
+		OpenGraphImage:         t.openGraphImage,
+		OpenGraphImageGenColor: t.openGraphImageGenColor,
+		OpenGraphImageGenDPI:   t.openGraphImageGenDPI,
+		OpenGraphImageGenSize:  t.openGraphImageGenSize,
 	}, nil
 }
 
@@ -74,16 +108,28 @@ type Project struct {
 	Owner string
 	Repo  string
 
-	CDocsDestination   string
-	CDocsHeaders       []string
-	CDocsBaseDirectory string
-	CDocsTemplate      string
-	CDocsWithSidebar   bool
-	BaseDestination    string
+	CDocsDestination            string
+	CDocsHeaders                []string
+	CDocsBaseDirectory          string
+	CDocsTemplate               string
+	CDocsWithSidebar            bool
+	CDocsOpenGraphTitle         string
+	CDocsOpenGraphDescription   string
+	CDocsOpenGraphImage         string
+	CDocsOpenGraphImageGenColor *uint32
+	CDocsOpenGraphImageGenDPI   *float64
+	CDocsOpenGraphImageGenSize  *float64
 
-	Template    string
-	Immutable   bool
-	WithSidebar bool
+	BaseDestination        string
+	Template               string
+	Immutable              bool
+	WithSidebar            bool
+	OpenGraphTitle         string
+	OpenGraphDescription   string
+	OpenGraphImage         string
+	OpenGraphImageGenColor *uint32
+	OpenGraphImageGenDPI   *float64
+	OpenGraphImageGenSize  *float64
 }
 
 func (p *Project) GetBaseDestination() string {
@@ -110,6 +156,13 @@ func (p *Project) GetTasks() ([]*runner.Task, error) {
 				layoutCtx: &templates.LayoutContext{
 					WithSidebar: p.WithSidebar,
 				},
+
+				openGraphTitle:         p.OpenGraphTitle,
+				openGraphDescription:   p.OpenGraphDescription,
+				openGraphImage:         p.OpenGraphImage,
+				openGraphImageGenColor: p.OpenGraphImageGenColor,
+				openGraphImageGenDPI:   p.OpenGraphImageGenDPI,
+				openGraphImageGenSize:  p.OpenGraphImageGenSize,
 			},
 		),
 	}
@@ -134,6 +187,13 @@ func (p *Project) GetTasks() ([]*runner.Task, error) {
 					layoutCtx: &templates.LayoutContext{
 						WithSidebar: p.CDocsWithSidebar,
 					},
+
+					openGraphTitle:         p.CDocsOpenGraphTitle,
+					openGraphDescription:   p.CDocsOpenGraphDescription,
+					openGraphImage:         p.CDocsOpenGraphImage,
+					openGraphImageGenColor: p.CDocsOpenGraphImageGenColor,
+					openGraphImageGenDPI:   p.CDocsOpenGraphImageGenDPI,
+					openGraphImageGenSize:  p.CDocsOpenGraphImageGenSize,
 				},
 			),
 		)

@@ -11,6 +11,7 @@ require (
 	github.com/yuin/goldmark-emoji v1.0.4
 	github.com/yuin/goldmark-highlighting/v2 v2.0.0-20230729083705-37449abec8cc
 	github.com/yuin/goldmark-meta v1.1.0
+	golang.org/x/image v0.23.0
 	golang.org/x/net v0.33.0
 	golang.org/x/sync v0.10.0
 	gopkg.in/yaml.v3 v3.0.1
@@ -18,5 +19,6 @@ require (
 
 require (
 	github.com/dlclark/regexp2 v1.11.4 // indirect
+	golang.org/x/text v0.21.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )

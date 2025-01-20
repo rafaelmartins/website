@@ -9,6 +9,7 @@ import (
 
 	"github.com/rafaelmartins/website/internal/cdocs"
 	"github.com/rafaelmartins/website/internal/github"
+	"github.com/rafaelmartins/website/internal/ogimage"
 	"github.com/rafaelmartins/website/internal/runner"
 	"github.com/rafaelmartins/website/internal/templates"
 )
@@ -23,7 +24,15 @@ type CDocs struct {
 	LayoutCtx     *templates.LayoutContext
 	Immutable     bool
 
+	OpenGraphTitle         string
+	OpenGraphDescription   string
+	OpenGraphImage         string
+	OpenGraphImageGenColor *uint32
+	OpenGraphImageGenDPI   *float64
+	OpenGraphImageGenSize  *float64
+
 	headerCtx map[string]*github.RequestContext
+	otitle    string
 }
 
 func (*CDocs) GetID() string {
@@ -68,12 +77,27 @@ func (d *CDocs) GetReader() (io.ReadCloser, error) {
 		return nil, err
 	}
 
-	title := fmt.Sprintf("%s: API Documentation", d.Repo)
+	title := fmt.Sprintf("API Documentation: %s", d.Repo)
+
+	d.otitle = title
+	if d.OpenGraphTitle != "" {
+		d.otitle = d.OpenGraphTitle
+	}
+
+	og := templates.OpenGraphEntry{
+		Title:       d.otitle,
+		Description: d.OpenGraphDescription,
+		Image:       ogimage.URL(d.URL),
+	}
+	if err := og.Validate(); err != nil {
+		return nil, err
+	}
 
 	buf := &bytes.Buffer{}
 	if err := templates.Execute(buf, d.Template, nil, d.LayoutCtx, &templates.ContentContext{
-		Title: title,
-		URL:   d.URL,
+		Title:     title,
+		URL:       d.URL,
+		OpenGraph: og,
 		Entry: &templates.ContentEntry{
 			Title: title,
 			CDocs: dctx,
@@ -113,8 +137,11 @@ func (d *CDocs) GetImmutable() bool {
 	return d.Immutable
 }
 
-func (*CDocs) GetByProducts(ch chan *runner.GeneratorByProduct) {
-	if ch != nil {
-		close(ch)
+func (d *CDocs) GetByProducts(ch chan *runner.GeneratorByProduct) {
+	if ch == nil {
+		return
 	}
+
+	ogimage.GenerateByProduct(ch, d.otitle, true, d.OpenGraphImage, d.OpenGraphImageGenColor, d.OpenGraphImageGenDPI, d.OpenGraphImageGenSize)
+	close(ch)
 }

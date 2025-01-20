@@ -7,6 +7,20 @@
     {{- if .Generator }}
     <meta name="generator" content="{{ .Generator }}">
     {{- end }}
+    {{- if .Config.Title }}
+    <meta property="og:site_name" content="{{ .Config.Title }}">
+    {{- end }}
+    <meta property="og:type" content="website">
+    {{- if .Content.OpenGraph.Title }}
+    <meta property="og:title" content="{{ .Content.OpenGraph.Title }}">
+    {{- end }}
+    {{- if .Content.OpenGraph.Description }}
+    <meta property="og:description" content="{{ .Content.OpenGraph.Description }}">
+    {{- end }}
+    <meta property="og:url" content="{{ .Config.URL }}{{ .Content.URL }}">
+    {{- if .Content.OpenGraph.Image }}
+    <meta property="og:image" content="{{ .Config.URL }}{{ .Content.OpenGraph.Image }}">
+    {{- end }}
     <title>{{ template "title" . }}</title>
     <link href="/assets/bulma/css/versions/bulma-no-dark-mode.min.css" rel="stylesheet" type="text/css">
     <link href="/assets/@fontsource-variable/nunito/wght.min.css" rel="stylesheet" type="text/css">

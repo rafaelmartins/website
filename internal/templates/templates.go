@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 	"text/template"
 	"time"
 
@@ -66,6 +67,25 @@ type ProjectContentEntry struct {
 	Date          time.Time
 }
 
+type OpenGraphEntry struct {
+	Title       string
+	Description string
+	Image       string
+}
+
+func (og *OpenGraphEntry) Validate() error {
+	if og.Title == "" {
+		return fmt.Errorf("templates: opengraph: title should not be empty")
+	}
+	if strings.ContainsAny(og.Title, "\t\n\r\"<>") {
+		return fmt.Errorf("templates: opengraph: title should not contain tabs, new lines, double quotes, html tags: %s", og.Title)
+	}
+	if strings.ContainsAny(og.Description, "\t\n\r\"<>") {
+		return fmt.Errorf("templates: opengraph: title should not contain tabs, new lines, double quotes, html tags: %s", og.Description)
+	}
+	return nil
+}
+
 type ContentEntry struct {
 	File    string
 	URL     string
@@ -91,6 +111,7 @@ type ContentContext struct {
 	Title       string
 	Description string
 	URL         string
+	OpenGraph   OpenGraphEntry
 	Entry       *ContentEntry
 	Entries     []*ContentEntry
 	Atom        *AtomContentEntry

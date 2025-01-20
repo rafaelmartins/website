@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/rafaelmartins/website/internal/github"
+	"github.com/rafaelmartins/website/internal/ogimage"
 	"github.com/rafaelmartins/website/internal/runner"
 	"github.com/rafaelmartins/website/internal/templates"
 	"golang.org/x/net/html"
@@ -24,7 +25,15 @@ type Project struct {
 	LayoutCtx *templates.LayoutContext
 	Immutable bool
 
+	OpenGraphTitle         string
+	OpenGraphDescription   string
+	OpenGraphImage         string
+	OpenGraphImageGenColor *uint32
+	OpenGraphImageGenDPI   *float64
+	OpenGraphImageGenSize  *float64
+
 	readmeCtx github.RequestContext
+	otitle    string
 	images    []string
 }
 
@@ -147,10 +156,30 @@ func (p *Project) GetReader() (io.ReadCloser, error) {
 
 	proj.Date = time.Now().UTC()
 
+	p.otitle = title
+	if p.OpenGraphTitle != "" {
+		p.otitle = p.OpenGraphTitle
+	}
+	odesc := proj.Description
+	if p.OpenGraphDescription != "" {
+		odesc = p.OpenGraphDescription
+	}
+
+	og := templates.OpenGraphEntry{
+		Title:       p.otitle,
+		Description: odesc,
+		Image:       ogimage.URL(p.URL),
+	}
+	if err := og.Validate(); err != nil {
+		return nil, err
+	}
+
 	buf := &bytes.Buffer{}
 	if err := templates.Execute(buf, p.Template, nil, p.LayoutCtx, &templates.ContentContext{
-		Title: title,
-		URL:   p.URL,
+		Title:       title,
+		Description: proj.Description,
+		URL:         p.URL,
+		OpenGraph:   og,
 		Entry: &templates.ContentEntry{
 			Title:   title,
 			Body:    body,
@@ -202,6 +231,8 @@ func (p *Project) GetByProducts(ch chan *runner.GeneratorByProduct) {
 			Reader:   rd,
 		}
 	}
+
+	ogimage.GenerateByProduct(ch, p.otitle, true, p.OpenGraphImage, p.OpenGraphImageGenColor, p.OpenGraphImageGenDPI, p.OpenGraphImageGenSize)
 	close(ch)
 }
 

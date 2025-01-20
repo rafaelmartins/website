@@ -130,12 +130,20 @@ func (t *Task) run(basedir string, cfg Config, force bool) error {
 	ch := make(chan *GeneratorByProduct)
 	go gen.GetByProducts(ch)
 
+	tmp := filepath.Base(t.impl.GetDestination())
+	tmp = strings.TrimSuffix(tmp, filepath.Ext(tmp))
+
+	bpDir := filepath.Join(basedir, t.group.GetBaseDestination(), filepath.Dir(t.impl.GetDestination()))
+	if tmp != "index" {
+		bpDir = filepath.Join(bpDir, tmp)
+	}
+
 	for bp := range ch {
 		if bp.Err != nil {
 			return bp.Err
 		}
 
-		dest := filepath.Join(basedir, t.group.GetBaseDestination(), filepath.Dir(t.impl.GetDestination()), bp.Filename)
+		dest := filepath.Join(bpDir, bp.Filename)
 
 		log.Printf("  %-8s  %s", strings.Repeat("-", len(gen.GetID())), dest)
 

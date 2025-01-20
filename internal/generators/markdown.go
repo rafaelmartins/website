@@ -2,13 +2,16 @@ package generators
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"log"
 	"os"
+	"path/filepath"
 	"text/template"
 	"time"
 
+	"github.com/rafaelmartins/website/internal/ogimage"
 	"github.com/rafaelmartins/website/internal/runner"
 	"github.com/rafaelmartins/website/internal/templates"
 	"github.com/yuin/goldmark"
@@ -59,7 +62,7 @@ func mdGetMetadata(f string, prop string, dflt interface{}) (interface{}, error)
 func mdParseDateFromInterface(itf interface{}) (time.Time, error) {
 	date, ok := itf.(string)
 	if !ok {
-		return time.Time{}, fmt.Errorf("html: invalid date: %+v", itf)
+		return time.Time{}, fmt.Errorf("markdown: invalid date: %+v", itf)
 	}
 
 	dt, err := time.Parse(time.DateTime, date)
@@ -98,6 +101,17 @@ type Markdown struct {
 	TemplateCtx       map[string]interface{}
 	Pagination        *templates.ContentPagination
 	LayoutCtx         *templates.LayoutContext
+
+	OpenGraphTitle         string
+	OpenGraphDescription   string
+	OpenGraphImage         string
+	OpenGraphImageURL      string
+	OpenGraphImageGenerate bool
+	OpenGraphImageGenColor *uint32
+	OpenGraphImageGenDPI   *float64
+	OpenGraphImageGenSize  *float64
+
+	ctx *templates.ContentContext
 }
 
 func (*Markdown) GetID() string {
@@ -105,13 +119,32 @@ func (*Markdown) GetID() string {
 }
 
 func (h *Markdown) GetReader() (io.ReadCloser, error) {
+	if h.URL == "" {
+		return nil, errors.New("markdown: missing url")
+	}
+
 	ctx := &templates.ContentContext{
 		Title:       h.Title,
 		Description: h.Description,
 		URL:         h.URL,
-		Atom:        &templates.AtomContentEntry{},
-		Pagination:  h.Pagination,
-		Extra:       h.TemplateCtx,
+		OpenGraph: templates.OpenGraphEntry{
+			Title:       h.OpenGraphTitle,
+			Description: h.OpenGraphDescription,
+			Image:       h.OpenGraphImageURL,
+		},
+		Atom:       &templates.AtomContentEntry{},
+		Pagination: h.Pagination,
+		Extra:      h.TemplateCtx,
+	}
+
+	if ctx.OpenGraph.Title == "" {
+		ctx.OpenGraph.Title = h.Title
+	}
+	if ctx.OpenGraph.Description == "" {
+		ctx.OpenGraph.Description = h.Description
+	}
+	if h.OpenGraphImageGenerate && ctx.OpenGraph.Image == "" {
+		ctx.OpenGraph.Image = ogimage.URL(h.URL)
 	}
 
 	atomUpdated := time.Time{}
@@ -144,7 +177,18 @@ func (h *Markdown) GetReader() (io.ReadCloser, error) {
 		if titleItf, ok := metadata["title"]; ok {
 			if title, ok := titleItf.(string); ok {
 				entry.Title = title
+				if ctx.OpenGraph.Title == "" {
+					ctx.OpenGraph.Title = title
+				}
 				delete(metadata, "title")
+			}
+		}
+		if descriptionItf, ok := metadata["description"]; ok {
+			if description, ok := descriptionItf.(string); ok {
+				if ctx.OpenGraph.Description == "" {
+					ctx.OpenGraph.Description = description
+				}
+				delete(metadata, "description")
 			}
 		}
 
@@ -159,7 +203,7 @@ func (h *Markdown) GetReader() (io.ReadCloser, error) {
 				post.Date = dt
 				delete(metadata, "date")
 			} else {
-				return nil, fmt.Errorf("html: post missing date: %s", src.File)
+				return nil, fmt.Errorf("markdown: post missing date: %s", src.File)
 			}
 
 			if authorItf, ok := metadata["author"]; ok {
@@ -217,6 +261,14 @@ func (h *Markdown) GetReader() (io.ReadCloser, error) {
 		},
 	}
 
+	h.ctx = ctx
+
+	if h.OpenGraphImageGenerate {
+		if err := ctx.OpenGraph.Validate(); err != nil {
+			return nil, err
+		}
+	}
+
 	buf := &bytes.Buffer{}
 	if err := templates.Execute(buf, h.Template, funcMap, h.LayoutCtx, ctx); err != nil {
 		return nil, err
@@ -257,8 +309,47 @@ func (*Markdown) GetImmutable() bool {
 	return false
 }
 
-func (*Markdown) GetByProducts(ch chan *runner.GeneratorByProduct) {
-	if ch != nil {
-		close(ch)
+func (h *Markdown) GetByProducts(ch chan *runner.GeneratorByProduct) {
+	if ch == nil {
+		return
 	}
+
+	// the runner ensures that the by products are produced only *after* the main reader is exhausted
+	if h.ctx == nil {
+		close(ch)
+		return
+	}
+
+	image := any(h.OpenGraphImage)
+	ccolor := h.OpenGraphImageGenColor
+	dpi := any(h.OpenGraphImageGenDPI)
+	size := any(h.OpenGraphImageGenSize)
+
+	// if entry, the frontmatter may override these settings
+	if e := h.ctx.Entry; e != nil {
+		if opengraphItf, ok := e.Extra["opengraph"]; ok {
+			if opengraphMap, ok := opengraphItf.(map[interface{}]interface{}); ok {
+				if imageItf, ok := opengraphMap["image"]; ok && len(h.Sources) == 1 {
+					if img, ok := imageItf.(string); ok {
+						image = filepath.Join(filepath.Dir(h.Sources[0].File), img)
+					}
+				}
+				if imageGenItf, ok := opengraphMap["image-gen"]; ok {
+					if imageGenMap, ok := imageGenItf.(map[interface{}]interface{}); ok {
+						if colorItf, ok := imageGenMap["color"]; ok {
+							if c, ok := colorItf.(int); ok {
+								tmp := uint32(c)
+								ccolor = &tmp
+							}
+						}
+						dpi = imageGenMap["dpi"]
+						size = imageGenMap["size"]
+					}
+				}
+			}
+		}
+	}
+
+	ogimage.GenerateByProduct(ch, h.ctx.OpenGraph.Title, h.OpenGraphImageGenerate, image, ccolor, dpi, size)
+	close(ch)
 }

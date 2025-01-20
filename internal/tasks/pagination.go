@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/rafaelmartins/website/internal/generators"
+	"github.com/rafaelmartins/website/internal/ogimage"
 	"github.com/rafaelmartins/website/internal/runner"
 	"github.com/rafaelmartins/website/internal/templates"
 )
@@ -30,6 +31,15 @@ type paginationTaskImpl struct {
 	templateCtx     map[string]interface{}
 	pagination      *templates.ContentPagination
 	layoutCtx       *templates.LayoutContext
+
+	openGraphTitle         string
+	openGraphDescription   string
+	openGraphImage         string
+	openGraphImageURL      string
+	openGraphImageGenerate bool
+	openGraphImageGenColor *uint32
+	openGraphImageGenDPI   *float64
+	openGraphImageGenSize  *float64
 }
 
 func (t *paginationTaskImpl) GetDestination() string {
@@ -51,6 +61,15 @@ func (t *paginationTaskImpl) GetGenerator() (runner.Generator, error) {
 		TemplateCtx:    t.templateCtx,
 		Pagination:     t.pagination,
 		LayoutCtx:      t.layoutCtx,
+
+		OpenGraphTitle:         t.openGraphTitle,
+		OpenGraphDescription:   t.openGraphDescription,
+		OpenGraphImage:         t.openGraphImage,
+		OpenGraphImageURL:      t.openGraphImageURL,
+		OpenGraphImageGenerate: t.openGraphImageGenerate,
+		OpenGraphImageGenColor: t.openGraphImageGenColor,
+		OpenGraphImageGenDPI:   t.openGraphImageGenDPI,
+		OpenGraphImageGenSize:  t.openGraphImageGenSize,
 	}, nil
 }
 
@@ -66,6 +85,13 @@ type Pagination struct {
 	Template        string
 	TemplateCtx     map[string]interface{}
 	WithSidebar     bool
+
+	OpenGraphTitle         string
+	OpenGraphDescription   string
+	OpenGraphImage         string
+	OpenGraphImageGenColor *uint32
+	OpenGraphImageGenDPI   *float64
+	OpenGraphImageGenSize  *float64
 }
 
 func (p *Pagination) GetBaseDestination() string {
@@ -142,6 +168,14 @@ func (p *Pagination) GetTasks() ([]*runner.Task, error) {
 						AtomURL: path.Join("/", p.BaseDestination, "atom.xml"),
 					},
 					layoutCtx: layoutCtx,
+
+					openGraphImageGenerate: !p.Atom,
+					openGraphTitle:         p.OpenGraphTitle,
+					openGraphDescription:   p.OpenGraphDescription,
+					openGraphImage:         p.OpenGraphImage,
+					openGraphImageGenColor: p.OpenGraphImageGenColor,
+					openGraphImageGenDPI:   p.OpenGraphImageGenDPI,
+					openGraphImageGenSize:  p.OpenGraphImageGenSize,
 				},
 			),
 		}, nil
@@ -183,12 +217,25 @@ func (p *Pagination) GetTasks() ([]*runner.Task, error) {
 						templateCtx:     p.TemplateCtx,
 						pagination:      pagination,
 						layoutCtx:       layoutCtx,
+
+						openGraphImageGenerate: !p.Atom,
+						openGraphTitle:         p.OpenGraphTitle,
+						openGraphDescription:   p.OpenGraphDescription,
+						openGraphImage:         p.OpenGraphImage,
+						openGraphImageGenColor: p.OpenGraphImageGenColor,
+						openGraphImageGenDPI:   p.OpenGraphImageGenDPI,
+						openGraphImageGenSize:  p.OpenGraphImageGenSize,
 					},
 				),
 			)
 			if p.Atom {
 				break
 			}
+		}
+
+		iurl := path.Join("/", p.BaseDestination)
+		if iurl != "/" {
+			iurl += "/"
 		}
 		rv = append(rv,
 			runner.NewTask(p,
@@ -204,6 +251,11 @@ func (p *Pagination) GetTasks() ([]*runner.Task, error) {
 					templateCtx:     p.TemplateCtx,
 					pagination:      pagination,
 					layoutCtx:       layoutCtx,
+
+					openGraphImageGenerate: false,
+					openGraphImageURL:      ogimage.URL(iurl),
+					openGraphTitle:         p.OpenGraphTitle,
+					openGraphDescription:   p.OpenGraphDescription,
 				},
 			),
 		)

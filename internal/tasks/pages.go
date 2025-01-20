@@ -19,6 +19,14 @@ type pageTaskImpl struct {
 	template          string
 	templateCtx       map[string]interface{}
 	layoutCtx         *templates.LayoutContext
+
+	openGraphTitle         string
+	openGraphDescription   string
+	openGraphImage         string
+	openGraphImageGenerate bool
+	openGraphImageGenColor *uint32
+	openGraphImageGenDPI   *float64
+	openGraphImageGenSize  *float64
 }
 
 func (t *pageTaskImpl) GetDestination() string {
@@ -29,12 +37,20 @@ func (t *pageTaskImpl) GetDestination() string {
 }
 
 func (t *pageTaskImpl) GetGenerator() (runner.Generator, error) {
+	url := path.Join("/", t.baseDestination, t.slug) + ".html"
+	if t.prettyURL {
+		url = path.Join("/", t.baseDestination, t.slug)
+		if url != "/" {
+			url += "/"
+		}
+	}
+
 	return &generators.Markdown{
-		URL: path.Join("/", t.baseDestination, t.slug) + "/",
+		URL: url,
 		Sources: []*generators.MarkdownSource{
 			{
 				File: t.source,
-				URL:  path.Join("/", t.baseDestination, t.slug) + "/",
+				URL:  url,
 			},
 		},
 		ExtraDependencies: t.extraDependencies,
@@ -42,11 +58,32 @@ func (t *pageTaskImpl) GetGenerator() (runner.Generator, error) {
 		Template:          t.template,
 		TemplateCtx:       t.templateCtx,
 		LayoutCtx:         t.layoutCtx,
+
+		OpenGraphTitle:         t.openGraphTitle,
+		OpenGraphDescription:   t.openGraphDescription,
+		OpenGraphImage:         t.openGraphImage,
+		OpenGraphImageGenerate: t.openGraphImageGenerate,
+		OpenGraphImageGenColor: t.openGraphImageGenColor,
+		OpenGraphImageGenDPI:   t.openGraphImageGenDPI,
+		OpenGraphImageGenSize:  t.openGraphImageGenSize,
 	}, nil
 }
 
+type PageSource struct {
+	Slug string
+	File string
+
+	OpenGraphTitle         string
+	OpenGraphDescription   string
+	OpenGraphImage         string
+	OpenGraphImageGenerate bool
+	OpenGraphImageGenColor *uint32
+	OpenGraphImageGenDPI   *float64
+	OpenGraphImageGenSize  *float64
+}
+
 type Pages struct {
-	Sources           map[string]string
+	Sources           []*PageSource
 	ExtraDependencies []string
 	HighlightStyle    string
 	PrettyURL         bool
@@ -81,13 +118,13 @@ func (p *Pages) GetTasks() ([]*runner.Task, error) {
 	}
 
 	rv := []*runner.Task{}
-	for k, v := range p.Sources {
+	for _, v := range p.Sources {
 		rv = append(rv,
 			runner.NewTask(p,
 				&pageTaskImpl{
 					baseDestination:   p.BaseDestination,
-					slug:              k,
-					source:            v,
+					slug:              v.Slug,
+					source:            v.File,
 					extraDependencies: deps,
 					highlightStyle:    style,
 					prettyURL:         p.PrettyURL,
@@ -96,6 +133,14 @@ func (p *Pages) GetTasks() ([]*runner.Task, error) {
 					layoutCtx: &templates.LayoutContext{
 						WithSidebar: p.WithSidebar,
 					},
+
+					openGraphTitle:         v.OpenGraphTitle,
+					openGraphDescription:   v.OpenGraphDescription,
+					openGraphImage:         v.OpenGraphImage,
+					openGraphImageGenerate: v.OpenGraphImageGenerate,
+					openGraphImageGenColor: v.OpenGraphImageGenColor,
+					openGraphImageGenDPI:   v.OpenGraphImageGenDPI,
+					openGraphImageGenSize:  v.OpenGraphImageGenSize,
 				},
 			),
 		)

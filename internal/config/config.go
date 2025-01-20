@@ -19,6 +19,19 @@ type Config struct {
 
 	TemplatePartials []string `yaml:"template-partials"`
 
+	OpenGraphImageGen struct {
+		Template string `yaml:"template"`
+		Mask     struct {
+			MinX *int `yaml:"min-x"`
+			MinY *int `yaml:"min-y"`
+			MaxX *int `yaml:"max-x"`
+			MaxY *int `yaml:"max-y"`
+		} `yaml:"mask"`
+		DefaultColor *uint32  `yaml:"default-color"`
+		DefaultDPI   *float64 `yaml:"default-dpi"`
+		DefaultSize  *float64 `yaml:"default-size"`
+	} `yaml:"opengraph-image-gen"`
+
 	Assets struct {
 		BaseDestination string `yaml:"base-destination"`
 		Npm             []*struct {
@@ -55,7 +68,27 @@ type Config struct {
 				BaseDirectory string   `yaml:"base-directory"`
 				Template      string   `yaml:"template"`
 				WithSidebar   *bool    `yaml:"with-sidebar"`
+				OpenGraph     struct {
+					Title       string `yaml:"title"`
+					Description string `yaml:"description"`
+					Image       string `yaml:"image"`
+					ImageGen    struct {
+						Color *uint32  `yaml:"color"`
+						DPI   *float64 `yaml:"dpi"`
+						Size  *float64 `yaml:"size"`
+					} `yaml:"image-gen"`
+				} `yaml:"opengraph"`
 			} `yaml:"c-docs"`
+			OpenGraph struct {
+				Title       string `yaml:"title"`
+				Description string `yaml:"description"`
+				Image       string `yaml:"image"`
+				ImageGen    struct {
+					Color *uint32  `yaml:"color"`
+					DPI   *float64 `yaml:"dpi"`
+					Size  *float64 `yaml:"size"`
+				} `yaml:"image-gen"`
+			} `yaml:"opengraph"`
 		} `yaml:"repositories"`
 		BaseDestination string `yaml:"base-destination"`
 		Template        string `yaml:"template"`
@@ -64,8 +97,19 @@ type Config struct {
 
 	Pages []*struct {
 		Sources []*struct {
-			Slug string `yaml:"slug"`
-			File string `yaml:"file"`
+			Slug      string `yaml:"slug"`
+			File      string `yaml:"file"`
+			OpenGraph struct {
+				Title       string `yaml:"title"`
+				Description string `yaml:"description"`
+				Image       string `yaml:"image"`
+				ImageGen    struct {
+					Generate *bool    `yaml:"generate"`
+					Color    *uint32  `yaml:"color"`
+					DPI      *float64 `yaml:"dpi"`
+					Size     *float64 `yaml:"size"`
+				} `yaml:"image-gen"`
+			} `yaml:"opengraph"`
 		} `yaml:"sources"`
 		ExtraDependencies []string               `yaml:"extra-dependencies"`
 		HighlightStyle    string                 `yaml:"highlight-style"`
@@ -88,6 +132,16 @@ type Config struct {
 		TemplatePagination string                 `yaml:"template-pagination"`
 		TemplateCtx        map[string]interface{} `yaml:"template-context"`
 		WithSidebar        bool                   `yaml:"with-sidebar"`
+		OpenGraph          struct {
+			Title       string `yaml:"title"`
+			Description string `yaml:"description"`
+			Image       string `yaml:"image"`
+			ImageGen    struct {
+				Color *uint32  `yaml:"color"`
+				DPI   *float64 `yaml:"dpi"`
+				Size  *float64 `yaml:"size"`
+			} `yaml:"image-gen"`
+		} `yaml:"opengraph"`
 
 		Groups []*struct {
 			Title              string                 `yaml:"title"`
@@ -103,6 +157,16 @@ type Config struct {
 			TemplatePagination string                 `yaml:"template-pagination"`
 			TemplateCtx        map[string]interface{} `yaml:"template-context"`
 			WithSidebar        bool                   `yaml:"with-sidebar"`
+			OpenGraph          struct {
+				Title       string `yaml:"title"`
+				Description string `yaml:"description"`
+				Image       string `yaml:"image"`
+				ImageGen    struct {
+					Color *uint32  `yaml:"color"`
+					DPI   *float64 `yaml:"dpi"`
+					Size  *float64 `yaml:"size"`
+				} `yaml:"image-gen"`
+			} `yaml:"opengraph"`
 		} `yaml:"groups"`
 	} `yaml:"posts"`
 

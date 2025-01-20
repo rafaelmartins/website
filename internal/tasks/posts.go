@@ -33,14 +33,21 @@ func (t *postTaskImpl) GetDestination() string {
 }
 
 func (t *postTaskImpl) GetGenerator() (runner.Generator, error) {
+	url := path.Join("/", t.baseDestination, t.slug)
+	if url != "/" {
+		url += "/"
+	}
+
 	return &generators.Markdown{
-		URL:            path.Join("/", t.baseDestination, t.slug, "index.html"),
+		URL:            url,
 		Sources:        []*generators.MarkdownSource{t.source},
 		IsPost:         true,
 		HighlightStyle: t.highlightStyle,
 		Template:       t.template,
 		TemplateCtx:    t.templateCtx,
 		LayoutCtx:      t.layoutCtx,
+
+		OpenGraphImageGenerate: true,
 	}, nil
 }
 
