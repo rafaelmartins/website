@@ -7,6 +7,9 @@
     {{- if .Generator }}
     <meta name="generator" content="{{ .Generator }}">
     {{- end }}
+    {{- if .Content.OpenGraph.Description }}
+    <meta name="description" content="{{ .Content.OpenGraph.Description }}">
+    {{- end }}
     {{- if .Config.Title }}
     <meta property="og:site_name" content="{{ .Config.Title }}">
     {{- end }}
@@ -20,6 +23,17 @@
     <meta property="og:url" content="{{ .Config.URL }}{{ .Content.URL }}">
     {{- if .Content.OpenGraph.Image }}
     <meta property="og:image" content="{{ .Config.URL }}{{ .Content.OpenGraph.Image }}">
+    {{- end }}
+    <meta name="twitter:card" content="summary_large_image">
+    {{- if .Content.OpenGraph.Title }}
+    <meta name="twitter:title" content="{{ .Content.OpenGraph.Title }}">
+    {{- end }}
+    {{- if .Content.OpenGraph.Description }}
+    <meta name="twitter:description" content="{{ .Content.OpenGraph.Description }}">
+    {{- end }}
+    <meta name="twitter:url" content="{{ .Config.URL }}{{ .Content.URL }}">
+    {{- if .Content.OpenGraph.Image }}
+    <meta name="twitter:image" content="{{ .Config.URL }}{{ .Content.OpenGraph.Image }}">
     {{- end }}
     <title>{{ template "title" . }}</title>
     <link href="/assets/bulma/css/versions/bulma-no-dark-mode.min.css" rel="stylesheet" type="text/css">
