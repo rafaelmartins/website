@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io"
 	"os"
+	"path/filepath"
 	"text/template"
 	"time"
 
@@ -311,7 +312,7 @@ func (h *Markdown) GetByProducts(ch chan *runner.GeneratorByProduct) {
 
 	if h.metadata != nil {
 		if h.metadata.OpenGraph.Image != "" {
-			image = h.metadata.OpenGraph.Image
+			image = filepath.Join(filepath.Dir(h.Sources[0].File), h.metadata.OpenGraph.Image)
 		}
 		if h.metadata.OpenGraph.ImageGen.Color != nil {
 			ccolor = h.metadata.OpenGraph.ImageGen.Color
