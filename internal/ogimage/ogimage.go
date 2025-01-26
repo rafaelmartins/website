@@ -29,9 +29,16 @@ var (
 	dColor color.Color
 	dDPI   float64
 	dSize  float64
+
+	available bool
 )
 
 func SetGlobals(template string, minX *int, minY *int, maxX *int, maxY *int, defaultColor *uint32, defaultDPI *float64, defaultSize *float64) error {
+	available = template != ""
+	if !available {
+		return nil
+	}
+
 	fp, err := os.Open(template)
 	if err != nil {
 		return err
@@ -93,10 +100,6 @@ func SetGlobals(template string, minX *int, minY *int, maxX *int, maxY *int, def
 	dDPI = ddpi
 	dSize = ssize
 	return nil
-}
-
-func IsConfigured() bool {
-	return img != nil
 }
 
 func Generate(text string, c color.Color, dpi *float64, size *float64) (io.ReadCloser, error) {
@@ -189,29 +192,22 @@ func Generate(text string, c color.Color, dpi *float64, size *float64) (io.ReadC
 	return io.NopCloser(buf), nil
 }
 
-func GenerateByProduct(ch chan *runner.GeneratorByProduct, title string, generate bool, image interface{}, c *uint32, dpi interface{}, size interface{}) {
-	if ch == nil || !generate {
+func GenerateByProduct(ch chan *runner.GeneratorByProduct, title string, generate bool, image string, c *uint32, dpi *float64, size *float64) {
+	if ch == nil || !generate || !available {
 		return
 	}
 
-	if image != nil {
-		if img, ok := image.(string); ok {
-			if img != "" {
-				rd, err := os.Open(img)
-				if err != nil {
-					ch <- &runner.GeneratorByProduct{Err: err}
-				} else {
-					ch <- &runner.GeneratorByProduct{
-						Filename: "opengraph.png",
-						Reader:   rd,
-					}
-				}
-				return
-			}
+	if image != "" {
+		rd, err := os.Open(image)
+		if err != nil {
+			ch <- &runner.GeneratorByProduct{Err: err}
 		} else {
-			ch <- &runner.GeneratorByProduct{Err: errors.New("ogimage: image is not string")}
-			return
+			ch <- &runner.GeneratorByProduct{
+				Filename: "opengraph.png",
+				Reader:   rd,
+			}
 		}
+		return
 	}
 
 	dcolor := dColor
@@ -224,17 +220,7 @@ func GenerateByProduct(ch chan *runner.GeneratorByProduct, title string, generat
 		}
 	}
 
-	ddpi := (*float64)(nil)
-	if pdpi, ok := dpi.(*float64); ok {
-		ddpi = pdpi
-	}
-
-	dsize := (*float64)(nil)
-	if psize, ok := size.(*float64); ok {
-		dsize = psize
-	}
-
-	rd, err := Generate(html.UnescapeString(title), dcolor, ddpi, dsize)
+	rd, err := Generate(html.UnescapeString(title), dcolor, dpi, size)
 	if err != nil {
 		ch <- &runner.GeneratorByProduct{Err: err}
 	} else {
@@ -246,7 +232,7 @@ func GenerateByProduct(ch chan *runner.GeneratorByProduct, title string, generat
 }
 
 func URL(baseurl string) string {
-	if baseurl == "" {
+	if baseurl == "" || !available {
 		return ""
 	}
 

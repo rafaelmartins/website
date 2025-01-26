@@ -37,8 +37,8 @@
   </dl>
   {{- if .Content.Pagination.Enabled }}
   <nav class="pagination" role="navigation" aria-label="pagination">
-    <a href="{{ .Content.Pagination.LinkFirst }}" class="pagination-previous{{ if not .Content.Pagination.LinkFirst }} is-disabled{{ end }}">Previous</a>
-    <a href="{{ .Content.Pagination.LinkLast }}" class="pagination-next{{ if not .Content.Pagination.LinkLast }} is-disabled{{ end }}">Next</a>
+    <a{{ if .Content.Pagination.LinkPrevious }} href="{{ .Content.Pagination.LinkPrevious }}"{{ end }} class="pagination-previous{{ if not .Content.Pagination.LinkPrevious }} is-disabled{{ end }}">Previous</a>
+    <a{{ if .Content.Pagination.LinkNext }} href="{{ .Content.Pagination.LinkNext }}"{{ end }} class="pagination-next{{ if not .Content.Pagination.LinkNext }} is-disabled{{ end }}">Next</a>
   </nav>
   {{- end }}
 </article>

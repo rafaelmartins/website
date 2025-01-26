@@ -339,10 +339,17 @@ func build() error {
 		}
 		templates.SetConfig(cfg)
 
-		if og := cfg.OpenGraphImageGen; og.Template != "" {
-			if err := ogimage.SetGlobals(og.Template, og.Mask.MinX, og.Mask.MinY, og.Mask.MaxX, og.Mask.MaxY, og.DefaultColor, og.DefaultDPI, og.DefaultSize); err != nil {
-				return err
-			}
+		if err := ogimage.SetGlobals(
+			cfg.OpenGraphImageGen.Template,
+			cfg.OpenGraphImageGen.Mask.MinX,
+			cfg.OpenGraphImageGen.Mask.MinY,
+			cfg.OpenGraphImageGen.Mask.MaxX,
+			cfg.OpenGraphImageGen.Mask.MaxY,
+			cfg.OpenGraphImageGen.DefaultColor,
+			cfg.OpenGraphImageGen.DefaultDPI,
+			cfg.OpenGraphImageGen.DefaultSize,
+		); err != nil {
+			return err
 		}
 
 		tg, err := getTaskGroups(cfg)

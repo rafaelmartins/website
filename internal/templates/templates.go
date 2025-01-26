@@ -98,13 +98,13 @@ type ContentEntry struct {
 }
 
 type ContentPagination struct {
-	Enabled   bool
-	BaseURL   string
-	AtomURL   string
-	Current   int
-	Total     int
-	LinkFirst string
-	LinkLast  string
+	Enabled      bool
+	BaseURL      string
+	AtomURL      string
+	Current      int
+	Total        int
+	LinkPrevious string
+	LinkNext     string
 }
 
 type ContentContext struct {

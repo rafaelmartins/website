@@ -122,12 +122,12 @@ func (p *Pagination) GetTasks() ([]*runner.Task, error) {
 			Source: src,
 		}
 
-		dt, err := generators.MarkdownParseDate(post.Source.File)
+		m, err := generators.MarkdownGetMetadata(post.Source.File)
 		if err != nil {
 			return nil, err
 		}
 
-		post.Date = dt
+		post.Date = m.Date.Time
 		posts = append(posts, post)
 	}
 
@@ -196,10 +196,10 @@ func (p *Pagination) GetTasks() ([]*runner.Task, error) {
 			Total:   total,
 		}
 		if page > 1 {
-			pagination.LinkFirst = path.Join(pagination.BaseURL, "1") + "/"
+			pagination.LinkPrevious = path.Join(pagination.BaseURL, strconv.FormatInt(int64(page-1), 10)) + "/"
 		}
 		if page < total {
-			pagination.LinkLast = path.Join(pagination.BaseURL, strconv.FormatInt(int64(total), 10)) + "/"
+			pagination.LinkNext = path.Join(pagination.BaseURL, strconv.FormatInt(int64(page+1), 10)) + "/"
 		}
 
 		if page == 1 {

@@ -3,11 +3,8 @@ package generators
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	"io"
-	"log"
 	"os"
-	"path/filepath"
 	"text/template"
 	"time"
 
@@ -17,10 +14,10 @@ import (
 	"github.com/yuin/goldmark"
 	emoji "github.com/yuin/goldmark-emoji"
 	highlighting "github.com/yuin/goldmark-highlighting/v2"
-	meta "github.com/yuin/goldmark-meta"
 	"github.com/yuin/goldmark/extension"
 	"github.com/yuin/goldmark/parser"
 	"github.com/yuin/goldmark/text"
+	"go.abhg.dev/goldmark/frontmatter"
 )
 
 func mdGetGoldmark(style string) goldmark.Markdown {
@@ -33,7 +30,7 @@ func mdGetGoldmark(style string) goldmark.Markdown {
 		goldmark.WithExtensions(
 			extension.GFM,
 			emoji.Emoji,
-			meta.Meta,
+			&frontmatter.Extender{},
 			highlighting.NewHighlighting(opt...),
 		),
 		goldmark.WithParserOptions(
@@ -42,46 +39,72 @@ func mdGetGoldmark(style string) goldmark.Markdown {
 	)
 }
 
-func mdGetMetadata(f string, prop string, dflt interface{}) (interface{}, error) {
+type MetadataDate struct {
+	time.Time
+}
+
+func (d *MetadataDate) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	s := ""
+	if err := unmarshal(&s); err != nil {
+		return err
+	}
+
+	dt, err1 := time.Parse(time.DateTime, s)
+	if err1 == nil {
+		d.Time = dt
+		return nil
+	}
+
+	dt, err := time.Parse(time.DateOnly, s)
+	if err == nil {
+		d.Time = dt
+		return nil
+	}
+	return err1
+}
+
+type Metadata struct {
+	Title       string       `yaml:"title"`
+	Description string       `yaml:"description"`
+	Date        MetadataDate `yaml:"date"`
+	Author      struct {
+		Name  string `yaml:"name"`
+		Email string `yaml:"email"`
+	} `yaml:"author"`
+	OpenGraph struct {
+		Title       string `yaml:"title"`
+		Description string `yaml:"description"`
+		Image       string `yaml:"image"`
+		ImageGen    struct {
+			Color *uint32  `yaml:"color"`
+			DPI   *float64 `yaml:"dpi"`
+			Size  *float64 `yaml:"size"`
+		} `yaml:"image-gen"`
+	} `yaml:"opengraph"`
+	Extra map[string]any `yaml:"extra"`
+}
+
+func mdGetMetadataFromContext(ctx parser.Context) (*Metadata, error) {
+	rv := &Metadata{}
+	m := frontmatter.Get(ctx)
+	if m == nil {
+		return nil, errors.New("markdown: missing frontmatter")
+	}
+	if err := m.Decode(rv); err != nil {
+		return nil, err
+	}
+	return rv, nil
+}
+
+func MarkdownGetMetadata(f string) (*Metadata, error) {
 	src, err := os.ReadFile(f)
 	if err != nil {
 		return nil, err
 	}
 
-	context := parser.NewContext()
-	mdGetGoldmark("").Parser().Parse(text.NewReader(src), parser.WithContext(context))
-
-	if m := meta.Get(context); m != nil {
-		if v, ok := m[prop]; ok {
-			return v, nil
-		}
-	}
-	return dflt, nil
-}
-
-func mdParseDateFromInterface(itf interface{}) (time.Time, error) {
-	date, ok := itf.(string)
-	if !ok {
-		return time.Time{}, fmt.Errorf("markdown: invalid date: %+v", itf)
-	}
-
-	dt, err := time.Parse(time.DateTime, date)
-	if err != nil {
-		dt, err = time.Parse(time.DateOnly, date)
-		if err != nil {
-			return time.Time{}, err
-		}
-	}
-	return dt, nil
-}
-
-func MarkdownParseDate(f string) (time.Time, error) {
-	itf, err := mdGetMetadata(f, "date", "")
-	if err != nil {
-		return time.Time{}, err
-	}
-
-	return mdParseDateFromInterface(itf)
+	ctx := parser.NewContext()
+	mdGetGoldmark("").Parser().Parse(text.NewReader(src), parser.WithContext(ctx))
+	return mdGetMetadataFromContext(ctx)
 }
 
 type MarkdownSource struct {
@@ -111,7 +134,8 @@ type Markdown struct {
 	OpenGraphImageGenDPI   *float64
 	OpenGraphImageGenSize  *float64
 
-	ctx *templates.ContentContext
+	ctx      *templates.ContentContext
+	metadata *Metadata
 }
 
 func (*Markdown) GetID() string {
@@ -146,6 +170,7 @@ func (h *Markdown) GetReader() (io.ReadCloser, error) {
 	if h.OpenGraphImageGenerate && ctx.OpenGraph.Image == "" {
 		ctx.OpenGraph.Image = ogimage.URL(h.URL)
 	}
+	h.ctx = ctx
 
 	atomUpdated := time.Time{}
 	entries := []*templates.ContentEntry{}
@@ -166,76 +191,44 @@ func (h *Markdown) GetReader() (io.ReadCloser, error) {
 			return nil, err
 		}
 		body := buf.String()
-		metadata := meta.Get(context)
+		metadata, err := mdGetMetadataFromContext(context)
+		if err != nil {
+			return nil, err
+		}
 
 		entry := &templates.ContentEntry{
-			File: src.File,
-			URL:  src.URL,
-			Body: body,
+			File:  src.File,
+			URL:   src.URL,
+			Title: metadata.Title,
+			Body:  body,
 		}
 
-		if titleItf, ok := metadata["title"]; ok {
-			if title, ok := titleItf.(string); ok {
-				entry.Title = title
-				if ctx.OpenGraph.Title == "" {
-					ctx.OpenGraph.Title = title
-				}
-				delete(metadata, "title")
-			}
+		if ctx.OpenGraph.Title == "" {
+			ctx.OpenGraph.Title = metadata.Title
 		}
-		if descriptionItf, ok := metadata["description"]; ok {
-			if description, ok := descriptionItf.(string); ok {
-				if ctx.OpenGraph.Description == "" {
-					ctx.OpenGraph.Description = description
-				}
-				delete(metadata, "description")
-			}
+		if ctx.OpenGraph.Description == "" {
+			ctx.OpenGraph.Description = metadata.Description
 		}
 
 		if h.IsPost {
-			post := &templates.PostContentEntry{}
-
-			if dateItf, ok := metadata["date"]; ok {
-				dt, err := mdParseDateFromInterface(dateItf)
-				if err != nil {
-					return nil, err
-				}
-				post.Date = dt
-				delete(metadata, "date")
-			} else {
-				return nil, fmt.Errorf("markdown: post missing date: %s", src.File)
+			entry.Post = &templates.PostContentEntry{
+				Date: metadata.Date.Time,
 			}
-
-			if authorItf, ok := metadata["author"]; ok {
-				if authorMap, ok := authorItf.(map[interface{}]interface{}); ok {
-					if nameItf, ok := authorMap["name"]; ok {
-						if name, ok := nameItf.(string); ok {
-							post.Author.Name = name
-						}
-					}
-					if emailItf, ok := authorMap["email"]; ok {
-						if email, ok := emailItf.(string); ok {
-							post.Author.Email = email
-						}
-					}
-				}
-				delete(metadata, "author")
-			}
-
-			entry.Post = post
-
+			entry.Post.Author.Name = metadata.Author.Name
+			entry.Post.Author.Email = metadata.Author.Email
 			if atomUpdated.IsZero() {
-				atomUpdated = post.Date
+				atomUpdated = entry.Post.Date
 			}
 		}
 
-		entry.Extra = metadata
+		entry.Extra = metadata.Extra
 
 		if h.Pagination == nil {
 			if h.Title == "" {
 				ctx.Title = entry.Title
 			}
 			ctx.Entry = entry
+			h.metadata = metadata
 			break
 		}
 
@@ -251,17 +244,14 @@ func (h *Markdown) GetReader() (io.ReadCloser, error) {
 	}
 
 	funcMap := template.FuncMap{
-		"markdownGetMetadata": func(f string, prop string, dflt interface{}) interface{} {
-			rv, err := mdGetMetadata(f, prop, dflt)
+		"markdownGetMetadata": func(f string) interface{} {
+			rv, err := MarkdownGetMetadata(f)
 			if err != nil {
-				log.Print(err)
-				return dflt
+				panic(err)
 			}
 			return rv
 		},
 	}
-
-	h.ctx = ctx
 
 	if h.OpenGraphImageGenerate {
 		if err := ctx.OpenGraph.Validate(); err != nil {
@@ -314,39 +304,23 @@ func (h *Markdown) GetByProducts(ch chan *runner.GeneratorByProduct) {
 		return
 	}
 
-	// the runner ensures that the by products are produced only *after* the main reader is exhausted
-	if h.ctx == nil {
-		close(ch)
-		return
-	}
-
-	image := any(h.OpenGraphImage)
+	image := h.OpenGraphImage
 	ccolor := h.OpenGraphImageGenColor
-	dpi := any(h.OpenGraphImageGenDPI)
-	size := any(h.OpenGraphImageGenSize)
+	dpi := h.OpenGraphImageGenDPI
+	size := h.OpenGraphImageGenSize
 
-	// if entry, the frontmatter may override these settings
-	if e := h.ctx.Entry; e != nil {
-		if opengraphItf, ok := e.Extra["opengraph"]; ok {
-			if opengraphMap, ok := opengraphItf.(map[interface{}]interface{}); ok {
-				if imageItf, ok := opengraphMap["image"]; ok && len(h.Sources) == 1 {
-					if img, ok := imageItf.(string); ok {
-						image = filepath.Join(filepath.Dir(h.Sources[0].File), img)
-					}
-				}
-				if imageGenItf, ok := opengraphMap["image-gen"]; ok {
-					if imageGenMap, ok := imageGenItf.(map[interface{}]interface{}); ok {
-						if colorItf, ok := imageGenMap["color"]; ok {
-							if c, ok := colorItf.(int); ok {
-								tmp := uint32(c)
-								ccolor = &tmp
-							}
-						}
-						dpi = imageGenMap["dpi"]
-						size = imageGenMap["size"]
-					}
-				}
-			}
+	if h.metadata != nil {
+		if h.metadata.OpenGraph.Image != "" {
+			image = h.metadata.OpenGraph.Image
+		}
+		if h.metadata.OpenGraph.ImageGen.Color != nil {
+			ccolor = h.metadata.OpenGraph.ImageGen.Color
+		}
+		if h.metadata.OpenGraph.ImageGen.DPI != nil {
+			dpi = h.metadata.OpenGraph.ImageGen.DPI
+		}
+		if h.metadata.OpenGraph.ImageGen.Size != nil {
+			size = h.metadata.OpenGraph.ImageGen.Size
 		}
 	}
 

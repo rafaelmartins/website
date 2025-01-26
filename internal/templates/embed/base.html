@@ -23,8 +23,10 @@
     <meta property="og:url" content="{{ .Config.URL }}{{ .Content.URL }}">
     {{- if .Content.OpenGraph.Image }}
     <meta property="og:image" content="{{ .Config.URL }}{{ .Content.OpenGraph.Image }}">
-    {{- end }}
     <meta name="twitter:card" content="summary_large_image">
+    {{- else }}
+    <meta name="twitter:card" content="summary">
+    {{- end }}
     {{- if .Content.OpenGraph.Title }}
     <meta name="twitter:title" content="{{ .Content.OpenGraph.Title }}">
     {{- end }}
