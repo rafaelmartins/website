@@ -33,6 +33,39 @@
 </div>
 {{- end }}
 
+{{ define "cdocs-toc" -}}
+<aside class="menu">
+  <p class="menu-label">Table of Contents</p>
+  <ul class="menu-list">
+    {{- range .Content.Entry.CDocs.Headers }}
+    <li>
+      <a class="has-text-weight-bold" href="#{{ .ID }}">Header: <code>{{ .Name }}</code></a>
+      <ul>
+        {{ range .Sections -}}
+        <li><a href="#{{ .ID }}">{{ .Name }}</a></li>
+        {{- end }}
+        {{- if .Structs }}
+        <li><a href="#struct-{{ .ID }}">Struct Definitions</a></li>
+        {{- end }}
+        {{- if .Enums }}
+        <li><a href="#enum-{{ .ID }}">Enumeration Definitions</a></li>
+        {{- end }}
+        {{- if .Defines }}
+        <li><a href="#define-{{ .ID }}">Macro Definitions</a></li>
+        {{- end }}
+        {{- if .Functions }}
+        <li><a href="#function-{{ .ID }}">Function Definitions</a></li>
+        {{- end }}
+        {{- if .FunctionTypes }}
+        <li><a href="#functiontype-{{ .ID }}">Function Type Definitions</a></li>
+        {{- end }}
+      </ul>
+    </li>
+    {{- end }}
+  </ul>
+</aside>
+{{- end }}
+
 {{ define "main" -}}
 <article>
   <h1 class="mb-5">{{ .Content.Title }}</h1>
@@ -41,9 +74,12 @@
       This page is best viewed on a larger screen.
     </div>
   </div>
+  <div class="is-hidden-tablet">
+    {{ template "cdocs-toc" . }}
+  </div>
   {{- range .Content.Entry.CDocs.Headers }}
   <div class="box">
-    <h2 id="{{ .ID }}">Header: {{ .Name }}</h2>
+    <h2 id="{{ .ID }}">Header: <code>{{ .Name }}</code></h2>
     {{ .Description}}
     <h3>Included Headers</h3>
     {{ template "cdocs-includes" .Includes }}
@@ -102,36 +138,9 @@
 {{- end }}
 
 {{ define "sidebar" -}}
-<aside class="menu">
-  <p class="menu-label">Table of Contents</p>
-  <ul class="menu-list">
-    {{- range .Content.Entry.CDocs.Headers }}
-    <li>
-      <a class="has-text-weight-bold" href="#{{ .ID }}">Header: {{ .Name }}</a>
-      <ul>
-        {{ range .Sections -}}
-        <li><a href="#{{ .ID }}">{{ .Name }}</a></li>
-        {{- end }}
-        {{- if .Structs }}
-        <li><a href="#struct-{{ .ID }}">Struct Definitions</a></li>
-        {{- end }}
-        {{- if .Enums }}
-        <li><a href="#enum-{{ .ID }}">Enumeration Definitions</a></li>
-        {{- end }}
-        {{- if .Defines }}
-        <li><a href="#define-{{ .ID }}">Macro Definitions</a></li>
-        {{- end }}
-        {{- if .Functions }}
-        <li><a href="#function-{{ .ID }}">Function Definitions</a></li>
-        {{- end }}
-        {{- if .FunctionTypes }}
-        <li><a href="#functiontype-{{ .ID }}">Function Type Definitions</a></li>
-        {{- end }}
-      </ul>
-    </li>
-    {{- end }}
-  </ul>
-</aside>
+<div class="is-hidden-mobile">
+  {{ template "cdocs-toc" . }}
+</div>
 <div class="has-text-centered is-size-7">
   <strong class="has-text-grey-light">Updated:</strong>
   <time class="has-text-grey-light">{{ .Content.Entry.CDocs.Date.Format "2006-01-02 15:04:05" }} UTC</time>
