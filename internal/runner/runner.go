@@ -143,18 +143,18 @@ func (t *Task) run(basedir string, cfg Config, force bool) error {
 			return bp.Err
 		}
 
-		dest := filepath.Join(bpDir, bp.Filename)
+		bpDest := filepath.Join(bpDir, bp.Filename)
 
-		log.Printf("  %-8s  %s", strings.Repeat("-", len(gen.GetID())), dest)
+		log.Printf("  %-8s  %s [%s]", gen.GetID(), dest, bpDest)
 
 		if err := func() error {
 			defer bp.Reader.Close()
 
-			if err := os.MkdirAll(filepath.Dir(dest), 0777); err != nil {
+			if err := os.MkdirAll(filepath.Dir(bpDest), 0777); err != nil {
 				return err
 			}
 
-			fp, err := os.Create(dest)
+			fp, err := os.Create(bpDest)
 			if err != nil {
 				return err
 			}
@@ -230,8 +230,7 @@ func Run(groups []*TaskGroup, basedir string, cfg Config, force bool) error {
 
 			if err := task.run(basedir, cfg, force); err != nil {
 				failures.Add(1)
-				log.Printf("  ERROR     %s", task.destination(basedir))
-				log.Printf("  -----     error: %s", err)
+				log.Printf("  %-8s  %s: %s", "[ERROR]", task.destination(basedir), err)
 			}
 		}(t)
 	}
