@@ -170,6 +170,16 @@ type Config struct {
 		} `yaml:"groups"`
 	} `yaml:"posts"`
 
+	QRCode []struct {
+		SourceFile      string  `yaml:"source-file"`
+		SourceContent   string  `yaml:"source-content"`
+		DestinationFile string  `yaml:"destination-file"`
+		Size            int     `yaml:"size"`
+		ForegroundColor *uint32 `yaml:"foreground-color"`
+		BackgroundColor *uint32 `yaml:"background-color"`
+		WithoutBorders  bool    `yaml:"without-borders"`
+	} `yaml:"qrcode"`
+
 	file string
 	ts   time.Time
 }

@@ -327,6 +327,23 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 			)
 		}
 	}
+
+	for _, qr := range c.QRCode {
+		rv = append(rv,
+			runner.NewTaskGroup(
+				&tasks.QRCode{
+					SourceFile:      qr.SourceFile,
+					SourceContent:   qr.SourceContent,
+					DestinationFile: qr.DestinationFile,
+					Size:            qr.Size,
+					ForegroundColor: qr.ForegroundColor,
+					BackgroundColor: qr.BackgroundColor,
+					WithoutBorders:  qr.WithoutBorders,
+				},
+			),
+		)
+	}
+
 	return rv, nil
 }
 
