@@ -87,12 +87,10 @@ type Metadata struct {
 
 func mdGetMetadataFromContext(ctx parser.Context) (*Metadata, error) {
 	rv := &Metadata{}
-	m := frontmatter.Get(ctx)
-	if m == nil {
-		return nil, errors.New("markdown: missing frontmatter")
-	}
-	if err := m.Decode(rv); err != nil {
-		return nil, err
+	if m := frontmatter.Get(ctx); m != nil {
+		if err := m.Decode(rv); err != nil {
+			return nil, err
+		}
 	}
 	return rv, nil
 }
