@@ -1,4 +1,4 @@
-{{ define "title" }}{{ .Content.Title }} - {{ .Config.Title }}{{ end }}
+{{ define "title" }}{{ required .Content.Title }} - {{ required .Config.Title }}{{ end }}
 
 {{ define "extra_head" -}}
 <link href="/assets/github-markdown-css/github-markdown-light.min.css" rel="stylesheet" type="text/css">
@@ -23,7 +23,7 @@
 
 {{ define "main" -}}
 <article class="anchor markdown-body">
-  <h1 class="title">{{ .Content.Entry.Title }}</h1>
+  <h1 class="title">{{ required .Content.Entry.Title }}</h1>
 {{ .Content.Entry.Body }}
 </article>
 {{- end }}
@@ -33,8 +33,8 @@
   <span class="icon">
     <i class="fas fa-lg fa-brands fa-github"></i>
   </span>
-  <a href="https://github.com/{{ .Content.Entry.Project.Owner }}/{{ .Content.Entry.Project.Repo }}">
-    <strong>{{ .Content.Entry.Project.Owner }}/{{ .Content.Entry.Project.Repo }}</strong>
+  <a href="https://github.com/{{ requiredAttr .Content.Entry.Project.Owner }}/{{ requiredAttr .Content.Entry.Project.Repo }}">
+    <strong>{{ required .Content.Entry.Project.Owner }}/{{ required .Content.Entry.Project.Repo }}</strong>
   </a>
 </div>
 <table class="table is-fullwidth">
@@ -48,7 +48,7 @@
     <tr>
       <th>Website:</th>
       <td>
-        <a href="{{ .Content.Entry.Project.URL }}">{{ .Content.Entry.Project.URL }}</a>
+        <a href="{{ requiredAttr .Content.Entry.Project.URL }}">{{ .Content.Entry.Project.URL }}</a>
       </td>
     </tr>
     {{- end }}
@@ -56,12 +56,12 @@
       {{- if .Content.Entry.Project.License.SPDX }}
       <th>Main License:</th>
       <td>
-        <a href="https://spdx.org/licenses/{{ .Content.Entry.Project.License.SPDX }}.html">{{ .Content.Entry.Project.License.SPDX }}</a>
+        <a href="https://spdx.org/licenses/{{ requiredAttr .Content.Entry.Project.License.SPDX }}.html">{{ .Content.Entry.Project.License.SPDX }}</a>
       </td>
       {{- else }}
       <th>License:</th>
       <td>
-        <a href="{{ .Content.Entry.Project.License.URL }}">Link</a>
+        <a href="{{ requiredAttr .Content.Entry.Project.License.URL }}">Link</a>
       </td>
       {{- end }}
     </tr>
@@ -106,9 +106,9 @@
   <tbody>
     <tr>
       <td>
-        <a href="{{ .Content.Entry.Project.LatestRelease.URL }}">{{ .Content.Entry.Project.LatestRelease.Name }}</a>
+        <a href="{{ requiredAttr .Content.Entry.Project.LatestRelease.URL }}">{{ required .Content.Entry.Project.LatestRelease.Name }}</a>
       </td>
-      <td>{{ .Content.Entry.Project.LatestRelease.Tag }}</td>
+      <td>{{ required .Content.Entry.Project.LatestRelease.Tag }}</td>
     </tr>
     {{- if .Content.Entry.Project.LatestRelease.Files }}
     <tr>
@@ -119,7 +119,7 @@
     <tr>
       <td colspan="2">
         <span class="icon"><i class="fa-solid fa-box-archive"></i></span>
-        <a href="{{ .URL }}">{{ .File }}</a>
+        <a href="{{ requiredAttr .URL }}">{{ required .File }}</a>
       </td>
     </tr>
     {{- end }}

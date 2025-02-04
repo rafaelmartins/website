@@ -254,12 +254,6 @@ func (h *Markdown) GetReader() (io.ReadCloser, error) {
 		},
 	}
 
-	if h.OpenGraphImageGenerate {
-		if err := ctx.OpenGraph.Validate(); err != nil {
-			return nil, err
-		}
-	}
-
 	buf := &bytes.Buffer{}
 	if err := templates.Execute(buf, h.Template, funcMap, h.LayoutCtx, ctx); err != nil {
 		return nil, err

@@ -1,8 +1,8 @@
-{{ define "title" }}{{ .Content.Entry.Title }} - {{ .Config.Title }}{{ end }}
+{{ define "title" }}{{ required .Content.Entry.Title }} - {{ required .Config.Title }}{{ end }}
 
 {{ define "main" -}}
 <article class="anchor">
-  <h1 class="title">{{ .Content.Entry.Title }}</h1>
+  <h1 class="title">{{ required .Content.Entry.Title }}</h1>
 {{ .Content.Entry.Body }}
   {{- if .Content.Entry.Post }}
   <div class="has-text-grey-light mt-6">

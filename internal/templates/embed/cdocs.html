@@ -1,4 +1,4 @@
-{{ define "title" }}{{ .Content.Title }} - {{ .Config.Title }}{{ end }}
+{{ define "title" }}{{ required .Content.Title }} - {{ required .Config.Title }}{{ end }}
 
 {{ define "extra_head" -}}
 <style type="text/css">
@@ -22,12 +22,12 @@
 {{- end }}
 
 {{ define "cdocs-entry" -}}
-<div id="{{ .ID }}" class="card">
+<div id="{{ requiredAttr .ID }}" class="card">
   <header class="card-header">
-    <a href="{{ .Link }}"><p class="card-header-title">{{ .Type }} <code>{{ .Name }}</code></p></a>
+    <a href="{{ requiredAttr .Link }}"><p class="card-header-title">{{ required .Type }} <code>{{ required .Name }}</code></p></a>
   </header>
   <div class="card-content">
-    {{ .Proto }}
+    {{ required .Proto }}
     {{ .Description }}
   </div>
 </div>
@@ -39,25 +39,25 @@
   <ul class="menu-list">
     {{- range .Content.Entry.CDocs.Headers }}
     <li>
-      <a class="has-text-weight-bold" href="#{{ .ID }}">Header: <code>{{ .Name }}</code></a>
+      <a class="has-text-weight-bold" href="#{{ requiredAttr .ID }}">Header: <code>{{ required .Name }}</code></a>
       <ul>
         {{ range .Sections -}}
-        <li><a href="#{{ .ID }}">{{ .Name }}</a></li>
+        <li><a href="#{{ requiredAttr .ID }}">{{ required .Name }}</a></li>
         {{- end }}
         {{- if .Structs }}
-        <li><a href="#struct-{{ .ID }}">Struct Definitions</a></li>
+        <li><a href="#struct-{{ requiredAttr .ID }}">Struct Definitions</a></li>
         {{- end }}
         {{- if .Enums }}
-        <li><a href="#enum-{{ .ID }}">Enumeration Definitions</a></li>
+        <li><a href="#enum-{{ requiredAttr .ID }}">Enumeration Definitions</a></li>
         {{- end }}
         {{- if .Defines }}
-        <li><a href="#define-{{ .ID }}">Macro Definitions</a></li>
+        <li><a href="#define-{{ requiredAttr .ID }}">Macro Definitions</a></li>
         {{- end }}
         {{- if .Functions }}
-        <li><a href="#function-{{ .ID }}">Function Definitions</a></li>
+        <li><a href="#function-{{ requiredAttr .ID }}">Function Definitions</a></li>
         {{- end }}
         {{- if .FunctionTypes }}
-        <li><a href="#functiontype-{{ .ID }}">Function Type Definitions</a></li>
+        <li><a href="#functiontype-{{ requiredAttr .ID }}">Function Type Definitions</a></li>
         {{- end }}
       </ul>
     </li>
@@ -68,7 +68,7 @@
 
 {{ define "main" -}}
 <article>
-  <h1 class="mb-5">{{ .Content.Title }}</h1>
+  <h1 class="mb-5">{{ required .Content.Title }}</h1>
   <div class="message is-dark is-small is-hidden-tablet">
     <div class="message-body">
       This page is best viewed on a larger screen.
@@ -79,12 +79,12 @@
   </div>
   {{- range .Content.Entry.CDocs.Headers }}
   <div class="box">
-    <h2 id="{{ .ID }}">Header: <code>{{ .Name }}</code></h2>
-    {{ .Description}}
+    <h2 id="{{ requiredAttr .ID }}">Header: <code>{{ required .Name }}</code></h2>
+    {{ .Description }}
     <h3>Included Headers</h3>
     {{ template "cdocs-includes" .Includes }}
     {{ range .Sections -}}
-    <h3 id="{{ .ID }}">{{ .Name }}</h3>
+    <h3 id="{{ requiredAttr .ID }}">{{ required .Name }}</h3>
     {{ .Description }}
     {{- range .Structs }}
     {{ template "cdocs-entry" . }}
@@ -103,31 +103,31 @@
     {{- end }}
     {{- end }}
     {{- if .Structs }}
-    <h3 id="struct-{{ .ID }}">Struct Definitions</h3>
+    <h3 id="struct-{{ requiredAttr .ID }}">Struct Definitions</h3>
     {{- range .Structs }}
     {{ template "cdocs-entry" . }}
     {{- end }}
     {{- end }}
     {{- if .Enums }}
-    <h3 id="enum-{{ .ID }}">Enumeration Definitions</h3>
+    <h3 id="enum-{{ requiredAttr .ID }}">Enumeration Definitions</h3>
     {{- range .Enums }}
     {{ template "cdocs-entry" . }}
     {{- end }}
     {{- end }}
     {{- if .Defines }}
-    <h3 id="define-{{ .ID }}">Macro Definitions</h3>
+    <h3 id="define-{{ requiredAttr .ID }}">Macro Definitions</h3>
     {{- range .Defines }}
     {{ template "cdocs-entry" . }}
     {{- end }}
     {{- end }}
     {{- if .Functions }}
-    <h3 id="function-{{ .ID }}">Function Definitions</h3>
+    <h3 id="function-{{ requiredAttr .ID }}">Function Definitions</h3>
     {{- range .Functions }}
     {{ template "cdocs-entry" . }}
     {{- end }}
     {{- end }}
     {{- if .FunctionTypes }}
-    <h3 id="functiontype-{{ .ID }}">Function Type Definitions</h3>
+    <h3 id="functiontype-{{ requiredAttr .ID }}">Function Type Definitions</h3>
     {{- range .FunctionTypes }}
     {{ template "cdocs-entry" . }}
     {{- end }}

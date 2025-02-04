@@ -1,19 +1,19 @@
-{{ define "title" }}{{ .Content.Title }} - {{ .Config.Title }}{{ end }}
+{{ define "title" }}{{ required .Content.Title }} - {{ required .Config.Title }}{{ end }}
 
 {{ define "main" -}}
 <article>
-  <h1 class="mb-5">{{ .Content.Title }}</h1>
+  <h1 class="mb-5">{{ required .Content.Title }}</h1>
   {{- if .Content.Description }}
   <div class="notification">
 {{ template "pagination-description" . }}
-    <a class="button is-small" href="{{ .Content.Pagination.AtomURL }}">
+    <a class="button is-small" href="{{ required .Content.Pagination.AtomURL }}">
       <i class="fa fa-rss mr-2" aria-hidden="true"></i>
       Atom feed
     </a>
   </div>
   {{- else }}
   <div class="block">
-    <a class="button is-small" href="{{ .Content.Pagination.AtomURL }}">
+    <a class="button is-small" href="{{ required .Content.Pagination.AtomURL }}">
       <i class="fa fa-rss mr-2" aria-hidden="true"></i>
       Atom feed
     </a>
@@ -22,8 +22,8 @@
   <dl class="mb-6">
     {{- range .Content.Entries }}
     <dt class="is-size-4 has-text-weight-bold">
-      <a class="has-text-link-dark" href="{{ .URL }}">
-        {{ .Title }}
+      <a class="has-text-link-dark" href="{{ required .URL }}">
+        {{ required .Title }}
       </a>
     </dt>
     {{- if .Post }}
@@ -45,5 +45,7 @@
 {{- end }}
 
 {{ define "pagination-description" -}}
+{{- if .Content.Description }}
 <p>{{ .Content.Description }}</p>
+{{- end }}
 {{- end }}

@@ -84,20 +84,15 @@ func (d *CDocs) GetReader() (io.ReadCloser, error) {
 		d.otitle = d.OpenGraphTitle
 	}
 
-	og := templates.OpenGraphEntry{
-		Title:       d.otitle,
-		Description: d.OpenGraphDescription,
-		Image:       ogimage.URL(d.URL),
-	}
-	if err := og.Validate(); err != nil {
-		return nil, err
-	}
-
 	buf := &bytes.Buffer{}
 	if err := templates.Execute(buf, d.Template, nil, d.LayoutCtx, &templates.ContentContext{
-		Title:     title,
-		URL:       d.URL,
-		OpenGraph: og,
+		Title: title,
+		URL:   d.URL,
+		OpenGraph: templates.OpenGraphEntry{
+			Title:       d.otitle,
+			Description: d.OpenGraphDescription,
+			Image:       ogimage.URL(d.URL),
+		},
 		Entry: &templates.ContentEntry{
 			Title: title,
 			CDocs: dctx,

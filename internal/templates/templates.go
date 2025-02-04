@@ -2,9 +2,11 @@ package templates
 
 import (
 	"embed"
+	"errors"
 	"fmt"
 	"io"
 	"os"
+	"reflect"
 	"strings"
 	"text/template"
 	"time"
@@ -71,19 +73,6 @@ type OpenGraphEntry struct {
 	Title       string
 	Description string
 	Image       string
-}
-
-func (og *OpenGraphEntry) Validate() error {
-	if og.Title == "" {
-		return fmt.Errorf("templates: opengraph: title should not be empty")
-	}
-	if strings.ContainsAny(og.Title, "\t\n\r\"<>") {
-		return fmt.Errorf("templates: opengraph: title should not contain tabs, new lines, double quotes, html tags: %s", og.Title)
-	}
-	if strings.ContainsAny(og.Description, "\t\n\r\"<>") {
-		return fmt.Errorf("templates: opengraph: title should not contain tabs, new lines, double quotes, html tags: %s", og.Description)
-	}
-	return nil
 }
 
 type ContentEntry struct {
@@ -166,7 +155,34 @@ func GetTimestamps(name string, withEmbed bool) ([]time.Time, error) {
 	return rv, nil
 }
 
+func required(v reflect.Value) (string, error) {
+	if !v.IsValid() {
+		return "", errors.New("invalid value")
+	}
+	if v.IsZero() {
+		return "", errors.New("zero value")
+	}
+	return v.String(), nil
+}
+
+func requiredAttr(v reflect.Value) (string, error) {
+	r, err := required(v)
+	if err != nil {
+		return "", err
+	}
+	if strings.ContainsAny(r, "\t\n\r\"<>") {
+		return "", errors.New("value should not contain tabs, new lines, double quotes, html tags")
+	}
+	return r, nil
+}
+
 func Execute(wr io.Writer, name string, fm template.FuncMap, lctx *LayoutContext, cctx *ContentContext) error {
+	if fm == nil {
+		fm = template.FuncMap{}
+	}
+	fm["required"] = required
+	fm["requiredAttr"] = requiredAttr
+
 	tmpl, err := template.New("base").Funcs(fm).ParseFS(content, "embed/base.html")
 	if err != nil {
 		return err

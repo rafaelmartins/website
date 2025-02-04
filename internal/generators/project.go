@@ -165,21 +165,16 @@ func (p *Project) GetReader() (io.ReadCloser, error) {
 		odesc = p.OpenGraphDescription
 	}
 
-	og := templates.OpenGraphEntry{
-		Title:       p.otitle,
-		Description: odesc,
-		Image:       ogimage.URL(p.URL),
-	}
-	if err := og.Validate(); err != nil {
-		return nil, err
-	}
-
 	buf := &bytes.Buffer{}
 	if err := templates.Execute(buf, p.Template, nil, p.LayoutCtx, &templates.ContentContext{
 		Title:       title,
 		Description: proj.Description,
 		URL:         p.URL,
-		OpenGraph:   og,
+		OpenGraph: templates.OpenGraphEntry{
+			Title:       p.otitle,
+			Description: odesc,
+			Image:       ogimage.URL(p.URL),
+		},
 		Entry: &templates.ContentEntry{
 			Title:   title,
 			Body:    body,

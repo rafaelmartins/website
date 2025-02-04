@@ -4,53 +4,45 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    {{- if .Generator }}
-    <meta name="generator" content="{{ .Generator }}">
-    {{- end }}
+    <meta name="generator" content="{{ required .Generator }}">
     {{- if .Content.OpenGraph.Description }}
-    <meta name="description" content="{{ .Content.OpenGraph.Description }}">
+    <meta name="description" content="{{ requiredAttr .Content.OpenGraph.Description }}">
     {{- end }}
-    {{- if .Config.Title }}
-    <meta property="og:site_name" content="{{ .Config.Title }}">
-    {{- end }}
+    <meta property="og:site_name" content="{{ requiredAttr .Config.Title }}">
     <meta property="og:type" content="website">
-    {{- if .Content.OpenGraph.Title }}
-    <meta property="og:title" content="{{ .Content.OpenGraph.Title }}">
-    {{- end }}
+    <meta property="og:title" content="{{ requiredAttr .Content.OpenGraph.Title }}">
     {{- if .Content.OpenGraph.Description }}
-    <meta property="og:description" content="{{ .Content.OpenGraph.Description }}">
+    <meta property="og:description" content="{{ requiredAttr .Content.OpenGraph.Description }}">
     {{- end }}
-    <meta property="og:url" content="{{ .Config.URL }}{{ .Content.URL }}">
+    <meta property="og:url" content="{{ requiredAttr .Config.URL }}{{ requiredAttr .Content.URL }}">
     {{- if .Content.OpenGraph.Image }}
-    <meta property="og:image" content="{{ .Config.URL }}{{ .Content.OpenGraph.Image }}">
+    <meta property="og:image" content="{{ requiredAttr .Config.URL }}{{ requiredAttr .Content.OpenGraph.Image }}">
     <meta name="twitter:card" content="summary_large_image">
     {{- else }}
     <meta name="twitter:card" content="summary">
     {{- end }}
-    {{- if .Content.OpenGraph.Title }}
-    <meta name="twitter:title" content="{{ .Content.OpenGraph.Title }}">
-    {{- end }}
+    <meta name="twitter:title" content="{{ requiredAttr .Content.OpenGraph.Title }}">
     {{- if .Content.OpenGraph.Description }}
-    <meta name="twitter:description" content="{{ .Content.OpenGraph.Description }}">
+    <meta name="twitter:description" content="{{ requiredAttr .Content.OpenGraph.Description }}">
     {{- end }}
-    <meta name="twitter:url" content="{{ .Config.URL }}{{ .Content.URL }}">
+    <meta name="twitter:url" content="{{ requiredAttr .Config.URL }}{{ requiredAttr .Content.URL }}">
     {{- if .Content.OpenGraph.Image }}
-    <meta name="twitter:image" content="{{ .Config.URL }}{{ .Content.OpenGraph.Image }}">
+    <meta name="twitter:image" content="{{ requiredAttr .Config.URL }}{{ requiredAttr .Content.OpenGraph.Image }}">
     {{- end }}
     <title>{{ template "title" . }}</title>
     <link href="/assets/bulma/css/versions/bulma-no-dark-mode.min.css" rel="stylesheet" type="text/css">
     <link href="/assets/@fontsource-variable/nunito/wght.min.css" rel="stylesheet" type="text/css">
     <link href="/assets/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
     {{- if .Config.Posts.PostsPerPageAtom }}
-    <link href="{{ if .Config.Posts.BaseDestination }}/{{ .Config.Posts.BaseDestination }}{{
+    <link href="{{ if .Config.Posts.BaseDestination }}/{{ requiredAttr .Config.Posts.BaseDestination }}{{
       end }}/atom.xml" rel="alternate" type="application/atom+xml" title="{{
-      if .Config.Posts.Title }}{{ .Config.Posts.Title }} - {{ end }}{{ $.Config.Title }}">
+      if .Config.Posts.Title }}{{ requiredAttr .Config.Posts.Title }} - {{ end }}{{ requiredAttr $.Config.Title }}">
     {{- end }}
     {{- range .Config.Posts.Groups }}
     {{- if .PostsPerPageAtom }}
-    <link href="{{ if .BaseDestination }}/{{ .BaseDestination }}{{
+    <link href="{{ if .BaseDestination }}/{{ requiredAttr .BaseDestination }}{{
       end }}/atom.xml" rel="alternate" type="application/atom+xml" title="{{
-      if .Title }}{{ .Title }} - {{ end }}{{ $.Config.Title }}">
+      if .Title }}{{ requiredAttr .Title }} - {{ end }}{{ requiredAttr $.Config.Title }}">
     {{- end }}
     {{- end }}
     <style type="text/css">
@@ -72,12 +64,12 @@
       <div class="container is-max-desktop">
         <div class="navbar-brand">
           <a class="navbar-item" href="/">
-            <h1 class="title is-4">{{ .Config.Title }}</h1>
+            <h1 class="title is-4">{{ requiredAttr .Config.Title }}</h1>
           </a>
           {{- range .Config.SocialLinks }}
-          <a class="navbar-item is-hidden-desktop is-hidden-mobile" href="{{ .URL }}" aria-label="{{ .Label }}">
+          <a class="navbar-item is-hidden-desktop is-hidden-mobile" href="{{ requiredAttr .URL }}" aria-label="{{ requiredAttr .Label }}">
             <span class="icon">
-              <i class="fas fa-lg fa-brands fa-{{ .Icon }}"></i>
+              <i class="fas fa-lg fa-brands fa-{{ requiredAttr .Icon }}"></i>
             </span>
           </a>
           {{- end }}
@@ -91,14 +83,14 @@
         <div id="navMenu" class="navbar-menu">
           <div class="navbar-start">
             {{- range .Config.Menu }}
-            <a class="navbar-item" href="{{ .URL }}">{{ .Title }}</a>
+            <a class="navbar-item" href="{{ requiredAttr .URL }}">{{ required .Title }}</a>
             {{- end }}
           </div>
           <div class="navbar-end">
             {{- range .Config.SocialLinks }}
-            <a class="navbar-item is-hidden-touch" href="{{ .URL }}" aria-label="{{ .Label }}">
+            <a class="navbar-item is-hidden-touch" href="{{ requiredAttr .URL }}" aria-label="{{ requiredAttr .Label }}">
               <span class="icon">
-                <i class="fas fa-lg fa-brands fa-{{ .Icon }}"></i>
+                <i class="fas fa-lg fa-brands fa-{{ requiredAttr .Icon }}"></i>
               </span>
             </a>
             {{- end }}
@@ -124,9 +116,9 @@
       <div class="content has-text-centered">
         <p class="mb-6 is-hidden-tablet">
           {{- range .Config.SocialLinks }}
-          <a href="{{ .URL }}" aria-label="{{ .Label }}">
+          <a href="{{ requiredAttr .URL }}" aria-label="{{ requiredAttr .Label }}">
             <span class="icon is-large has-text-grey-dark">
-              <i class="fas fa-2x fa-brands fa-{{ .Icon }}"></i>
+              <i class="fas fa-2x fa-brands fa-{{ requiredAttr .Icon }}"></i>
             </span>
           </a>
           {{- end }}
@@ -151,7 +143,7 @@
 </html>
 {{- end }}
 
-{{ define "title" }}{{ .Config.Title }}{{ end }}
+{{ define "title" }}{{ required .Config.Title }}{{ end }}
 
 {{ define "extra_head" }}{{ end }}
 
@@ -159,4 +151,4 @@
 
 {{ define "sidebar" }}{{ end }}
 
-{{ define "footer" }}{{ .Config.Footer }}{{ end }}
+{{ define "footer" }}{{ required .Config.Footer }}{{ end }}
