@@ -21,7 +21,7 @@
       <name>{{ if .Post.Author.Name }}{{ .Post.Author.Name }}{{ else }}{{ $.Config.Author.Name }}{{ end }}</name>
       <email>{{ if .Post.Author.Email }}{{ .Post.Author.Email }}{{ else }}{{ $.Config.Author.Email }}{{ end }}</email>
     </author>
-    <content type="html"><![CDATA[{{ required .Body }}]]></content>
+    <content type="html">{{ required .Body | html }}</content>
   </entry>
   {{- end }}
 </feed>
