@@ -155,25 +155,28 @@ func GetTimestamps(name string, withEmbed bool) ([]time.Time, error) {
 	return rv, nil
 }
 
-func required(v reflect.Value) (string, error) {
+func required(v reflect.Value) (reflect.Value, error) {
 	if !v.IsValid() {
-		return "", errors.New("invalid value")
+		return reflect.Value{}, errors.New("invalid value")
 	}
 	if v.IsZero() {
-		return "", errors.New("zero value")
+		return reflect.Value{}, errors.New("zero value")
 	}
-	return v.String(), nil
+	return v, nil
 }
 
-func requiredAttr(v reflect.Value) (string, error) {
+func requiredAttr(v reflect.Value) (reflect.Value, error) {
 	r, err := required(v)
 	if err != nil {
-		return "", err
+		return reflect.Value{}, err
 	}
-	if strings.ContainsAny(r, "\t\n\r\"<>") {
-		return "", errors.New("value should not contain tabs, new lines, double quotes, html tags")
+	if r.Kind() == reflect.Interface {
+		r = reflect.ValueOf(r.Interface())
 	}
-	return r, nil
+	if strings.ContainsAny(r.String(), "\t\n\r\"<>") {
+		return reflect.Value{}, errors.New("value should not contain tabs, new lines, double quotes, html tags")
+	}
+	return v, nil
 }
 
 func Execute(wr io.Writer, name string, fm template.FuncMap, lctx *LayoutContext, cctx *ContentContext) error {
