@@ -6,14 +6,14 @@
   {{- if .Content.Description }}
   <div class="notification">
 {{ template "pagination-description" . }}
-    <a class="button is-small" href="{{ required .Content.Pagination.AtomURL }}">
+    <a class="button is-small" href="{{ requiredAttr .Content.Pagination.AtomURL }}">
       <i class="fa fa-rss mr-2" aria-hidden="true"></i>
       Atom feed
     </a>
   </div>
   {{- else }}
   <div class="block">
-    <a class="button is-small" href="{{ required .Content.Pagination.AtomURL }}">
+    <a class="button is-small" href="{{ requiredAttr .Content.Pagination.AtomURL }}">
       <i class="fa fa-rss mr-2" aria-hidden="true"></i>
       Atom feed
     </a>
@@ -22,7 +22,7 @@
   <dl class="mb-6">
     {{- range .Content.Entries }}
     <dt class="is-size-4 has-text-weight-bold">
-      <a class="has-text-link-dark" href="{{ required .URL }}">
+      <a class="has-text-link-dark" href="{{ requiredAttr .URL }}">
         {{ required .Title }}
       </a>
     </dt>
@@ -37,8 +37,8 @@
   </dl>
   {{- if .Content.Pagination.Enabled }}
   <nav class="pagination" role="navigation" aria-label="pagination">
-    <a{{ if .Content.Pagination.LinkPrevious }} href="{{ .Content.Pagination.LinkPrevious }}"{{ end }} class="pagination-previous{{ if not .Content.Pagination.LinkPrevious }} is-disabled{{ end }}">Previous</a>
-    <a{{ if .Content.Pagination.LinkNext }} href="{{ .Content.Pagination.LinkNext }}"{{ end }} class="pagination-next{{ if not .Content.Pagination.LinkNext }} is-disabled{{ end }}">Next</a>
+    <a{{ if .Content.Pagination.LinkPrevious }} href="{{ requiredAttr .Content.Pagination.LinkPrevious }}"{{ end }} class="pagination-previous{{ if not .Content.Pagination.LinkPrevious }} is-disabled{{ end }}">Previous</a>
+    <a{{ if .Content.Pagination.LinkNext }} href="{{ requiredAttr .Content.Pagination.LinkNext }}"{{ end }} class="pagination-next{{ if not .Content.Pagination.LinkNext }} is-disabled{{ end }}">Next</a>
   </nav>
   {{- end }}
 </article>
