@@ -28,9 +28,9 @@ runs:
         ref="${{ inputs.website-ref }}"
         if git ls-remote --exit-code https://github.com/rafaelmartins/website.git "${ref}" > /dev/null; then
           echo "ref=$(git ls-remote https://github.com/rafaelmartins/website.git "${ref}" | cut -d$'\t' -f1)" >> $GITHUB_OUTPUT
-          exit 0
+        else
+          echo "ref=${ref}" >> $GITHUB_OUTPUT
         fi
-        echo "ref=${ref}" >> $GITHUB_OUTPUT
       shell: bash
 
     - name: Restore build from cache, if exists
@@ -58,9 +58,7 @@ runs:
 
     - name: Build binary
       if: steps.cache-restore.outputs.cache-hit != 'true'
-      run: |
-        go build \
-          -o /opt/website/website
+      run: go build -o /opt/website/website
       working-directory: .build/website
       shell: bash
 
@@ -74,14 +72,12 @@ runs:
       shell: bash
 
     - name: Check if binary works
-      id: version
       run: website -v
       shell: bash
 
     - name: Save build to cache, if needed
       if: steps.cache-restore.outputs.cache-hit != 'true'
       uses: actions/cache/save@v4
-      id: cache-save
       with:
         path: /opt/website
         key: ${{ runner.os }}-build-website-${{ steps.gitref.outputs.ref }}
