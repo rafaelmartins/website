@@ -9,7 +9,6 @@ For a long time I've been willing to have simple project pages for my open sourc
 The code is kinda generic (writing code that way is just stronger than me...), but that’s it: there’s no documentation neither usage examples, and my content repository is private. This program is open source, but if you decide to use it, you are on your own. There are some quite interesting code snippets in this codebae, though. Make sure to take a look if you like Go `:-)`.
 
 ## Some cool features
-
 - Generation of project pages from GitHub READMEs.
 - Generation of project API documentation, similar to Doxygen, but simpler, focused on C.
 - Embedded default templates.
@@ -18,7 +17,7 @@ The code is kinda generic (writing code that way is just stronger than me...), b
 - Supports groups of posts.
 - Automatic generation of OpenGraph metadata and images.
 - Atom feeds for main blog and every group of posts.
-- QR Code encoder
+- QR Code encoder.
 
 ## Versioning
 This software won't ever get a formal release, but there's a version string generated from the latest Git commit timestamp and hash, as available when building the binary. Example: `2024110110-a1b2c3d`.
