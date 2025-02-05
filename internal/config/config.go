@@ -196,11 +196,14 @@ func New(file string) (*Config, error) {
 		return nil, err
 	}
 
+	dec := yaml.NewDecoder(f)
+	dec.KnownFields(true)
+
 	rv := &Config{
 		file: file,
 		ts:   st.ModTime().UTC(),
 	}
-	if err := yaml.NewDecoder(f).Decode(rv); err != nil {
+	if err := dec.Decode(rv); err != nil {
 		return nil, err
 	}
 	return rv, nil
