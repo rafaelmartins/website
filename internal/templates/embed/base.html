@@ -5,15 +5,11 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="generator" content="{{ required .Generator }}">
-    {{- if .Content.OpenGraph.Description }}
     <meta name="description" content="{{ requiredAttr .Content.OpenGraph.Description }}">
-    {{- end }}
     <meta property="og:site_name" content="{{ requiredAttr .Config.Title }}">
     <meta property="og:type" content="website">
     <meta property="og:title" content="{{ requiredAttr .Content.OpenGraph.Title }}">
-    {{- if .Content.OpenGraph.Description }}
     <meta property="og:description" content="{{ requiredAttr .Content.OpenGraph.Description }}">
-    {{- end }}
     <meta property="og:url" content="{{ requiredAttr .Config.URL }}{{ requiredAttr .Content.URL }}">
     {{- if .Content.OpenGraph.Image }}
     <meta property="og:image" content="{{ requiredAttr .Config.URL }}{{ requiredAttr .Content.OpenGraph.Image }}">
@@ -22,9 +18,7 @@
     <meta name="twitter:card" content="summary">
     {{- end }}
     <meta name="twitter:title" content="{{ requiredAttr .Content.OpenGraph.Title }}">
-    {{- if .Content.OpenGraph.Description }}
     <meta name="twitter:description" content="{{ requiredAttr .Content.OpenGraph.Description }}">
-    {{- end }}
     <meta name="twitter:url" content="{{ requiredAttr .Config.URL }}{{ requiredAttr .Content.URL }}">
     {{- if .Content.OpenGraph.Image }}
     <meta name="twitter:image" content="{{ requiredAttr .Config.URL }}{{ requiredAttr .Content.OpenGraph.Image }}">
