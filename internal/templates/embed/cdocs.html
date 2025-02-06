@@ -11,7 +11,7 @@
 </style>
 {{- end }}
 
-{{ define "cdocs-includes" -}}
+{{ define "cdocs_includes" -}}
 {{ if . -}}
 <pre>{{ range $i, $v := . }}
   {{- if $i }}
@@ -21,7 +21,7 @@
 {{- end }}
 {{- end }}
 
-{{ define "cdocs-entry" -}}
+{{ define "cdocs_entry" -}}
 <div id="{{ requiredAttr .ID }}" class="card">
   <header class="card-header">
     <a href="{{ requiredAttr .Link }}"><p class="card-header-title">{{ required .Type }} <code>{{ required .Name }}</code></p></a>
@@ -33,7 +33,7 @@
 </div>
 {{- end }}
 
-{{ define "cdocs-toc" -}}
+{{ define "cdocs_toc" -}}
 <aside class="menu">
   <p class="menu-label">Table of Contents</p>
   <ul class="menu-list">
@@ -75,61 +75,61 @@
     </div>
   </div>
   <div class="is-hidden-tablet">
-    {{ template "cdocs-toc" . }}
+    {{ template "cdocs_toc" . }}
   </div>
   {{- range .Content.Entry.CDocs.Headers }}
   <div class="box">
     <h2 id="{{ requiredAttr .ID }}">Header: <code>{{ required .Name }}</code></h2>
     {{ .Description }}
     <h3>Included Headers</h3>
-    {{ template "cdocs-includes" .Includes }}
+    {{ template "cdocs_includes" .Includes }}
     {{ range .Sections -}}
     <h3 id="{{ requiredAttr .ID }}">{{ required .Name }}</h3>
     {{ .Description }}
     {{- range .Structs }}
-    {{ template "cdocs-entry" . }}
+    {{ template "cdocs_entry" . }}
     {{- end }}
     {{- range .Enums }}
-    {{ template "cdocs-entry" . }}
+    {{ template "cdocs_entry" . }}
     {{- end }}
     {{- range .Defines }}
-    {{ template "cdocs-entry" . }}
+    {{ template "cdocs_entry" . }}
     {{- end }}
     {{- range .Functions }}
-    {{ template "cdocs-entry" . }}
+    {{ template "cdocs_entry" . }}
     {{- end }}
     {{- range .FunctionTypes }}
-    {{ template "cdocs-entry" . }}
+    {{ template "cdocs_entry" . }}
     {{- end }}
     {{- end }}
     {{- if .Structs }}
     <h3 id="struct-{{ requiredAttr .ID }}">Struct Definitions</h3>
     {{- range .Structs }}
-    {{ template "cdocs-entry" . }}
+    {{ template "cdocs_entry" . }}
     {{- end }}
     {{- end }}
     {{- if .Enums }}
     <h3 id="enum-{{ requiredAttr .ID }}">Enumeration Definitions</h3>
     {{- range .Enums }}
-    {{ template "cdocs-entry" . }}
+    {{ template "cdocs_entry" . }}
     {{- end }}
     {{- end }}
     {{- if .Defines }}
     <h3 id="define-{{ requiredAttr .ID }}">Macro Definitions</h3>
     {{- range .Defines }}
-    {{ template "cdocs-entry" . }}
+    {{ template "cdocs_entry" . }}
     {{- end }}
     {{- end }}
     {{- if .Functions }}
     <h3 id="function-{{ requiredAttr .ID }}">Function Definitions</h3>
     {{- range .Functions }}
-    {{ template "cdocs-entry" . }}
+    {{ template "cdocs_entry" . }}
     {{- end }}
     {{- end }}
     {{- if .FunctionTypes }}
     <h3 id="functiontype-{{ requiredAttr .ID }}">Function Type Definitions</h3>
     {{- range .FunctionTypes }}
-    {{ template "cdocs-entry" . }}
+    {{ template "cdocs_entry" . }}
     {{- end }}
     {{- end }}
   </div>
@@ -139,7 +139,7 @@
 
 {{ define "sidebar" -}}
 <div class="is-hidden-mobile">
-  {{ template "cdocs-toc" . }}
+  {{ template "cdocs_toc" . }}
 </div>
 <div class="has-text-centered is-size-7">
   <strong class="has-text-grey-light">Updated:</strong>

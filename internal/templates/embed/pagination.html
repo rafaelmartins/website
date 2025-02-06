@@ -5,7 +5,7 @@
   <h1 class="mb-5">{{ required .Content.Title }}</h1>
   {{- if .Content.Description }}
   <div class="notification">
-{{ template "pagination-description" . }}
+{{ template "pagination_description" . }}
     <a class="button is-small" href="{{ requiredAttr .Content.Pagination.AtomURL }}">
       <i class="fa fa-rss mr-2" aria-hidden="true"></i>
       Atom feed
