@@ -46,7 +46,8 @@ func (t *pageTaskImpl) GetGenerator() (runner.Generator, error) {
 	}
 
 	return &generators.Markdown{
-		URL: url,
+		URL:  url,
+		Slug: t.slug,
 		Sources: []*generators.MarkdownSource{
 			{
 				File: t.source,

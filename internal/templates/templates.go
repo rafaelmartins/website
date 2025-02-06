@@ -100,6 +100,7 @@ type ContentContext struct {
 	Title       string
 	Description string
 	URL         string
+	Slug        string
 	OpenGraph   OpenGraphEntry
 	Entry       *ContentEntry
 	Entries     []*ContentEntry
@@ -230,7 +231,7 @@ func Execute(wr io.Writer, name string, fm template.FuncMap, lctx *LayoutContext
 		gen = m
 	}
 
-	return tmpl.ExecuteTemplate(wr, "base", &context{
+	return tmpl.Option("missingkey=zero").ExecuteTemplate(wr, "base", &context{
 		Config:    ccfg,
 		Generator: gen,
 		Layout:    llctx,

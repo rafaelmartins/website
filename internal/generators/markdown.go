@@ -115,6 +115,7 @@ type Markdown struct {
 	Title             string
 	Description       string
 	URL               string
+	Slug              string
 	Sources           []*MarkdownSource
 	IsPost            bool
 	ExtraDependencies []string
@@ -150,6 +151,7 @@ func (h *Markdown) GetReader() (io.ReadCloser, error) {
 		Title:       h.Title,
 		Description: h.Description,
 		URL:         h.URL,
+		Slug:        h.Slug,
 		OpenGraph: templates.OpenGraphEntry{
 			Title:       h.OpenGraphTitle,
 			Description: h.OpenGraphDescription,

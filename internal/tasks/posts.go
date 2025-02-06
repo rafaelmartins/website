@@ -40,6 +40,7 @@ func (t *postTaskImpl) GetGenerator() (runner.Generator, error) {
 
 	return &generators.Markdown{
 		URL:            url,
+		Slug:           t.slug,
 		Sources:        []*generators.MarkdownSource{t.source},
 		IsPost:         true,
 		HighlightStyle: t.highlightStyle,
