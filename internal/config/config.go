@@ -59,10 +59,9 @@ type Config struct {
 
 	Projects []*struct {
 		Repositories []*struct {
-			Owner     string `yaml:"owner"`
-			Repo      string `yaml:"repo"`
-			Immutable *bool  `yaml:"immutable"`
-			CDocs     struct {
+			Owner string `yaml:"owner"`
+			Repo  string `yaml:"repo"`
+			CDocs struct {
 				Destination   string   `yaml:"destination"`
 				Headers       []string `yaml:"headers"`
 				BaseDirectory string   `yaml:"base-directory"`
@@ -79,6 +78,7 @@ type Config struct {
 					} `yaml:"image-gen"`
 				} `yaml:"opengraph"`
 			} `yaml:"c-docs"`
+			GoImport  string `yaml:"go-import"`
 			OpenGraph struct {
 				Title       string `yaml:"title"`
 				Description string `yaml:"description"`
@@ -89,6 +89,7 @@ type Config struct {
 					Size  *float64 `yaml:"size"`
 				} `yaml:"image-gen"`
 			} `yaml:"opengraph"`
+			Immutable *bool `yaml:"immutable"`
 		} `yaml:"repositories"`
 		BaseDestination string `yaml:"base-destination"`
 		Template        string `yaml:"template"`

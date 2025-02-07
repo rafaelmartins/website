@@ -12,12 +12,13 @@ The code is kinda generic (writing code that way is just stronger than me...), b
 - Generation of project pages from GitHub READMEs.
 - Generation of project API documentation, similar to Doxygen, but simpler, focused on C.
 - Embedded default templates.
-- Javascript/CSS assets downloaded directly from CDN to host locally.
+- Javascript/CSS assets downloaded directly from CDN to be hosted locally.
 - Runner can rebuild output files when the binary is rebuilt or any source file changes.
 - Supports groups of posts.
 - Automatic generation of OpenGraph metadata and images.
 - Atom feeds for main blog and every group of posts.
 - QR Code encoder.
+- Go vanity import paths.
 
 ## Versioning
 This software won't ever get a formal release, but there's a version string generated from the latest Git commit timestamp and hash, as available when building the binary. Example: `2024110110-a1b2c3d`.

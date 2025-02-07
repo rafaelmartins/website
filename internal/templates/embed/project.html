@@ -19,6 +19,9 @@
     padding: var(--bulma-size-normal) !important;
   }
 </style>
+{{- if .Content.Entry.Project.GoImport }}
+<meta name="go-import" content="{{ requiredAttr .Content.Entry.Project.GoImport }} git https://github.com/{{ requiredAttr .Content.Entry.Project.Owner }}/{{ requiredAttr .Content.Entry.Project.Repo }}.git">
+{{- end }}
 {{- end }}
 
 {{ define "main" -}}

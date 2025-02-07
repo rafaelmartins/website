@@ -58,6 +58,7 @@ type ProjectContentEntry struct {
 	Repo        string
 	URL         string
 	Description string
+	GoImport    string
 	Stars       int
 	Watching    int
 	Forks       int

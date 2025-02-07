@@ -20,6 +20,7 @@ import (
 type Project struct {
 	Owner     string
 	Repo      string
+	GoImport  string
 	URL       string
 	Template  string
 	LayoutCtx *templates.LayoutContext
@@ -60,8 +61,9 @@ func (p *Project) GetReader() (io.ReadCloser, error) {
 	p.images = images
 
 	proj := &templates.ProjectContentEntry{
-		Owner: p.Owner,
-		Repo:  p.Repo,
+		Owner:    p.Owner,
+		Repo:     p.Repo,
+		GoImport: p.GoImport,
 	}
 
 	rbody, err := github.Request(nil, "GET", "repos/"+p.Owner+"/"+p.Repo, nil)
