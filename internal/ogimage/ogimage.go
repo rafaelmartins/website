@@ -13,6 +13,7 @@ import (
 	"os"
 	"path"
 	"strings"
+	"time"
 
 	"github.com/rafaelmartins/website/internal/ogfont"
 	"github.com/rafaelmartins/website/internal/runner"
@@ -22,6 +23,7 @@ import (
 )
 
 var (
+	tmpl string
 	fnt  *ogfont.Font
 	img  image.Image
 	mask image.Rectangle
@@ -49,6 +51,7 @@ func SetGlobals(template string, minX *int, minY *int, maxX *int, maxY *int, def
 	if err != nil {
 		return err
 	}
+	tmpl = template
 
 	mmin := iimg.Bounds().Min
 	if minX != nil {
@@ -100,6 +103,18 @@ func SetGlobals(template string, minX *int, minY *int, maxX *int, maxY *int, def
 	dDPI = ddpi
 	dSize = ssize
 	return nil
+}
+
+func GetTimeStamps() ([]time.Time, error) {
+	rv := []time.Time{}
+	if tmpl != "" {
+		st, err := os.Stat(tmpl)
+		if err != nil {
+			return nil, err
+		}
+		rv = append(rv, st.ModTime().UTC())
+	}
+	return rv, nil
 }
 
 func Generate(text string, c color.Color, dpi *float64, size *float64) (io.ReadCloser, error) {

@@ -267,6 +267,12 @@ func (h *Markdown) GetTimeStamps() ([]time.Time, error) {
 		return nil, err
 	}
 
+	og, err := ogimage.GetTimeStamps()
+	if err != nil {
+		return nil, err
+	}
+	rv = append(rv, og...)
+
 	for _, src := range h.Sources {
 		if src.File == "" {
 			continue

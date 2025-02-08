@@ -116,6 +116,12 @@ func (d *CDocs) GetTimeStamps() ([]time.Time, error) {
 		return nil, err
 	}
 
+	og, err := ogimage.GetTimeStamps()
+	if err != nil {
+		return nil, err
+	}
+	rv = append(rv, og...)
+
 	d.initHeaderCtx()
 
 	for _, h := range d.Headers {

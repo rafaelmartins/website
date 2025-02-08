@@ -201,6 +201,12 @@ func (p *Project) GetTimeStamps() ([]time.Time, error) {
 		return nil, err
 	}
 
+	og, err := ogimage.GetTimeStamps()
+	if err != nil {
+		return nil, err
+	}
+	rv = append(rv, og...)
+
 	if _, _, err := github.Readme(&p.readmeCtx, p.Owner, p.Repo); err != nil {
 		return nil, err
 	}
