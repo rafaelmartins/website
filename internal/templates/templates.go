@@ -117,6 +117,7 @@ type context struct {
 	Generator *meta.Metadata
 	Layout    *LayoutContext
 	Content   *ContentContext
+	Time      time.Time
 }
 
 func SetConfig(cfg *config.Config) {
@@ -237,5 +238,6 @@ func Execute(wr io.Writer, name string, fm template.FuncMap, lctx *LayoutContext
 		Generator: gen,
 		Layout:    llctx,
 		Content:   lcctx,
+		Time:      time.Now().UTC(),
 	})
 }
