@@ -29,6 +29,12 @@
   <h1 class="title">{{ required .Content.Entry.Title }}</h1>
 {{ .Content.Entry.Body }}
 </article>
+{{- if .Content.Entry.Project.LatestRelease }}
+<article class="anchor markdown-body mt-6">
+  <h1 class="title"><i class="fas fa-sm fa-rocket"></i> {{ .Content.Entry.Project.LatestRelease.Name }}</h1>
+{{ .Content.Entry.Project.LatestRelease.Body }}
+</article>
+{{- end }}
 {{- end }}
 
 {{ define "sidebar" -}}
@@ -90,6 +96,7 @@
       <td>{{ .Content.Entry.Project.Forks }}</td>
     </tr>
   </tbody>
+  {{- if not .Content.Entry.Project.LatestRelease }}
   <tfoot>
     <tr>
       <td colspan="2" class="has-text-centered is-size-7">
@@ -98,6 +105,7 @@
       </td>
     </tr>
   </tfoot>
+  {{- end }}
 </table>
 {{- if .Content.Entry.Project.LatestRelease }}
 <table class="table is-fullwidth">
@@ -107,15 +115,25 @@
     </tr>
   </thead>
   <tbody>
+    {{- if eq .Content.Entry.Project.LatestRelease.Name .Content.Entry.Project.LatestRelease.Tag }}
+    <tr>
+      <td colspan="2">
+        <span class="icon"><i class="fas fa-rocket"></i></span>
+        <a href="{{ requiredAttr .Content.Entry.Project.LatestRelease.URL }}">{{ required .Content.Entry.Project.LatestRelease.Name }}</a>
+      </td>
+    </tr>
+    {{- else }}
     <tr>
       <td>
+        <span class="icon"><i class="fas fa-rocket"></i></span>
         <a href="{{ requiredAttr .Content.Entry.Project.LatestRelease.URL }}">{{ required .Content.Entry.Project.LatestRelease.Name }}</a>
       </td>
       <td>{{ required .Content.Entry.Project.LatestRelease.Tag }}</td>
     </tr>
+    {{- end }}
     {{- if .Content.Entry.Project.LatestRelease.Files }}
     <tr>
-      <th>Files:</th>
+      <th colspan="2" class="has-text-centered">Files</th>
     </tr>
     {{- end }}
     {{- range .Content.Entry.Project.LatestRelease.Files }}
@@ -127,6 +145,14 @@
     </tr>
     {{- end }}
   </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2" class="has-text-centered is-size-7">
+        <strong class="has-text-grey-light">Updated:</strong>
+        <time class="has-text-grey-light">{{ .Content.Entry.Project.Date.Format "2006-01-02 15:04:05" }} UTC</time>
+      </td>
+    </tr>
+  </tfoot>
 </table>
 {{- end }}
 {{- end }}
