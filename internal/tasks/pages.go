@@ -45,10 +45,10 @@ func (t *pageTaskImpl) GetGenerator() (runner.Generator, error) {
 		}
 	}
 
-	return &generators.Markdown{
+	return &generators.Content{
 		URL:  url,
 		Slug: t.slug,
-		Sources: []*generators.MarkdownSource{
+		Sources: []*generators.ContentSource{
 			{
 				File: t.source,
 				URL:  url,

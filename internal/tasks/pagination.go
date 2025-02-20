@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/rafaelmartins/website/internal/content"
 	"github.com/rafaelmartins/website/internal/generators"
 	"github.com/rafaelmartins/website/internal/ogimage"
 	"github.com/rafaelmartins/website/internal/runner"
@@ -15,7 +16,7 @@ import (
 )
 
 type paginationPost struct {
-	Source *generators.MarkdownSource
+	Source *generators.ContentSource
 	Date   time.Time
 }
 
@@ -24,7 +25,7 @@ type paginationTaskImpl struct {
 	baseDestination string
 	title           string
 	description     string
-	sources         []*generators.MarkdownSource
+	sources         []*generators.ContentSource
 	slug            string
 	highlightStyle  string
 	template        string
@@ -50,7 +51,7 @@ func (t *paginationTaskImpl) GetDestination() string {
 }
 
 func (t *paginationTaskImpl) GetGenerator() (runner.Generator, error) {
-	return &generators.Markdown{
+	return &generators.Content{
 		Title:          t.title,
 		Description:    t.description,
 		URL:            path.Join("/", t.baseDestination, t.slug) + "/",
@@ -78,7 +79,7 @@ type Pagination struct {
 	Atom            bool
 	Title           string
 	Description     string
-	Sources         []*generators.MarkdownSource
+	Sources         []*generators.ContentSource
 	PostsPerPage    int
 	SortReverse     bool
 	HighlightStyle  string
@@ -123,7 +124,7 @@ func (p *Pagination) GetTasks() ([]*runner.Task, error) {
 			Source: src,
 		}
 
-		m, err := generators.MarkdownGetMetadata(post.Source.File)
+		m, err := content.GetMetadata(post.Source.File)
 		if err != nil {
 			return nil, err
 		}
@@ -184,7 +185,7 @@ func (p *Pagination) GetTasks() ([]*runner.Task, error) {
 
 	rv := []*runner.Task{}
 	for chk := range slices.Chunk(posts, ppp) {
-		srcs := []*generators.MarkdownSource{}
+		srcs := []*generators.ContentSource{}
 		for _, s := range chk {
 			srcs = append(srcs, s.Source)
 		}

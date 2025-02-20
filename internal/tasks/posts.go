@@ -8,20 +8,21 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/rafaelmartins/website/internal/content"
 	"github.com/rafaelmartins/website/internal/generators"
 	"github.com/rafaelmartins/website/internal/runner"
 	"github.com/rafaelmartins/website/internal/templates"
 )
 
 type postSource struct {
-	source *generators.MarkdownSource
+	source *generators.ContentSource
 	slug   string
 }
 
 type postTaskImpl struct {
 	baseDestination string
 	slug            string
-	source          *generators.MarkdownSource
+	source          *generators.ContentSource
 	highlightStyle  string
 	template        string
 	templateCtx     map[string]interface{}
@@ -38,10 +39,10 @@ func (t *postTaskImpl) GetGenerator() (runner.Generator, error) {
 		url += "/"
 	}
 
-	return &generators.Markdown{
+	return &generators.Content{
 		URL:            url,
 		Slug:           t.slug,
-		Sources:        []*generators.MarkdownSource{t.source},
+		Sources:        []*generators.ContentSource{t.source},
 		IsPost:         true,
 		HighlightStyle: t.highlightStyle,
 		Template:       t.template,
@@ -79,15 +80,16 @@ func (p *Posts) getSources() ([]*postSource, error) {
 
 	rv := []*postSource{}
 	for _, src := range srcs {
-		if filepath.Ext(src.Name()) != ".md" {
+		fpath := filepath.Join(p.SourceDir, src.Name())
+		if !content.IsSupported(fpath) {
 			continue
 		}
 
-		slug := strings.TrimSuffix(src.Name(), ".md")
+		slug := strings.TrimSuffix(src.Name(), filepath.Ext(src.Name()))
 		rv = append(rv,
 			&postSource{
-				source: &generators.MarkdownSource{
-					File: filepath.Join(p.SourceDir, src.Name()),
+				source: &generators.ContentSource{
+					File: fpath,
 					URL:  path.Join("/", p.BaseDestination, slug) + "/",
 				},
 				slug: slug,
@@ -97,13 +99,13 @@ func (p *Posts) getSources() ([]*postSource, error) {
 	return rv, nil
 }
 
-func (p *Posts) GetSources() ([]*generators.MarkdownSource, error) {
+func (p *Posts) GetSources() ([]*generators.ContentSource, error) {
 	srcs, err := p.getSources()
 	if err != nil {
 		return nil, err
 	}
 
-	rv := []*generators.MarkdownSource{}
+	rv := []*generators.ContentSource{}
 	for _, src := range srcs {
 		rv = append(rv, src.source)
 	}

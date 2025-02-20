@@ -172,7 +172,7 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 		)
 	}
 
-	globalPostSources := []*generators.MarkdownSource{}
+	globalPostSources := []*generators.ContentSource{}
 	for _, ps := range c.Posts.Groups {
 		sortReverse := true
 		if ps.SortReverse != nil && !*ps.SortReverse {

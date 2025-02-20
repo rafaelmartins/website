@@ -9,114 +9,23 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/rafaelmartins/website/internal/content"
 	"github.com/rafaelmartins/website/internal/ogimage"
 	"github.com/rafaelmartins/website/internal/runner"
 	"github.com/rafaelmartins/website/internal/templates"
-	"github.com/yuin/goldmark"
-	emoji "github.com/yuin/goldmark-emoji"
-	highlighting "github.com/yuin/goldmark-highlighting/v2"
-	"github.com/yuin/goldmark/extension"
-	"github.com/yuin/goldmark/parser"
-	"github.com/yuin/goldmark/text"
-	"go.abhg.dev/goldmark/frontmatter"
 )
 
-func mdGetGoldmark(style string) goldmark.Markdown {
-	opt := []highlighting.Option{}
-	if style != "" {
-		opt = append(opt, highlighting.WithStyle(style))
-	}
-
-	return goldmark.New(
-		goldmark.WithExtensions(
-			extension.GFM,
-			emoji.Emoji,
-			&frontmatter.Extender{},
-			highlighting.NewHighlighting(opt...),
-		),
-		goldmark.WithParserOptions(
-			parser.WithAutoHeadingID(),
-		),
-	)
-}
-
-type MetadataDate struct {
-	time.Time
-}
-
-func (d *MetadataDate) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	s := ""
-	if err := unmarshal(&s); err != nil {
-		return err
-	}
-
-	dt, err1 := time.Parse(time.DateTime, s)
-	if err1 == nil {
-		d.Time = dt
-		return nil
-	}
-
-	dt, err := time.Parse(time.DateOnly, s)
-	if err == nil {
-		d.Time = dt
-		return nil
-	}
-	return err1
-}
-
-type Metadata struct {
-	Title       string       `yaml:"title"`
-	Description string       `yaml:"description"`
-	Date        MetadataDate `yaml:"date"`
-	Author      struct {
-		Name  string `yaml:"name"`
-		Email string `yaml:"email"`
-	} `yaml:"author"`
-	OpenGraph struct {
-		Title       string `yaml:"title"`
-		Description string `yaml:"description"`
-		Image       string `yaml:"image"`
-		ImageGen    struct {
-			Color *uint32  `yaml:"color"`
-			DPI   *float64 `yaml:"dpi"`
-			Size  *float64 `yaml:"size"`
-		} `yaml:"image-gen"`
-	} `yaml:"opengraph"`
-	Extra map[string]any `yaml:"extra"`
-}
-
-func mdGetMetadataFromContext(ctx parser.Context) (*Metadata, error) {
-	rv := &Metadata{}
-	if m := frontmatter.Get(ctx); m != nil {
-		if err := m.Decode(rv); err != nil {
-			return nil, err
-		}
-	}
-	return rv, nil
-}
-
-func MarkdownGetMetadata(f string) (*Metadata, error) {
-	src, err := os.ReadFile(f)
-	if err != nil {
-		return nil, err
-	}
-
-	ctx := parser.NewContext()
-	mdGetGoldmark("").Parser().Parse(text.NewReader(src), parser.WithContext(ctx))
-	return mdGetMetadataFromContext(ctx)
-}
-
-type MarkdownSource struct {
+type ContentSource struct {
 	File string
 	URL  string
 }
 
-type Markdown struct {
+type Content struct {
 	Title             string
 	Description       string
 	URL               string
 	Slug              string
-	Sources           []*MarkdownSource
+	Sources           []*ContentSource
 	IsPost            bool
 	ExtraDependencies []string
 	HighlightStyle    string
@@ -135,14 +44,14 @@ type Markdown struct {
 	OpenGraphImageGenSize  *float64
 
 	ctx      *templates.ContentContext
-	metadata *Metadata
+	metadata *content.Metadata
 }
 
-func (*Markdown) GetID() string {
-	return "MARKDOWN"
+func (*Content) GetID() string {
+	return "CONTENT"
 }
 
-func (h *Markdown) GetReader() (io.ReadCloser, error) {
+func (h *Content) GetReader() (io.ReadCloser, error) {
 	if h.URL == "" {
 		return nil, errors.New("markdown: missing url")
 	}
@@ -181,18 +90,7 @@ func (h *Markdown) GetReader() (io.ReadCloser, error) {
 			continue
 		}
 
-		fc, err := os.ReadFile(src.File)
-		if err != nil {
-			return nil, err
-		}
-
-		buf := &bytes.Buffer{}
-		context := parser.NewContext()
-		if err := mdGetGoldmark(h.HighlightStyle).Convert(fc, buf, parser.WithContext(context)); err != nil {
-			return nil, err
-		}
-		body := buf.String()
-		metadata, err := mdGetMetadataFromContext(context)
+		body, metadata, err := content.Render(src.File, h.HighlightStyle, h.URL)
 		if err != nil {
 			return nil, err
 		}
@@ -245,13 +143,7 @@ func (h *Markdown) GetReader() (io.ReadCloser, error) {
 	}
 
 	funcMap := template.FuncMap{
-		"markdownGetMetadata": func(f string) interface{} {
-			rv, err := MarkdownGetMetadata(f)
-			if err != nil {
-				panic(err)
-			}
-			return rv
-		},
+		"contentGetMetadata": content.GetMetadata,
 	}
 
 	buf := &bytes.Buffer{}
@@ -261,7 +153,7 @@ func (h *Markdown) GetReader() (io.ReadCloser, error) {
 	return io.NopCloser(buf), nil
 }
 
-func (h *Markdown) GetTimeStamps() ([]time.Time, error) {
+func (h *Content) GetTimeStamps() ([]time.Time, error) {
 	rv, err := templates.GetTimestamps(h.Template, true)
 	if err != nil {
 		return nil, err
@@ -283,6 +175,12 @@ func (h *Markdown) GetTimeStamps() ([]time.Time, error) {
 			return nil, err
 		}
 		rv = append(rv, st.ModTime().UTC())
+
+		assets, err := content.ListAssetTimeStamps(src.File)
+		if err != nil {
+			return nil, err
+		}
+		rv = append(rv, assets...)
 	}
 
 	for _, dep := range h.ExtraDependencies {
@@ -296,13 +194,32 @@ func (h *Markdown) GetTimeStamps() ([]time.Time, error) {
 	return rv, nil
 }
 
-func (*Markdown) GetImmutable() bool {
+func (*Content) GetImmutable() bool {
 	return false
 }
 
-func (h *Markdown) GetByProducts(ch chan *runner.GeneratorByProduct) {
+func (h *Content) GetByProducts(ch chan *runner.GeneratorByProduct) {
 	if ch == nil {
 		return
+	}
+
+	if h.ctx.Entry != nil {
+		assets, err := content.ListAssets(h.ctx.Entry.File)
+		if err != nil {
+			ch <- &runner.GeneratorByProduct{Err: err}
+			return
+		}
+		for _, asset := range assets {
+			fn, fp, err := content.OpenAsset(h.ctx.Entry.File, asset)
+			if err != nil {
+				ch <- &runner.GeneratorByProduct{Err: err}
+				return
+			}
+			ch <- &runner.GeneratorByProduct{
+				Filename: fn,
+				Reader:   fp,
+			}
+		}
 	}
 
 	image := h.OpenGraphImage
