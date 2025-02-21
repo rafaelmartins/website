@@ -16,30 +16,53 @@ import (
 	"github.com/yuin/goldmark/util"
 )
 
-type imageTransformer struct {
+var pcTitleKey = parser.NewContextKey()
+
+type tbTransformer struct {
 	baseurl string
 }
 
-func (it *imageTransformer) Transform(node *ast.Document, reader text.Reader, pc parser.Context) {
+func (tt *tbTransformer) Transform(node *ast.Document, reader text.Reader, pc parser.Context) {
+	if fc := node.FirstChild(); pc != nil && fc != nil && fc.Kind() == ast.KindHeading {
+		pc.Set(pcTitleKey, string(fc.(*ast.Heading).Lines().Value(reader.Source())))
+		node.RemoveChild(node, fc)
+	}
+
 	ast.Walk(node, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
 		if entering && n.Kind() == ast.KindImage {
 			img := n.(*ast.Image)
-			if s := string(img.Destination); it.baseurl != "" && strings.HasPrefix(s, "assets/") {
-				img.Destination = []byte(filepath.Join(it.baseurl, s))
+			if s := string(img.Destination); tt.baseurl != "" && strings.HasPrefix(s, "assets/") {
+				img.Destination = []byte(filepath.Join(tt.baseurl, s))
+				return ast.WalkStop, nil
 			}
 		}
 		return ast.WalkContinue, nil
 	})
 }
 
-type imageExtension struct {
+type tbExtension struct {
 	baseurl string
 }
 
-func (ie *imageExtension) Extend(m goldmark.Markdown) {
+func (te *tbExtension) Extend(m goldmark.Markdown) {
 	m.Parser().AddOptions(parser.WithASTTransformers(
-		util.Prioritized(&imageTransformer{ie.baseurl}, 0),
+		util.Prioritized(&tbTransformer{te.baseurl}, 0),
 	))
+}
+
+func tbRender(src []byte, style string, baseurl string) (string, *Metadata, error) {
+	pc := parser.NewContext()
+
+	rendered, meta, err := mkdRender(src, style, pc, &tbExtension{baseurl})
+	if err != nil {
+		return "", nil, err
+	}
+
+	if title, ok := pc.Get(pcTitleKey).(string); ok && title != "" {
+		meta.Title = title
+	}
+
+	return rendered, meta, nil
 }
 
 type textBundle struct{}
@@ -72,7 +95,7 @@ func (*textBundle) Render(f string, style string, baseurl string) (string, *Meta
 	if err != nil {
 		return "", nil, err
 	}
-	return mkdRender(src, style, &imageExtension{baseurl})
+	return tbRender(src, style, baseurl)
 }
 
 func (*textBundle) ListAssets(f string) ([]string, error) {

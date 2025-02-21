@@ -61,7 +61,7 @@ type Metadata struct {
 	Extra map[string]any `yaml:"extra"`
 }
 
-func mkdRender(src []byte, style string, ext ...goldmark.Extender) (string, *Metadata, error) {
+func mkdRender(src []byte, style string, pc parser.Context, ext ...goldmark.Extender) (string, *Metadata, error) {
 	opt := []highlighting.Option{}
 	if style != "" {
 		opt = append(opt, highlighting.WithStyle(style))
@@ -84,14 +84,17 @@ func mkdRender(src []byte, style string, ext ...goldmark.Extender) (string, *Met
 		),
 	)
 
+	if pc == nil {
+		pc = parser.NewContext()
+	}
+
 	buf := &bytes.Buffer{}
-	ctx := parser.NewContext()
-	if err := mkd.Convert(src, buf, parser.WithContext(ctx)); err != nil {
+	if err := mkd.Convert(src, buf, parser.WithContext(pc)); err != nil {
 		return "", nil, err
 	}
 
 	md := &Metadata{}
-	if m := frontmatter.Get(ctx); m != nil {
+	if m := frontmatter.Get(pc); m != nil {
 		if err := m.Decode(md); err != nil {
 			return "", nil, err
 		}
@@ -112,7 +115,7 @@ func (*markdown) Render(f string, style string, baseurl string) (string, *Metada
 		return "", nil, err
 	}
 
-	return mkdRender(src, style)
+	return mkdRender(src, style, nil)
 }
 
 func (*markdown) ListAssets(f string) ([]string, error) {

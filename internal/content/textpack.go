@@ -51,7 +51,7 @@ func (*textPack) Render(f string, style string, baseurl string) (string, *Metada
 	if err != nil {
 		return "", nil, err
 	}
-	return mkdRender(data, style, &imageExtension{baseurl})
+	return tbRender(data, style, baseurl)
 }
 
 func (*textPack) ListAssets(f string) ([]string, error) {

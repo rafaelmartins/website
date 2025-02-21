@@ -19,6 +19,7 @@ The code is kinda generic (writing code that way is just stronger than me...), b
 - Atom feeds for main blog and every group of posts.
 - QR Code encoder.
 - Go vanity import paths.
+- `textbundle` and `textpack` support.
 
 ## Versioning
 This software won't ever get a formal release, but there's a version string generated from the latest Git commit timestamp and hash, as available when building the binary. Example: `2024110110-a1b2c3d`.
