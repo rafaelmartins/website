@@ -1,7 +1,9 @@
 package content
 
 import (
+	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"io/fs"
 	"os"
@@ -65,6 +67,25 @@ func tbRender(src []byte, style string, baseurl string) (string, *Metadata, erro
 	return rendered, meta, nil
 }
 
+func tbValidate(info []byte) error {
+	v := &struct {
+		Version int    `json:"version"`
+		Type    string `json:"type"`
+	}{}
+
+	if err := json.Unmarshal(info, v); err != nil {
+		return err
+	}
+
+	if v.Version >= 2 {
+		if v.Type != "net.daringfireball.markdown" {
+			return fmt.Errorf("content: textbundle: invalid type: %s", v.Type)
+		}
+	}
+
+	return nil
+}
+
 type textBundle struct{}
 
 func (*textBundle) IsSupported(f string) bool {
@@ -80,6 +101,14 @@ func (*textBundle) IsSupported(f string) bool {
 }
 
 func (*textBundle) Render(f string, style string, baseurl string) (string, *Metadata, error) {
+	info, err := os.ReadFile(filepath.Join(f, "info.json"))
+	if err != nil {
+		return "", nil, err
+	}
+	if err := tbValidate(info); err != nil {
+		return "", nil, err
+	}
+
 	srcs, err := filepath.Glob(filepath.Join(f, "text.*"))
 	if err != nil {
 		return "", nil, err

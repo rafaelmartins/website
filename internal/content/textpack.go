@@ -26,8 +26,15 @@ func (*textPack) Render(f string, style string, baseurl string) (string, *Metada
 	}
 	defer r.Close()
 
+	info := (*zip.File)(nil)
 	src := (*zip.File)(nil)
 	for _, f := range r.File {
+		if m, err := filepath.Match(path.Join("*.textbundle", "info.json"), f.Name); err != nil {
+			return "", nil, err
+		} else if m {
+			info = f
+		}
+
 		if m, err := filepath.Match(path.Join("*.textbundle", "text.*"), f.Name); err != nil {
 			return "", nil, err
 		} else if m {
@@ -37,10 +44,27 @@ func (*textPack) Render(f string, style string, baseurl string) (string, *Metada
 			src = f
 		}
 	}
+
+	if info == nil {
+		return "", nil, errors.New("content: textpack: no info.json file found")
+	}
+	ifp, err := info.Open()
+	if err != nil {
+		return "", nil, err
+	}
+	defer ifp.Close()
+
+	idata, err := io.ReadAll(ifp)
+	if err != nil {
+		return "", nil, err
+	}
+	if err := tbValidate(idata); err != nil {
+		return "", nil, err
+	}
+
 	if src == nil {
 		return "", nil, errors.New("content: textpack: no text file found")
 	}
-
 	fp, err := src.Open()
 	if err != nil {
 		return "", nil, err
