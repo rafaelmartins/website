@@ -44,7 +44,7 @@ jobs:
       - name: Dump outputs
         run: |
           echo "Cache hit: ${{ steps.test.outputs.cache-hit }}"
-          test "${{ steps.test.outputs.cache-hit }}" = "0"
+          test "${{ steps.test.outputs.cache-hit }}" = ""
 
   # FIXME: deduplicate
   test-check-cache:
