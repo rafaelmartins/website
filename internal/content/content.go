@@ -9,8 +9,8 @@ import (
 type contentProvider interface {
 	IsSupported(f string) bool
 	Render(f string, style string, baseurl string) (string, *Metadata, error)
+	GetTimeStamps(f string) ([]time.Time, error)
 	ListAssets(f string) ([]string, error)
-	ListAssetTimeStamps(f string) ([]time.Time, error)
 	OpenAsset(f string, a string) (string, io.ReadCloser, error)
 }
 
@@ -36,31 +36,31 @@ func IsSupported(f string) bool {
 func Render(f string, style string, baseurl string) (string, *Metadata, error) {
 	p := getProvider(f)
 	if p == nil {
-		return "", nil, fmt.Errorf("content: render: no provider found: %s", f)
+		return "", nil, fmt.Errorf("content: no provider found: %s", f)
 	}
 	return p.Render(f, style, baseurl)
+}
+
+func GetTimeStamps(f string) ([]time.Time, error) {
+	p := getProvider(f)
+	if p == nil {
+		return nil, fmt.Errorf("content: no provider found: %s", f)
+	}
+	return p.GetTimeStamps(f)
 }
 
 func ListAssets(f string) ([]string, error) {
 	p := getProvider(f)
 	if p == nil {
-		return nil, fmt.Errorf("content: render: no provider found: %s", f)
+		return nil, fmt.Errorf("content: no provider found: %s", f)
 	}
 	return p.ListAssets(f)
-}
-
-func ListAssetTimeStamps(f string) ([]time.Time, error) {
-	p := getProvider(f)
-	if p == nil {
-		return nil, fmt.Errorf("content: render: no provider found: %s", f)
-	}
-	return p.ListAssetTimeStamps(f)
 }
 
 func OpenAsset(f string, a string) (string, io.ReadCloser, error) {
 	p := getProvider(f)
 	if p == nil {
-		return "", nil, fmt.Errorf("content: render: no provider found: %s", f)
+		return "", nil, fmt.Errorf("content: no provider found: %s", f)
 	}
 	return p.OpenAsset(f, a)
 }

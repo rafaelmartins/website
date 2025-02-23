@@ -100,7 +100,21 @@ func (*textBundle) IsSupported(f string) bool {
 	return st.IsDir()
 }
 
-func (*textBundle) Render(f string, style string, baseurl string) (string, *Metadata, error) {
+func (*textBundle) getSource(f string) (string, error) {
+	srcs, err := filepath.Glob(filepath.Join(f, "text.*"))
+	if err != nil {
+		return "", err
+	}
+
+	if l := len(srcs); l == 0 {
+		return "", errors.New("content: textbundle: no text file found")
+	} else if l > 1 {
+		return "", errors.New("content: textbundle: more than one text file found")
+	}
+	return srcs[0], nil
+}
+
+func (tb *textBundle) Render(f string, style string, baseurl string) (string, *Metadata, error) {
 	info, err := os.ReadFile(filepath.Join(f, "info.json"))
 	if err != nil {
 		return "", nil, err
@@ -109,22 +123,47 @@ func (*textBundle) Render(f string, style string, baseurl string) (string, *Meta
 		return "", nil, err
 	}
 
-	srcs, err := filepath.Glob(filepath.Join(f, "text.*"))
+	srcf, err := tb.getSource(f)
 	if err != nil {
 		return "", nil, err
 	}
 
-	if l := len(srcs); l == 0 {
-		return "", nil, errors.New("content: textbundle: no text file found")
-	} else if l > 1 {
-		return "", nil, errors.New("content: textbundle: more than one text file found")
-	}
-
-	src, err := os.ReadFile(srcs[0])
+	src, err := os.ReadFile(srcf)
 	if err != nil {
 		return "", nil, err
 	}
 	return tbRender(src, style, baseurl)
+}
+
+func (tb *textBundle) GetTimeStamps(f string) ([]time.Time, error) {
+	src, err := tb.getSource(f)
+	if err != nil {
+		return nil, err
+	}
+	st, err := os.Stat(src)
+	if err != nil {
+		return nil, err
+	}
+	rv := []time.Time{st.ModTime().UTC()}
+
+	ist, err := os.Stat(filepath.Join(f, "info.json"))
+	if err != nil {
+		return nil, err
+	}
+	rv = append(rv, ist.ModTime().UTC())
+
+	assets, err := tb.ListAssets(f)
+	if err != nil {
+		return nil, err
+	}
+	for _, asset := range assets {
+		st, err := os.Stat(filepath.Join(f, "assets", asset))
+		if err != nil {
+			return nil, err
+		}
+		rv = append(rv, st.ModTime().UTC())
+	}
+	return rv, nil
 }
 
 func (*textBundle) ListAssets(f string) ([]string, error) {
@@ -146,23 +185,6 @@ func (*textBundle) ListAssets(f string) ([]string, error) {
 		return nil
 	}); err != nil {
 		return nil, err
-	}
-	return rv, nil
-}
-
-func (tb *textBundle) ListAssetTimeStamps(f string) ([]time.Time, error) {
-	assets, err := tb.ListAssets(f)
-	if err != nil {
-		return nil, err
-	}
-
-	rv := []time.Time{}
-	for _, asset := range assets {
-		st, err := os.Stat(filepath.Join(f, "assets", asset))
-		if err != nil {
-			return nil, err
-		}
-		rv = append(rv, st.ModTime().UTC())
 	}
 	return rv, nil
 }

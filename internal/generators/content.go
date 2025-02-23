@@ -184,17 +184,11 @@ func (h *Content) GetTimeStamps() ([]time.Time, error) {
 			}
 		}
 
-		st, err := os.Stat(src.File)
+		ts, err := content.GetTimeStamps(src.File)
 		if err != nil {
 			return nil, err
 		}
-		rv = append(rv, st.ModTime().UTC())
-
-		assets, err := content.ListAssetTimeStamps(src.File)
-		if err != nil {
-			return nil, err
-		}
-		rv = append(rv, assets...)
+		rv = append(rv, ts...)
 	}
 
 	if len(dirs) > 0 {

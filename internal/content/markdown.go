@@ -118,11 +118,15 @@ func (*markdown) Render(f string, style string, baseurl string) (string, *Metada
 	return mkdRender(src, style, nil)
 }
 
-func (*markdown) ListAssets(f string) ([]string, error) {
-	return nil, nil
+func (*markdown) GetTimeStamps(f string) ([]time.Time, error) {
+	st, err := os.Stat(f)
+	if err != nil {
+		return nil, err
+	}
+	return []time.Time{st.ModTime().UTC()}, nil
 }
 
-func (*markdown) ListAssetTimeStamps(f string) ([]time.Time, error) {
+func (*markdown) ListAssets(f string) ([]string, error) {
 	return nil, nil
 }
 

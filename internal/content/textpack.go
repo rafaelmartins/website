@@ -78,6 +78,14 @@ func (*textPack) Render(f string, style string, baseurl string) (string, *Metada
 	return tbRender(data, style, baseurl)
 }
 
+func (*textPack) GetTimeStamps(f string) ([]time.Time, error) {
+	st, err := os.Stat(f)
+	if err != nil {
+		return nil, err
+	}
+	return []time.Time{st.ModTime().UTC()}, nil
+}
+
 func (*textPack) ListAssets(f string) ([]string, error) {
 	r, err := zip.OpenReader(f)
 	if err != nil {
@@ -97,14 +105,6 @@ func (*textPack) ListAssets(f string) ([]string, error) {
 		}
 	}
 	return rv, nil
-}
-
-func (*textPack) ListAssetTimeStamps(f string) ([]time.Time, error) {
-	st, err := os.Stat(f)
-	if err != nil {
-		return nil, err
-	}
-	return []time.Time{st.ModTime().UTC()}, nil
 }
 
 func (*textPack) OpenAsset(f string, a string) (string, io.ReadCloser, error) {
