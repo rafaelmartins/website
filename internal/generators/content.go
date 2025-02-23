@@ -165,9 +165,23 @@ func (h *Content) GetTimeStamps() ([]time.Time, error) {
 	}
 	rv = append(rv, og...)
 
+	dirs := []string{}
 	for _, src := range h.Sources {
 		if src.File == "" {
 			continue
+		}
+
+		if h.Pagination != nil {
+			fd := filepath.Dir(src.File)
+			found := false
+			for _, d := range dirs {
+				if d == fd {
+					found = true
+				}
+			}
+			if !found {
+				dirs = append(dirs, fd)
+			}
 		}
 
 		st, err := os.Stat(src.File)
@@ -181,6 +195,16 @@ func (h *Content) GetTimeStamps() ([]time.Time, error) {
 			return nil, err
 		}
 		rv = append(rv, assets...)
+	}
+
+	if len(dirs) > 0 {
+		for _, dir := range dirs {
+			st, err := os.Stat(dir)
+			if err != nil {
+				return nil, err
+			}
+			rv = append(rv, st.ModTime().UTC())
+		}
 	}
 
 	for _, dep := range h.ExtraDependencies {

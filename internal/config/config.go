@@ -220,8 +220,14 @@ func (c *Config) GetTimeStamp() (time.Time, error) {
 
 func (c *Config) IsUpToDate() bool {
 	ts, err := c.GetTimeStamp()
-	if err != nil {
+	if err != nil || ts.Compare(c.ts) > 0 {
 		return false
 	}
-	return ts.Compare(c.ts) <= 0
+	for _, pg := range c.Posts.Groups {
+		st, err := os.Stat(pg.SourceDir)
+		if err != nil || st.ModTime().UTC().Compare(c.ts) > 0 {
+			return false
+		}
+	}
+	return true
 }
