@@ -1,6 +1,8 @@
 package config
 
 import (
+	"errors"
+	"io/fs"
 	"os"
 	"time"
 
@@ -225,7 +227,13 @@ func (c *Config) IsUpToDate() bool {
 	}
 	for _, pg := range c.Posts.Groups {
 		st, err := os.Stat(pg.SourceDir)
-		if err != nil || st.ModTime().UTC().Compare(c.ts) > 0 {
+		if err != nil {
+			if errors.Is(err, fs.ErrNotExist) {
+				continue
+			}
+			return false
+		}
+		if st.ModTime().UTC().Compare(c.ts) > 0 {
 			return false
 		}
 	}
