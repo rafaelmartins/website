@@ -12,14 +12,14 @@ require (
 	github.com/yuin/goldmark-emoji v1.0.4
 	github.com/yuin/goldmark-highlighting/v2 v2.0.0-20230729083705-37449abec8cc
 	go.abhg.dev/goldmark/frontmatter v0.2.0
-	golang.org/x/image v0.23.0
-	golang.org/x/net v0.33.0
-	golang.org/x/sync v0.10.0
+	golang.org/x/image v0.24.0
+	golang.org/x/net v0.35.0
+	golang.org/x/sync v0.11.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
-	github.com/BurntSushi/toml v1.2.1 // indirect
-	github.com/dlclark/regexp2 v1.11.4 // indirect
-	golang.org/x/text v0.21.0 // indirect
+	github.com/BurntSushi/toml v1.4.0 // indirect
+	github.com/dlclark/regexp2 v1.11.5 // indirect
+	golang.org/x/text v0.22.0 // indirect
 )
