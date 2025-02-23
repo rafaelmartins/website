@@ -9,6 +9,27 @@ import (
 	"time"
 )
 
+type MetadataGo struct {
+	Version string
+	Cgo     bool
+	Arch    string
+	OS      string
+}
+
+func (m *MetadataGo) String() string {
+	rv := ""
+	if m.Version != "" {
+		rv += m.Version
+		if m.OS != "" && m.Arch != "" {
+			rv += " " + m.OS + "/" + m.Arch
+		}
+		if m.Cgo {
+			rv += " cgo"
+		}
+	}
+	return rv
+}
+
 type Metadata struct {
 	Name    string
 	Version string
@@ -21,22 +42,13 @@ type Metadata struct {
 		URL      string
 	}
 
-	Go struct {
-		Version string
-		Cgo     bool
-		Arch    string
-		OS      string
-	}
+	Go MetadataGo
 }
 
 func (m *Metadata) String() string {
 	rv := m.Name + " " + m.Version
-	if m.Go.Version != "" {
-		rv += " (" + m.Go.Version
-		if m.Go.OS != "" && m.Go.Arch != "" {
-			rv += " " + m.Go.OS + "/" + m.Go.Arch
-		}
-		rv += ")"
+	if v := m.Go.String(); v != "" {
+		rv += " (" + v + ")"
 	}
 	return rv
 }
