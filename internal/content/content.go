@@ -20,6 +20,7 @@ var providers = []contentProvider{
 	&markdown{},
 	&textBundle{},
 	&textPack{},
+	&html{},
 }
 
 func getProvider(f string) contentProvider {
