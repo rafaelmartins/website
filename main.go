@@ -305,6 +305,7 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 						CDocsDestination:            repo.CDocs.Destination,
 						CDocsHeaders:                repo.CDocs.Headers,
 						CDocsBaseDirectory:          repo.CDocs.BaseDirectory,
+						CDocsLocalDirectory:         repo.CDocs.LocalDirectory,
 						CDocsTemplate:               repo.CDocs.Template,
 						CDocsWithSidebar:            dsidebar,
 						CDocsOpenGraphTitle:         repo.CDocs.OpenGraph.Title,

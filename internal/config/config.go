@@ -64,12 +64,13 @@ type Config struct {
 			Owner string `yaml:"owner"`
 			Repo  string `yaml:"repo"`
 			CDocs struct {
-				Destination   string   `yaml:"destination"`
-				Headers       []string `yaml:"headers"`
-				BaseDirectory string   `yaml:"base-directory"`
-				Template      string   `yaml:"template"`
-				WithSidebar   *bool    `yaml:"with-sidebar"`
-				OpenGraph     struct {
+				Destination    string   `yaml:"destination"`
+				Headers        []string `yaml:"headers"`
+				BaseDirectory  string   `yaml:"base-directory"`
+				LocalDirectory string   `yaml:"local-directory"`
+				Template       string   `yaml:"template"`
+				WithSidebar    *bool    `yaml:"with-sidebar"`
+				OpenGraph      struct {
 					Title       string `yaml:"title"`
 					Description string `yaml:"description"`
 					Image       string `yaml:"image"`

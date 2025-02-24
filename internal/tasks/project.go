@@ -61,6 +61,7 @@ type cdocsTaskImpl struct {
 	destination     string
 	headers         []string
 	basedir         string
+	localdir        string
 	template        string
 	immutable       bool
 	layoutCtx       *templates.LayoutContext
@@ -88,14 +89,15 @@ func (t *cdocsTaskImpl) GetGenerator() (runner.Generator, error) {
 	}
 
 	return &generators.CDocs{
-		Owner:         t.owner,
-		Repo:          t.repo,
-		Headers:       t.headers,
-		BaseDirectory: t.basedir,
-		URL:           path.Join("/", t.baseDestination, t.repo, dest) + "/",
-		Template:      t.template,
-		LayoutCtx:     t.layoutCtx,
-		Immutable:     t.immutable,
+		Owner:          t.owner,
+		Repo:           t.repo,
+		Headers:        t.headers,
+		BaseDirectory:  t.basedir,
+		LocalDirectory: t.localdir,
+		URL:            path.Join("/", t.baseDestination, t.repo, dest) + "/",
+		Template:       t.template,
+		LayoutCtx:      t.layoutCtx,
+		Immutable:      t.immutable,
 
 		OpenGraphTitle:         t.openGraphTitle,
 		OpenGraphDescription:   t.openGraphDescription,
@@ -115,6 +117,7 @@ type Project struct {
 	CDocsDestination            string
 	CDocsHeaders                []string
 	CDocsBaseDirectory          string
+	CDocsLocalDirectory         string
 	CDocsTemplate               string
 	CDocsWithSidebar            bool
 	CDocsOpenGraphTitle         string
@@ -187,6 +190,7 @@ func (p *Project) GetTasks() ([]*runner.Task, error) {
 					destination:     p.CDocsDestination,
 					headers:         p.CDocsHeaders,
 					basedir:         p.CDocsBaseDirectory,
+					localdir:        p.CDocsLocalDirectory,
 					template:        dtmpl,
 					immutable:       p.Immutable,
 					layoutCtx: &templates.LayoutContext{

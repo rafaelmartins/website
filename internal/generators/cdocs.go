@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"os"
 	"path"
 	"time"
 
@@ -15,14 +16,15 @@ import (
 )
 
 type CDocs struct {
-	Owner         string
-	Repo          string
-	Headers       []string
-	BaseDirectory string
-	URL           string
-	Template      string
-	LayoutCtx     *templates.LayoutContext
-	Immutable     bool
+	Owner          string
+	Repo           string
+	Headers        []string
+	BaseDirectory  string
+	LocalDirectory string
+	URL            string
+	Template       string
+	LayoutCtx      *templates.LayoutContext
+	Immutable      bool
 
 	OpenGraphTitle         string
 	OpenGraphDescription   string
@@ -32,6 +34,7 @@ type CDocs struct {
 	OpenGraphImageGenSize  *float64
 
 	headerCtx map[string]*github.RequestContext
+	readmeCtx github.RequestContext
 	otitle    string
 }
 
@@ -53,9 +56,27 @@ func (d *CDocs) initHeaderCtx() {
 func (d *CDocs) GetReader() (io.ReadCloser, error) {
 	d.initHeaderCtx()
 
+	baseHtmlUrl := ""
+	if d.LocalDirectory != "" {
+		_, u, err := github.Readme(&d.readmeCtx, d.Owner, d.Repo)
+		if err != nil {
+			return nil, err
+		}
+		baseHtmlUrl = path.Dir(u)
+	}
+
 	headers := []*cdocs.TemplateCtxHeader{}
 	for _, h := range d.Headers {
-		hdr, htmlUrl, err := github.Contents(d.headerCtx[h], d.Owner, d.Repo, path.Join(d.BaseDirectory, h), true)
+		hdr := (io.ReadCloser)(nil)
+		htmlUrl := ""
+		err := (error)(nil)
+
+		if d.LocalDirectory != "" {
+			htmlUrl = path.Join(baseHtmlUrl, d.BaseDirectory, h)
+			hdr, err = os.Open(path.Join(d.LocalDirectory, d.BaseDirectory, h))
+		} else {
+			hdr, htmlUrl, err = github.Contents(d.headerCtx[h], d.Owner, d.Repo, path.Join(d.BaseDirectory, h), true)
+		}
 		if err != nil {
 			return nil, err
 		}
@@ -107,13 +128,23 @@ func (d *CDocs) GetTimeStamps() ([]time.Time, error) {
 	// we would be safe to just run this method frequently, as we support cache with
 	// etag/last-modified, but it is easier to just disable this manually when adding
 	// a new project than spam github servers for no good reason.
-	if d.Immutable {
+	if d.Immutable && d.LocalDirectory == "" {
 		return nil, nil
 	}
 
 	rv, err := templates.GetTimestamps(d.Template, !d.Immutable)
 	if err != nil {
 		return nil, err
+	}
+
+	if d.LocalDirectory != "" {
+		for _, h := range d.Headers {
+			st, err := os.Stat(path.Join(d.LocalDirectory, d.BaseDirectory, h))
+			if err != nil {
+				return nil, err
+			}
+			rv = append(rv, st.ModTime().UTC())
+		}
 	}
 
 	og, err := ogimage.GetTimeStamps()
@@ -135,7 +166,7 @@ func (d *CDocs) GetTimeStamps() ([]time.Time, error) {
 }
 
 func (d *CDocs) GetImmutable() bool {
-	return d.Immutable
+	return d.Immutable && d.LocalDirectory == ""
 }
 
 func (d *CDocs) GetByProducts(ch chan *runner.GeneratorByProduct) {

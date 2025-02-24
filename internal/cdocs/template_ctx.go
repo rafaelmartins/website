@@ -298,6 +298,7 @@ func NewTemplateCtx(headers []*TemplateCtxHeader) (*TemplateCtx, error) {
 	for _, hdr := range headers {
 		hctx := HeaderCtx{
 			Name: hdr.Filename,
+			ID:   id(hdr.Filename),
 		}
 
 		link := func(line int) string {
