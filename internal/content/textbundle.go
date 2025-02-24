@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/rafaelmartins/website/internal/content/frontmatter"
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/ast"
 	"github.com/yuin/goldmark/parser"
@@ -52,7 +53,7 @@ func (te *tbExtension) Extend(m goldmark.Markdown) {
 	))
 }
 
-func tbRender(src []byte, style string, baseurl string) (string, *Metadata, error) {
+func tbRender(src []byte, style string, baseurl string) (string, *frontmatter.FrontMatter, error) {
 	pc := parser.NewContext()
 
 	rendered, meta, err := mkdRender(src, style, pc, &tbExtension{baseurl})
@@ -114,7 +115,7 @@ func (*textBundle) getSource(f string) (string, error) {
 	return srcs[0], nil
 }
 
-func (tb *textBundle) Render(f string, style string, baseurl string) (string, *Metadata, error) {
+func (tb *textBundle) Render(f string, style string, baseurl string) (string, *frontmatter.FrontMatter, error) {
 	info, err := os.ReadFile(filepath.Join(f, "info.json"))
 	if err != nil {
 		return "", nil, err

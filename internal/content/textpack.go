@@ -11,6 +11,8 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/rafaelmartins/website/internal/content/frontmatter"
 )
 
 type textPack struct{}
@@ -19,7 +21,7 @@ func (*textPack) IsSupported(f string) bool {
 	return filepath.Ext(f) == ".textpack"
 }
 
-func (*textPack) Render(f string, style string, baseurl string) (string, *Metadata, error) {
+func (*textPack) Render(f string, style string, baseurl string) (string, *frontmatter.FrontMatter, error) {
 	r, err := zip.OpenReader(f)
 	if err != nil {
 		return "", nil, err

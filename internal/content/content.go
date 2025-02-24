@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"io"
 	"time"
+
+	"github.com/rafaelmartins/website/internal/content/frontmatter"
 )
 
 type contentProvider interface {
 	IsSupported(f string) bool
-	Render(f string, style string, baseurl string) (string, *Metadata, error)
+	Render(f string, style string, baseurl string) (string, *frontmatter.FrontMatter, error)
 	GetTimeStamps(f string) ([]time.Time, error)
 	ListAssets(f string) ([]string, error)
 	OpenAsset(f string, a string) (string, io.ReadCloser, error)
@@ -33,7 +35,7 @@ func IsSupported(f string) bool {
 	return getProvider(f) != nil
 }
 
-func Render(f string, style string, baseurl string) (string, *Metadata, error) {
+func Render(f string, style string, baseurl string) (string, *frontmatter.FrontMatter, error) {
 	p := getProvider(f)
 	if p == nil {
 		return "", nil, fmt.Errorf("content: no provider found: %s", f)
@@ -65,7 +67,7 @@ func OpenAsset(f string, a string) (string, io.ReadCloser, error) {
 	return p.OpenAsset(f, a)
 }
 
-func GetMetadata(f string) (*Metadata, error) {
+func GetMetadata(f string) (*frontmatter.FrontMatter, error) {
 	_, md, err := Render(f, "", "")
 	return md, err
 }

@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/rafaelmartins/website/internal/content"
+	"github.com/rafaelmartins/website/internal/content/frontmatter"
 	"github.com/rafaelmartins/website/internal/ogimage"
 	"github.com/rafaelmartins/website/internal/runner"
 	"github.com/rafaelmartins/website/internal/templates"
@@ -44,7 +45,7 @@ type Content struct {
 	OpenGraphImageGenSize  *float64
 
 	ctx      *templates.ContentContext
-	metadata *content.Metadata
+	metadata *frontmatter.FrontMatter
 }
 
 func (*Content) GetID() string {
