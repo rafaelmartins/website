@@ -88,7 +88,7 @@
     <tr>
       <th style="width: 48px;"><span class="icon"><i class="fas fa-book"></i></span></th>
       <td>
-        <a href="{{ .Content.Entry.Project.CDocsURL }}">API Documentation</a>
+        <a href="{{ requiredAttr .Content.Entry.Project.CDocsURL }}">API Documentation</a>
       </td>
     </tr>
     {{- end }}
@@ -96,7 +96,7 @@
     <tr>
       <th style="width: 48px;"><span class="icon"><i class="fas fa-brands fa-golang"></i></span></th>
       <td>
-        <a href="https://pkg.go.dev/{{ $imp }}">{{ $imp }}</a>
+        <a href="https://pkg.go.dev/{{ requiredAttr $imp }}">{{ $imp }}</a>
       </td>
     </tr>
     {{- end }}
