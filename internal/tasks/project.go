@@ -13,10 +13,15 @@ type projectTaskImpl struct {
 	baseDestination string
 	owner           string
 	repo            string
-	goImport        string
 	template        string
 	immutable       bool
 	layoutCtx       *templates.LayoutContext
+
+	goImport    string
+	goDocImport string
+
+	cdocsEnabled     bool
+	cdocsDestination string
 
 	openGraphTitle         string
 	openGraphDescription   string
@@ -35,11 +40,23 @@ func (t *projectTaskImpl) GetGenerator() (runner.Generator, error) {
 	if url != "/" {
 		url += "/"
 	}
+	cdocsUrl := ""
+	if t.cdocsEnabled {
+		cdocsUrl = path.Join("/", t.baseDestination, t.repo, t.cdocsDestination)
+		if cdocsUrl != "/" {
+			cdocsUrl += "/"
+		}
+	}
 
 	return &generators.Project{
-		Owner:     t.owner,
-		Repo:      t.repo,
-		GoImport:  t.goImport,
+		Owner: t.owner,
+		Repo:  t.repo,
+
+		GoImport:    t.goImport,
+		GoDocImport: t.goDocImport,
+
+		CDocsURL: cdocsUrl,
+
 		URL:       url,
 		Template:  t.template,
 		Immutable: t.immutable,
@@ -75,11 +92,7 @@ type cdocsTaskImpl struct {
 }
 
 func (t *cdocsTaskImpl) GetDestination() string {
-	dest := t.destination
-	if dest == "" {
-		dest = "api"
-	}
-	return filepath.Join(t.repo, dest, "index.html")
+	return filepath.Join(t.repo, t.destination, "index.html")
 }
 
 func (t *cdocsTaskImpl) GetGenerator() (runner.Generator, error) {
@@ -112,7 +125,8 @@ type Project struct {
 	Owner string
 	Repo  string
 
-	GoImport string
+	GoImport    string
+	GoDocImport string
 
 	CDocsDestination            string
 	CDocsHeaders                []string
@@ -152,15 +166,23 @@ func (p *Project) GetTasks() ([]*runner.Task, error) {
 		tmpl = "project.html"
 	}
 
+	cdocsDestination := p.CDocsDestination
+	if cdocsDestination == "" {
+		cdocsDestination = "api"
+	}
+
 	rv := []*runner.Task{
 		runner.NewTask(p,
 			&projectTaskImpl{
-				baseDestination: p.GetBaseDestination(),
-				owner:           p.Owner,
-				repo:            p.Repo,
-				goImport:        p.GoImport,
-				template:        tmpl,
-				immutable:       p.Immutable,
+				baseDestination:  p.GetBaseDestination(),
+				owner:            p.Owner,
+				repo:             p.Repo,
+				goImport:         p.GoImport,
+				goDocImport:      p.GoDocImport,
+				cdocsDestination: cdocsDestination,
+				cdocsEnabled:     len(p.CDocsHeaders) > 0,
+				template:         tmpl,
+				immutable:        p.Immutable,
 				layoutCtx: &templates.LayoutContext{
 					WithSidebar: p.WithSidebar,
 				},
@@ -187,7 +209,7 @@ func (p *Project) GetTasks() ([]*runner.Task, error) {
 					baseDestination: p.GetBaseDestination(),
 					owner:           p.Owner,
 					repo:            p.Repo,
-					destination:     p.CDocsDestination,
+					destination:     cdocsDestination,
 					headers:         p.CDocsHeaders,
 					basedir:         p.CDocsBaseDirectory,
 					localdir:        p.CDocsLocalDirectory,

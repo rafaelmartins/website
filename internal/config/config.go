@@ -81,8 +81,9 @@ type Config struct {
 					} `yaml:"image-gen"`
 				} `yaml:"opengraph"`
 			} `yaml:"c-docs"`
-			GoImport  string `yaml:"go-import"`
-			OpenGraph struct {
+			GoImport    string `yaml:"go-import"`
+			GoDocImport string `yaml:"go-doc-import"`
+			OpenGraph   struct {
 				Title       string `yaml:"title"`
 				Description string `yaml:"description"`
 				Image       string `yaml:"image"`

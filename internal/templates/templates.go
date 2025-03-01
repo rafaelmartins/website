@@ -54,15 +54,18 @@ type ProjectContentLatestRelease struct {
 }
 
 type ProjectContentEntry struct {
-	Owner       string
-	Repo        string
-	URL         string
-	Description string
-	GoImport    string
-	Stars       int
-	Watching    int
-	Forks       int
-	License     struct {
+	Owner        string
+	Repo         string
+	URL          string
+	Description  string
+	GoImport     string
+	GoDocImport  string
+	CDocsEnabled bool
+	CDocsURL     string
+	Stars        int
+	Watching     int
+	Forks        int
+	License      struct {
 		SPDX string
 		URL  string
 	}

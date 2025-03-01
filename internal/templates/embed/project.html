@@ -76,6 +76,33 @@
     </tr>
   </tbody>
 </table>
+{{- if or .Content.Entry.Project.GoImport .Content.Entry.Project.CDocsURL }}
+<table class="table is-fullwidth">
+  <thead>
+    <tr>
+      <th colspan="2" class="has-text-centered">Project Documentation</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{- if .Content.Entry.Project.CDocsURL }}
+    <tr>
+      <th style="width: 48px;"><span class="icon"><i class="fas fa-book"></i></span></th>
+      <td>
+        <a href="{{ .Content.Entry.Project.CDocsURL }}">API Documentation</a>
+      </td>
+    </tr>
+    {{- end }}
+    {{- if $imp := or .Content.Entry.Project.GoDocImport .Content.Entry.Project.GoImport }}
+    <tr>
+      <th style="width: 48px;"><span class="icon"><i class="fas fa-brands fa-golang"></i></span></th>
+      <td>
+        <a href="https://pkg.go.dev/{{ $imp }}">{{ $imp }}</a>
+      </td>
+    </tr>
+    {{- end }}
+  </tbody>
+</table>
+{{- end }}
 <table class="table is-fullwidth">
   <thead>
     <tr>
