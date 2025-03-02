@@ -59,7 +59,7 @@ type ProjectContentEntry struct {
 	URL          string
 	Description  string
 	GoImport     string
-	GoDocImport  string
+	GoRepo       string
 	CDocsEnabled bool
 	CDocsURL     string
 	Stars        int

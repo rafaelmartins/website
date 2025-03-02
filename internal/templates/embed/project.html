@@ -20,7 +20,7 @@
   }
 </style>
 {{- if .Content.Entry.Project.GoImport }}
-<meta name="go-import" content="{{ requiredAttr .Content.Entry.Project.GoImport }} git https://github.com/{{ requiredAttr .Content.Entry.Project.Owner }}/{{ requiredAttr .Content.Entry.Project.Repo }}.git">
+<meta name="go-import" content="{{ requiredAttr .Content.Entry.Project.GoImport }} git https://github.com/{{ requiredAttr .Content.Entry.Project.Owner }}/{{ if .Content.Entry.Project.GoRepo }}{{ requiredAttr .Content.Entry.Project.GoRepo }}{{ else }}{{ requiredAttr .Content.Entry.Project.Repo }}{{ end }}.git">
 {{- end }}
 {{- end }}
 
@@ -92,11 +92,11 @@
       </td>
     </tr>
     {{- end }}
-    {{- if $imp := or .Content.Entry.Project.GoDocImport .Content.Entry.Project.GoImport }}
+    {{- if .Content.Entry.Project.GoImport }}
     <tr>
       <th style="width: 48px;"><span class="icon"><i class="fas fa-brands fa-golang"></i></span></th>
       <td>
-        <a href="https://pkg.go.dev/{{ requiredAttr $imp }}">{{ $imp }}</a>
+        <a href="https://pkg.go.dev/{{ requiredAttr .Content.Entry.Project.GoImport }}">{{ .Content.Entry.Project.GoImport }}</a>
       </td>
     </tr>
     {{- end }}

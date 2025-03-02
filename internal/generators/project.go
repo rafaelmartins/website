@@ -21,8 +21,8 @@ type Project struct {
 	Owner string
 	Repo  string
 
-	GoImport    string
-	GoDocImport string
+	GoImport string
+	GoRepo   string
 
 	CDocsURL string
 
@@ -66,11 +66,11 @@ func (p *Project) GetReader() (io.ReadCloser, error) {
 	p.images = images
 
 	proj := &templates.ProjectContentEntry{
-		Owner:       p.Owner,
-		Repo:        p.Repo,
-		GoImport:    p.GoImport,
-		GoDocImport: p.GoDocImport,
-		CDocsURL:    p.CDocsURL,
+		Owner:    p.Owner,
+		Repo:     p.Repo,
+		GoImport: p.GoImport,
+		GoRepo:   p.GoRepo,
+		CDocsURL: p.CDocsURL,
 	}
 
 	rbody, err := github.Request(nil, "GET", "repos/"+p.Owner+"/"+p.Repo, nil)

@@ -300,8 +300,8 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 						Owner: repo.Owner,
 						Repo:  repo.Repo,
 
-						GoImport:    repo.GoImport,
-						GoDocImport: repo.GoDocImport,
+						GoImport: repo.Go.Import,
+						GoRepo:   repo.Go.Repo,
 
 						CDocsDestination:            repo.CDocs.Destination,
 						CDocsHeaders:                repo.CDocs.Headers,

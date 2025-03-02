@@ -17,8 +17,8 @@ type projectTaskImpl struct {
 	immutable       bool
 	layoutCtx       *templates.LayoutContext
 
-	goImport    string
-	goDocImport string
+	goImport string
+	goRepo   string
 
 	cdocsEnabled     bool
 	cdocsDestination string
@@ -52,8 +52,8 @@ func (t *projectTaskImpl) GetGenerator() (runner.Generator, error) {
 		Owner: t.owner,
 		Repo:  t.repo,
 
-		GoImport:    t.goImport,
-		GoDocImport: t.goDocImport,
+		GoImport: t.goImport,
+		GoRepo:   t.goRepo,
 
 		CDocsURL: cdocsUrl,
 
@@ -125,8 +125,8 @@ type Project struct {
 	Owner string
 	Repo  string
 
-	GoImport    string
-	GoDocImport string
+	GoImport string
+	GoRepo   string
 
 	CDocsDestination            string
 	CDocsHeaders                []string
@@ -178,7 +178,7 @@ func (p *Project) GetTasks() ([]*runner.Task, error) {
 				owner:            p.Owner,
 				repo:             p.Repo,
 				goImport:         p.GoImport,
-				goDocImport:      p.GoDocImport,
+				goRepo:           p.GoRepo,
 				cdocsDestination: cdocsDestination,
 				cdocsEnabled:     len(p.CDocsHeaders) > 0,
 				template:         tmpl,
