@@ -40,7 +40,7 @@ func watchExec(fn func()) {
 				break
 			}
 		}
-		time.Sleep(time.Millisecond * 200)
+		time.Sleep(time.Second)
 	}
 }
 
