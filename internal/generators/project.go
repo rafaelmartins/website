@@ -21,6 +21,8 @@ type Project struct {
 	Owner string
 	Repo  string
 
+	DocLinks []*templates.ProjectContentDocLink
+
 	GoImport string
 	GoRepo   string
 
@@ -68,6 +70,7 @@ func (p *Project) GetReader() (io.ReadCloser, error) {
 	proj := &templates.ProjectContentEntry{
 		Owner:    p.Owner,
 		Repo:     p.Repo,
+		DocLinks: p.DocLinks,
 		GoImport: p.GoImport,
 		GoRepo:   p.GoRepo,
 		CDocsURL: p.CDocsURL,

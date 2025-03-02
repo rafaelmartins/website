@@ -294,11 +294,22 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 				dsidebar = false
 			}
 
+			docLinks := []*templates.ProjectContentDocLink{}
+			for _, docLink := range repo.DocLinks {
+				docLinks = append(docLinks, &templates.ProjectContentDocLink{
+					URL:   docLink.URL,
+					Label: docLink.Label,
+					Icon:  docLink.Icon,
+				})
+			}
+
 			rv = append(rv,
 				runner.NewTaskGroup(
 					&tasks.Project{
 						Owner: repo.Owner,
 						Repo:  repo.Repo,
+
+						DocLinks: docLinks,
 
 						GoImport: repo.Go.Import,
 						GoRepo:   repo.Go.Repo,

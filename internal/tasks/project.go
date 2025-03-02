@@ -17,6 +17,8 @@ type projectTaskImpl struct {
 	immutable       bool
 	layoutCtx       *templates.LayoutContext
 
+	docLinks []*templates.ProjectContentDocLink
+
 	goImport string
 	goRepo   string
 
@@ -51,6 +53,8 @@ func (t *projectTaskImpl) GetGenerator() (runner.Generator, error) {
 	return &generators.Project{
 		Owner: t.owner,
 		Repo:  t.repo,
+
+		DocLinks: t.docLinks,
 
 		GoImport: t.goImport,
 		GoRepo:   t.goRepo,
@@ -125,6 +129,8 @@ type Project struct {
 	Owner string
 	Repo  string
 
+	DocLinks []*templates.ProjectContentDocLink
+
 	GoImport string
 	GoRepo   string
 
@@ -177,6 +183,7 @@ func (p *Project) GetTasks() ([]*runner.Task, error) {
 				baseDestination:  p.GetBaseDestination(),
 				owner:            p.Owner,
 				repo:             p.Repo,
+				docLinks:         p.DocLinks,
 				goImport:         p.GoImport,
 				goRepo:           p.GoRepo,
 				cdocsDestination: cdocsDestination,

@@ -53,11 +53,18 @@ type ProjectContentLatestRelease struct {
 	Files []*ProjectContentLatestReleaseFile
 }
 
+type ProjectContentDocLink struct {
+	URL   string
+	Label string
+	Icon  string
+}
+
 type ProjectContentEntry struct {
 	Owner        string
 	Repo         string
 	URL          string
 	Description  string
+	DocLinks     []*ProjectContentDocLink
 	GoImport     string
 	GoRepo       string
 	CDocsEnabled bool

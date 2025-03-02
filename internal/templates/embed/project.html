@@ -76,7 +76,7 @@
     </tr>
   </tbody>
 </table>
-{{- if or .Content.Entry.Project.GoImport .Content.Entry.Project.CDocsURL }}
+{{- if .Content.Entry.Project.DocLinks }}
 <table class="table is-fullwidth">
   <thead>
     <tr>
@@ -84,11 +84,30 @@
     </tr>
   </thead>
   <tbody>
+    {{- range .Content.Entry.Project.DocLinks }}
+    <tr>
+      <th style="width: 48px;"><span class="icon"><i class="fas {{ requiredAttr .Icon }}"></i></span></th>
+      <td>
+        <a href="{{ requiredAttr .URL }}">{{ required .Label }}</a>
+      </td>
+    </tr>
+    {{- end }}
+  </tbody>
+</table>
+{{- end }}
+{{- if or .Content.Entry.Project.GoImport .Content.Entry.Project.CDocsURL }}
+<table class="table is-fullwidth">
+  <thead>
+    <tr>
+      <th colspan="2" class="has-text-centered">API Documentation</th>
+    </tr>
+  </thead>
+  <tbody>
     {{- if .Content.Entry.Project.CDocsURL }}
     <tr>
       <th style="width: 48px;"><span class="icon"><i class="fas fa-book"></i></span></th>
       <td>
-        <a href="{{ requiredAttr .Content.Entry.Project.CDocsURL }}">API Documentation</a>
+        <a href="{{ requiredAttr .Content.Entry.Project.CDocsURL }}">C API Documentation</a>
       </td>
     </tr>
     {{- end }}
