@@ -55,6 +55,7 @@ runs:
       with:
         go-version-file: .build/website/go.mod
         cache-dependency-path: .build/website/go.sum
+        check-latest: true
 
     - name: Build binary
       if: steps.cache-restore.outputs.cache-hit != 'true'
