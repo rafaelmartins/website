@@ -1,6 +1,6 @@
 module github.com/rafaelmartins/website
 
-go 1.23.0
+go 1.23
 
 require (
 	github.com/alecthomas/chroma/v2 v2.15.0
