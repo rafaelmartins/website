@@ -1,7 +1,6 @@
 package frontmatter
 
 import (
-	"bufio"
 	"bytes"
 	"errors"
 	"time"
@@ -54,42 +53,33 @@ type FrontMatter struct {
 	Extra map[string]any `yaml:"extra"`
 }
 
-func appendLine(buf []byte, scanner *bufio.Scanner) []byte {
-	// this changes the line ending to `\n`, if the file had windows/mac line endings,
-	// which is not something bad at all :)
-	return append(buf, append(scanner.Bytes(), '\n')...)
-}
-
 func Parse(src []byte) (*FrontMatter, []byte, error) {
 	fm := []byte{}
 	rest := []byte{}
 	level := 0
 
-	s := bufio.NewScanner(bytes.NewBuffer(src))
-	for s.Scan() {
-		if err := s.Err(); err != nil {
-			return nil, nil, err
-		}
+	for rawLine := range bytes.Lines(src) {
+		line := string(bytes.TrimRight(rawLine, "\r\n"))
 
 		switch level {
 		case 0:
-			if s.Text() != "---" {
-				rest = appendLine(rest, s)
+			if line != "---" {
+				rest = append(rest, rawLine...)
 				level = 2
 				continue
 			}
-			fm = appendLine(fm, s)
+			fm = append(fm, rawLine...)
 			level = 1
 
 		case 1:
-			if s.Text() == "---" {
+			if line == "---" {
 				level = 2
 				continue
 			}
-			fm = appendLine(fm, s)
+			fm = append(fm, rawLine...)
 
 		case 2:
-			rest = appendLine(rest, s)
+			rest = append(rest, rawLine...)
 		}
 	}
 
