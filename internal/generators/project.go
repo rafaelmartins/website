@@ -148,18 +148,10 @@ func (p *Project) GetReader() (io.ReadCloser, error) {
 			if err != nil {
 				return nil, err
 			}
-
-			// FIXME: handle images, relative to the tag instead of the default branch
-			// right now none of my projects have images in the releases... ¯\_(ツ)_/¯
-			_, rbody, _, err := p.processHtml(baseurl, mkd)
-			if err != nil {
-				return nil, err
-			}
-
 			proj.LatestRelease = &templates.ProjectContentLatestRelease{
 				Name: vlr.Name,
 				Tag:  vlr.TagName,
-				Body: rbody,
+				Body: mkd,
 				URL:  vlr.HtmlUrl,
 			}
 			for _, asset := range vlr.Assets {
