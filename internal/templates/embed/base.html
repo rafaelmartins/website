@@ -77,7 +77,22 @@
         <div id="navMenu" class="navbar-menu">
           <div class="navbar-start">
             {{- range .Config.Menu }}
+            {{- if .Dropdown }}
+            <div class="navbar-item has-dropdown is-hoverable">
+              <a class="navbar-link" href="{{ if .URL }}{{ .URL }}{{ else }}#{{ end }}">{{ required .Title }}</a>
+              <div class="navbar-dropdown is-boxed">
+                {{- range .Dropdown }}
+                {{- if .Divider }}
+                <hr class="navbar-divider">
+                {{- else }}
+                <a class="navbar-item" href="{{ requiredAttr .URL }}">{{ required .Title }}</a>
+                {{- end }}
+                {{- end }}
+              </div>
+            </div>
+            {{- else }}
             <a class="navbar-item" href="{{ requiredAttr .URL }}">{{ required .Title }}</a>
+            {{- end }}
             {{- end }}
           </div>
           <div class="navbar-end">

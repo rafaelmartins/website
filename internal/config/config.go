@@ -49,8 +49,13 @@ type Config struct {
 	} `yaml:"files"`
 
 	Menu []*struct {
-		Title string `yaml:"title"`
-		URL   string `yaml:"url"`
+		Title    string `yaml:"title"`
+		URL      string `yaml:"url"`
+		Dropdown []struct {
+			Title   string `yaml:"title"`
+			URL     string `yaml:"url"`
+			Divider bool   `yaml:"divider"`
+		} `yaml:"dropdown"`
 	} `yaml:"menu"`
 
 	SocialLinks []*struct {
