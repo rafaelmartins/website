@@ -59,6 +59,8 @@ runs:
     - name: Build binary
       if: steps.cache-restore.outputs.cache-hit != 'true'
       run: go build -o /opt/website/website
+      env:
+        CGO_ENABLED: 0
       working-directory: .build/website
       shell: bash
 
