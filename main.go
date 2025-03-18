@@ -91,7 +91,7 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 		runner.NewTaskGroup(
 			&tasks.NpmPackage{
 				Name:    "@fontsource-variable/nunito",
-				Version: "5.1.1",
+				Version: "5.2.5",
 				Files: []string{
 					"wght.min.css",
 					"files/nunito-cyrillic-ext-wght-normal.woff2",
