@@ -9,7 +9,6 @@ import (
 	"image/color"
 	"image/png"
 	"io"
-	"math"
 	"os"
 	"path"
 	"strings"
@@ -39,6 +38,14 @@ func SetGlobals(template string, minX *int, minY *int, maxX *int, maxY *int, def
 	available = template != ""
 	if !available {
 		return nil
+	}
+
+	if fnt == nil {
+		f, err := ogfont.New()
+		if err != nil {
+			return err
+		}
+		fnt = f
 	}
 
 	fp, err := os.Open(template)
@@ -107,31 +114,25 @@ func SetGlobals(template string, minX *int, minY *int, maxX *int, maxY *int, def
 
 func GetTimeStamps() ([]time.Time, error) {
 	rv := []time.Time{}
-	if tmpl != "" {
-		st, err := os.Stat(tmpl)
-		if err != nil {
-			return nil, err
-		}
-		rv = append(rv, st.ModTime().UTC())
+	if !available {
+		return rv, nil
 	}
+
+	st, err := os.Stat(tmpl)
+	if err != nil {
+		return nil, err
+	}
+	rv = append(rv, st.ModTime().UTC())
 	return rv, nil
 }
 
 func Generate(text string, c color.Color, dpi *float64, size *float64) (io.ReadCloser, error) {
-	if img == nil {
+	if !available || img == nil {
 		return nil, errors.New("ogimage: not initialized")
 	}
 
 	if strings.ContainsAny(text, "\t\n\r") {
 		return nil, errors.New("ogimage: invalid whitespace characters found in text")
-	}
-
-	if fnt == nil {
-		f, err := ogfont.New()
-		if err != nil {
-			return nil, err
-		}
-		fnt = f
 	}
 
 	ddpi := dDPI
@@ -159,45 +160,17 @@ func Generate(text string, c color.Color, dpi *float64, size *float64) (io.ReadC
 		Face: face,
 	}
 
-	fontHeight := face.Metrics().Ascent.Ceil()
-	fontSpacing := int(math.Ceil(float64(fontHeight) * 0.125))
-
-	availWidth := mask.Dx()
-	availHeight := mask.Dy()
-
-	height := 0
-	lines := []string{}
-	if text != "" {
-		line := ""
-		for _, part := range strings.Split(text, " ") {
-			tline := ""
-			if line == "" {
-				tline = part
-			} else {
-				tline = line + " " + part
-			}
-			if l := d.MeasureString(tline).Ceil(); l > availWidth {
-				lines = append(lines, line)
-				line = part
-			} else {
-				line = tline
-			}
-		}
-		if line != "" {
-			lines = append(lines, line)
-		}
-		height = len(lines)*fontHeight + (len(lines)-1)*fontSpacing
-		if height > availHeight {
-			return nil, errors.New("ogimage: text is too long")
-		}
+	lines, height, err := titleSplit(text, face, mask)
+	if err != nil {
+		return nil, err
 	}
 
-	y := mask.Min.Y + fontHeight + (mask.Dy()-height)/2
+	y := mask.Min.Y + titleFaceHeight(face) + (mask.Dy()-height)/2
 	for _, line := range lines {
 		x := mask.Min.X + (mask.Dx()-d.MeasureString(line).Ceil())/2
 		d.Dot = fixed.P(x, y)
 		d.DrawString(line)
-		y += fontHeight + fontSpacing
+		y += titleFaceHeight(face) + titleFaceSpacing(face)
 	}
 
 	buf := &bytes.Buffer{}
