@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"path"
 	"path/filepath"
+	"slices"
 	"strings"
 	"time"
 
@@ -266,7 +267,7 @@ func (p *Project) GetByProducts(ch chan *runner.GeneratorByProduct) {
 	}
 
 	for _, img := range p.images {
-		rd, _, err := github.Contents(nil, p.Owner, p.Repo, path.Join(p.SubPage, img), true)
+		rd, _, err := github.Contents(nil, p.Owner, p.Repo, strings.TrimPrefix(img, "images/"), true)
 		if err != nil {
 			ch <- &runner.GeneratorByProduct{Err: err}
 			break
@@ -341,7 +342,9 @@ func (p *Project) processHtml(baseUrl string, data string) (string, string, []st
 						if !u.IsAbs() {
 							if rv := fixSubPageHtmlImg(u.Path, p.SubPage); rv != "" {
 								tok.Attr[idx].Val = rv
-								images = append(images, rv)
+								if !slices.Contains(images, rv) {
+									images = append(images, rv)
+								}
 							}
 						}
 					}
@@ -426,14 +429,5 @@ func fixSubPageHtmlImg(img string, subpage string) string {
 		}
 		absImg = path.Join(absSubpage, skipFolder, img)
 	}
-
-	// FIXME: if the same image is used by two different pages, there could be a race condition.
-	rv, err := filepath.Rel(filepath.FromSlash(absSubpage), filepath.FromSlash(absImg))
-	if err != nil {
-		return ""
-	}
-	if rv == "." {
-		return ""
-	}
-	return filepath.ToSlash(rv)
+	return path.Join("images", absImg)
 }
