@@ -294,6 +294,26 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 				dsidebar = false
 			}
 
+			subPages := []*tasks.ProjectSubPage{}
+			for _, sp := range repo.SubPages {
+				sidebar := true
+				if sp.WithSidebar != nil && !*sp.WithSidebar {
+					sidebar = false
+				}
+
+				subPages = append(subPages, &tasks.ProjectSubPage{
+					SubPage:                sp.SubPage,
+					Template:               sp.Template,
+					WithSidebar:            sidebar,
+					OpenGraphTitle:         sp.OpenGraph.Title,
+					OpenGraphDescription:   sp.OpenGraph.Description,
+					OpenGraphImage:         sp.OpenGraph.Image,
+					OpenGraphImageGenColor: sp.OpenGraph.ImageGen.Color,
+					OpenGraphImageGenDPI:   sp.OpenGraph.ImageGen.DPI,
+					OpenGraphImageGenSize:  sp.OpenGraph.ImageGen.Size,
+				})
+			}
+
 			docLinks := []*templates.ProjectContentDocLink{}
 			for _, docLink := range repo.DocLinks {
 				docLinks = append(docLinks, &templates.ProjectContentDocLink{
@@ -309,6 +329,7 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 						Owner: repo.Owner,
 						Repo:  repo.Repo,
 
+						SubPages: subPages,
 						DocLinks: docLinks,
 
 						GoImport: repo.Go.Import,

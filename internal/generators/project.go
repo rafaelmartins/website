@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/url"
+	"path"
 	"path/filepath"
 	"strings"
 	"time"
@@ -18,9 +19,11 @@ import (
 )
 
 type Project struct {
-	Owner string
-	Repo  string
+	Owner   string
+	Repo    string
+	SubPage string
 
+	SubPages []string
 	DocLinks []*templates.ProjectContentDocLink
 
 	GoImport string
@@ -40,9 +43,9 @@ type Project struct {
 	OpenGraphImageGenDPI   *float64
 	OpenGraphImageGenSize  *float64
 
-	readmeCtx github.RequestContext
-	otitle    string
-	images    []string
+	contentCtx github.RequestContext
+	otitle     string
+	images     []string
 }
 
 func (*Project) GetID() string {
@@ -50,9 +53,28 @@ func (*Project) GetID() string {
 }
 
 func (p *Project) GetReader() (io.ReadCloser, error) {
-	mks, baseurl, err := github.Readme(&p.readmeCtx, p.Owner, p.Repo)
-	if err != nil {
-		return nil, err
+	mks := ""
+	baseurl := ""
+	if p.SubPage != "" {
+		var err error
+		var rd io.ReadCloser
+		rd, baseurl, err = github.Contents(&p.contentCtx, p.Owner, p.Repo, p.SubPage+".md", true)
+		if err != nil {
+			return nil, err
+		}
+		defer rd.Close()
+
+		data, err := io.ReadAll(rd)
+		if err != nil {
+			return nil, err
+		}
+		mks = string(data)
+	} else {
+		var err error
+		mks, baseurl, err = github.Readme(&p.contentCtx, p.Owner, p.Repo)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	mkr, err := github.Markdown(nil, p.Owner, p.Repo, mks)
@@ -98,25 +120,31 @@ func (p *Project) GetReader() (io.ReadCloser, error) {
 	proj.Watching = v.SubscribersCount
 	proj.Forks = v.ForksCount
 
+	withLicense := true
 	lbody, err := github.Request(nil, "GET", "repos/"+p.Owner+"/"+p.Repo+"/license", nil)
 	if err != nil {
-		return nil, err
+		if herr, ok := err.(*github.HttpError); !ok || herr.StatusCode != 404 {
+			return nil, err
+		}
+		withLicense = false
 	}
 
-	vl := struct {
-		HtmlUrl string `json:"html_url"`
-		License struct {
-			SpdxId string `json:"spdx_id"`
-		} `json:"license"`
-	}{}
-	if err := json.Unmarshal(lbody, &vl); err != nil {
-		return nil, err
-	}
+	if withLicense {
+		vl := struct {
+			HtmlUrl string `json:"html_url"`
+			License struct {
+				SpdxId string `json:"spdx_id"`
+			} `json:"license"`
+		}{}
+		if err := json.Unmarshal(lbody, &vl); err != nil {
+			return nil, err
+		}
 
-	if vl.License.SpdxId != "NOASSERTION" {
-		proj.License.SPDX = vl.License.SpdxId
+		if vl.License.SpdxId != "NOASSERTION" {
+			proj.License.SPDX = vl.License.SpdxId
+		}
+		proj.License.URL = vl.HtmlUrl
 	}
-	proj.License.URL = vl.HtmlUrl
 
 	withRelease := true
 	lrbody, err := github.Request(nil, "GET", "repos/"+p.Owner+"/"+p.Repo+"/releases/latest", nil)
@@ -216,10 +244,16 @@ func (p *Project) GetTimeStamps() ([]time.Time, error) {
 	}
 	rv = append(rv, og...)
 
-	if _, _, err := github.Readme(&p.readmeCtx, p.Owner, p.Repo); err != nil {
+	if p.SubPage != "" {
+		_, _, err = github.Contents(&p.contentCtx, p.Owner, p.Repo, p.SubPage+".md", false)
+	} else {
+		_, _, err = github.Readme(&p.contentCtx, p.Owner, p.Repo)
+	}
+	if err != nil {
 		return nil, err
 	}
-	return append(rv, p.readmeCtx.LastModifiedTime), nil
+
+	return append(rv, p.contentCtx.LastModifiedTime), nil
 }
 
 func (p *Project) GetImmutable() bool {
@@ -232,7 +266,7 @@ func (p *Project) GetByProducts(ch chan *runner.GeneratorByProduct) {
 	}
 
 	for _, img := range p.images {
-		rd, _, err := github.Contents(nil, p.Owner, p.Repo, img, true)
+		rd, _, err := github.Contents(nil, p.Owner, p.Repo, path.Join(p.SubPage, img), true)
 		if err != nil {
 			ch <- &runner.GeneratorByProduct{Err: err}
 			break
@@ -287,8 +321,9 @@ func (p *Project) processHtml(baseUrl string, data string) (string, string, []st
 						}
 
 						if !u.IsAbs() && (len(u.Fragment) == 0 || len(u.Path) != 0) {
-							if len(u.Path) > 0 && u.Path[0] == '/' {
-								u.Path = u.Path[1:]
+							if rv := fixSubPageHtmlLink(u.Path, p.SubPage, p.SubPages); rv != "" {
+								tok.Attr[idx].Val = rv
+								continue
 							}
 							tok.Attr[idx].Val = burl.ResolveReference(u).String()
 						}
@@ -304,7 +339,10 @@ func (p *Project) processHtml(baseUrl string, data string) (string, string, []st
 						}
 
 						if !u.IsAbs() {
-							images = append(images, strings.TrimPrefix(strings.TrimPrefix(u.Path, "./"), "/"))
+							if rv := fixSubPageHtmlImg(u.Path, p.SubPage); rv != "" {
+								tok.Attr[idx].Val = rv
+								images = append(images, rv)
+							}
 						}
 					}
 				}
@@ -335,4 +373,67 @@ func (p *Project) processHtml(baseUrl string, data string) (string, string, []st
 			fmt.Fprint(buf, tok)
 		}
 	}
+}
+
+func fixSubPageHtmlLink(link string, subpage string, subpages []string) string {
+	if !strings.HasSuffix(link, ".md") {
+		return ""
+	}
+	link = strings.TrimSuffix(link, ".md")
+
+	skipFolder := ".."
+	if subpage == "" {
+		subpage = "."
+		skipFolder = "."
+	}
+	absSubpage := path.Clean("/" + subpage)
+
+	absLink := link
+	if !path.IsAbs(link) {
+		if p := path.Join("/dummy/"+subpage, skipFolder, link); !strings.HasPrefix(p, "/dummy/") {
+			return ""
+		}
+		absLink = path.Join(absSubpage, skipFolder, link)
+	}
+
+	for _, sp := range subpages {
+		if abssp := path.Clean("/" + sp); abssp == absLink {
+			rv, err := filepath.Rel(filepath.FromSlash(absSubpage), filepath.FromSlash(absLink))
+			if err != nil {
+				return ""
+			}
+			if rv == "." {
+				return ""
+			}
+			return filepath.ToSlash(rv) + "/"
+		}
+	}
+	return ""
+}
+
+func fixSubPageHtmlImg(img string, subpage string) string {
+	skipFolder := ".."
+	if subpage == "" {
+		subpage = "."
+		skipFolder = "."
+	}
+	absSubpage := path.Clean("/" + subpage)
+
+	absImg := img
+	if !path.IsAbs(img) {
+		if p := path.Join("/dummy/"+subpage, skipFolder, img); !strings.HasPrefix(p, "/dummy/") {
+			return ""
+		}
+		absImg = path.Join(absSubpage, skipFolder, img)
+	}
+
+	// FIXME: if the same image is used by two different pages, there could be a race condition.
+	rv, err := filepath.Rel(filepath.FromSlash(absSubpage), filepath.FromSlash(absImg))
+	if err != nil {
+		return ""
+	}
+	if rv == "." {
+		return ""
+	}
+	return filepath.ToSlash(rv)
 }

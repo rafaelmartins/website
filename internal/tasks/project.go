@@ -13,10 +13,12 @@ type projectTaskImpl struct {
 	baseDestination string
 	owner           string
 	repo            string
+	subPage         string
 	template        string
 	immutable       bool
 	layoutCtx       *templates.LayoutContext
 
+	subPages []string
 	docLinks []*templates.ProjectContentDocLink
 
 	goImport string
@@ -34,11 +36,17 @@ type projectTaskImpl struct {
 }
 
 func (t *projectTaskImpl) GetDestination() string {
+	if t.subPage != "" {
+		return filepath.Join(t.repo, t.subPage, "index.html")
+	}
 	return filepath.Join(t.repo, "index.html")
 }
 
 func (t *projectTaskImpl) GetGenerator() (runner.Generator, error) {
 	url := path.Join("/", t.baseDestination, t.repo)
+	if t.subPage != "" {
+		url = path.Join(url, t.subPage)
+	}
 	if url != "/" {
 		url += "/"
 	}
@@ -51,9 +59,11 @@ func (t *projectTaskImpl) GetGenerator() (runner.Generator, error) {
 	}
 
 	return &generators.Project{
-		Owner: t.owner,
-		Repo:  t.repo,
+		Owner:   t.owner,
+		Repo:    t.repo,
+		SubPage: t.subPage,
 
+		SubPages: t.subPages,
 		DocLinks: t.docLinks,
 
 		GoImport: t.goImport,
@@ -125,10 +135,23 @@ func (t *cdocsTaskImpl) GetGenerator() (runner.Generator, error) {
 	}, nil
 }
 
+type ProjectSubPage struct {
+	SubPage                string
+	Template               string
+	WithSidebar            bool
+	OpenGraphTitle         string
+	OpenGraphDescription   string
+	OpenGraphImage         string
+	OpenGraphImageGenColor *uint32
+	OpenGraphImageGenDPI   *float64
+	OpenGraphImageGenSize  *float64
+}
+
 type Project struct {
 	Owner string
 	Repo  string
 
+	SubPages []*ProjectSubPage
 	DocLinks []*templates.ProjectContentDocLink
 
 	GoImport string
@@ -177,12 +200,18 @@ func (p *Project) GetTasks() ([]*runner.Task, error) {
 		cdocsDestination = "api"
 	}
 
+	subpages := []string{}
+	for _, subpage := range p.SubPages {
+		subpages = append(subpages, subpage.SubPage)
+	}
+
 	rv := []*runner.Task{
 		runner.NewTask(p,
 			&projectTaskImpl{
 				baseDestination:  p.GetBaseDestination(),
 				owner:            p.Owner,
 				repo:             p.Repo,
+				subPages:         subpages,
 				docLinks:         p.DocLinks,
 				goImport:         p.GoImport,
 				goRepo:           p.GoRepo,
@@ -232,6 +261,40 @@ func (p *Project) GetTasks() ([]*runner.Task, error) {
 					openGraphImageGenColor: p.CDocsOpenGraphImageGenColor,
 					openGraphImageGenDPI:   p.CDocsOpenGraphImageGenDPI,
 					openGraphImageGenSize:  p.CDocsOpenGraphImageGenSize,
+				},
+			),
+		)
+	}
+
+	for _, subpage := range p.SubPages {
+		tmpl := subpage.Template
+		if tmpl == "" {
+			tmpl = "project.html"
+		}
+
+		rv = append(rv,
+			runner.NewTask(p,
+				&projectTaskImpl{
+					baseDestination:  p.GetBaseDestination(),
+					owner:            p.Owner,
+					repo:             p.Repo,
+					subPage:          subpage.SubPage,
+					subPages:         subpages,
+					docLinks:         p.DocLinks,
+					cdocsDestination: cdocsDestination,
+					cdocsEnabled:     len(p.CDocsHeaders) > 0,
+					template:         tmpl,
+					immutable:        p.Immutable,
+					layoutCtx: &templates.LayoutContext{
+						WithSidebar: subpage.WithSidebar,
+					},
+
+					openGraphTitle:         subpage.OpenGraphTitle,
+					openGraphDescription:   subpage.OpenGraphDescription,
+					openGraphImage:         subpage.OpenGraphImage,
+					openGraphImageGenColor: subpage.OpenGraphImageGenColor,
+					openGraphImageGenDPI:   subpage.OpenGraphImageGenDPI,
+					openGraphImageGenSize:  subpage.OpenGraphImageGenSize,
 				},
 			),
 		)

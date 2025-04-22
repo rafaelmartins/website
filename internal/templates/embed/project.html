@@ -67,7 +67,7 @@
       <td>
         <a href="https://spdx.org/licenses/{{ requiredAttr .Content.Entry.Project.License.SPDX }}.html">{{ .Content.Entry.Project.License.SPDX }}</a>
       </td>
-      {{- else }}
+      {{- else if .Content.Entry.Project.License.URL }}
       <th>License:</th>
       <td>
         <a href="{{ requiredAttr .Content.Entry.Project.License.URL }}">Link</a>

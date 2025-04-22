@@ -66,8 +66,23 @@ type Config struct {
 
 	Projects []*struct {
 		Repositories []*struct {
-			Owner string `yaml:"owner"`
-			Repo  string `yaml:"repo"`
+			Owner    string `yaml:"owner"`
+			Repo     string `yaml:"repo"`
+			SubPages []struct {
+				SubPage     string
+				Template    string `yaml:"template"`
+				WithSidebar *bool  `yaml:"with-sidebar"`
+				OpenGraph   struct {
+					Title       string `yaml:"title"`
+					Description string `yaml:"description"`
+					Image       string `yaml:"image"`
+					ImageGen    struct {
+						Color *uint32  `yaml:"color"`
+						DPI   *float64 `yaml:"dpi"`
+						Size  *float64 `yaml:"size"`
+					} `yaml:"image-gen"`
+				} `yaml:"opengraph"`
+			} `yaml:"subpages"`
 			CDocs struct {
 				Destination    string   `yaml:"destination"`
 				Headers        []string `yaml:"headers"`
