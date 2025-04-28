@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"slices"
 	"text/template"
 	"time"
 
@@ -173,14 +174,7 @@ func (h *Content) GetTimeStamps() ([]time.Time, error) {
 		}
 
 		if h.Pagination != nil {
-			fd := filepath.Dir(src.File)
-			found := false
-			for _, d := range dirs {
-				if d == fd {
-					found = true
-				}
-			}
-			if !found {
+			if fd := filepath.Dir(src.File); !slices.Contains(dirs, fd) {
 				dirs = append(dirs, fd)
 			}
 		}

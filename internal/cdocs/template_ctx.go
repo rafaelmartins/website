@@ -3,6 +3,7 @@ package cdocs
 import (
 	"fmt"
 	"io"
+	"slices"
 	"strings"
 	"time"
 
@@ -475,14 +476,9 @@ func NewTemplateCtx(headers []*TemplateCtxHeader) (*TemplateCtx, error) {
 					include += "\""
 				}
 
-				found := false
-				for _, i := range headers {
-					if i.Filename == inc.File {
-						found = true
-						break
-					}
-				}
-				if found {
+				if slices.ContainsFunc(headers, func(ctx *TemplateCtxHeader) bool {
+					return ctx.Filename == inc.File
+				}) {
 					include += `<a href="#` + id(inc.File) + `">` + inc.File + "</a>"
 				} else {
 					include += inc.File

@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"slices"
 	"strings"
 	"sync/atomic"
 	"time"
@@ -89,14 +90,9 @@ func (t *Task) run(basedir string, cfg Config, force bool) error {
 
 		if st, err := os.Stat(dest); err == nil {
 			destts := st.ModTime().UTC()
-			found := false
-			for _, ts := range timestamps {
-				if ts.Compare(destts) > 0 {
-					found = true
-					break
-				}
-			}
-			if !found {
+			if !slices.ContainsFunc(timestamps, func(ts time.Time) bool {
+				return ts.Compare(destts) > 0
+			}) {
 				return nil
 			}
 		}
