@@ -14,6 +14,7 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/rafaelmartins/website/internal/postproc"
 	"golang.org/x/sync/semaphore"
 )
 
@@ -100,26 +101,12 @@ func (t *Task) run(basedir string, cfg Config, force bool) error {
 
 	log.Printf("  %-8s  %s", gen.GetID(), dest)
 
-	if err := func() error {
-		rd, err := gen.GetReader()
-		if err != nil {
-			return err
-		}
-		defer rd.Close()
-
-		if err := os.MkdirAll(filepath.Dir(dest), 0777); err != nil {
-			return err
-		}
-
-		fp, err := os.Create(dest)
-		if err != nil {
-			return err
-		}
-		defer fp.Close()
-
-		_, err = io.Copy(fp, rd)
+	rd, err := gen.GetReader()
+	if err != nil {
 		return err
-	}(); err != nil {
+	}
+
+	if err := postproc.PostProc(dest, rd); err != nil {
 		return err
 	}
 
@@ -143,22 +130,7 @@ func (t *Task) run(basedir string, cfg Config, force bool) error {
 
 		log.Printf("  %-8s  %s [%s]", gen.GetID(), dest, bpDest)
 
-		if err := func() error {
-			defer bp.Reader.Close()
-
-			if err := os.MkdirAll(filepath.Dir(bpDest), 0777); err != nil {
-				return err
-			}
-
-			fp, err := os.Create(bpDest)
-			if err != nil {
-				return err
-			}
-			defer fp.Close()
-
-			_, err = io.Copy(fp, bp.Reader)
-			return err
-		}(); err != nil {
+		if err := postproc.PostProc(bpDest, bp.Reader); err != nil {
 			return err
 		}
 	}

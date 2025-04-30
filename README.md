@@ -20,6 +20,7 @@ The code is kinda generic (writing code that way is just stronger than me...), b
 - QR Code encoder.
 - Go vanity import paths.
 - `textbundle` and `textpack` support.
+- Post-processing of generated files, such as compression, quantizing, minification, etc.
 
 ## Versioning
 This software won't ever receive an official release, but it generates a version string based on the latest Git commit timestamp and hash during the binary build process. Example: `2024110110-a1b2c3d`.

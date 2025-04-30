@@ -83,3 +83,7 @@ runs:
       with:
         path: /opt/website
         key: ${{ runner.os }}-build-website-${{ steps.gitref.outputs.ref }}
+
+    - name: Install runtime dependencies
+      run: sudo apt install -y --no-install-recommends pngnq jpegoptim
+      shell: bash
