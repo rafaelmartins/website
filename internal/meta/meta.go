@@ -95,8 +95,8 @@ func GetMetadata() (*Metadata, error) {
 
 	rv.Name = bi.Path
 	rv.Version = bi.Main.Version
-	rv.URL = baseUrl
-	rv.Git.URL = fmt.Sprintf("%s/commit/%s", rv.URL, rv.Git.Revision)
+	rv.URL = fmt.Sprintf("https://%s", rv.Name)
+	rv.Git.URL = fmt.Sprintf("%s/commit/%s", baseUrl, rv.Git.Revision)
 	rv.Go.Version = bi.GoVersion
 
 	return rv, nil
