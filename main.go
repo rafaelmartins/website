@@ -6,15 +6,15 @@ import (
 	"log"
 	"os"
 
-	"github.com/rafaelmartins/website/internal/cdocs"
-	"github.com/rafaelmartins/website/internal/config"
-	"github.com/rafaelmartins/website/internal/generators"
-	"github.com/rafaelmartins/website/internal/meta"
-	"github.com/rafaelmartins/website/internal/ogimage"
-	"github.com/rafaelmartins/website/internal/runner"
-	"github.com/rafaelmartins/website/internal/tasks"
-	"github.com/rafaelmartins/website/internal/templates"
-	"github.com/rafaelmartins/website/internal/webserver"
+	"rafaelmartins.com/p/website/internal/cdocs"
+	"rafaelmartins.com/p/website/internal/config"
+	"rafaelmartins.com/p/website/internal/generators"
+	"rafaelmartins.com/p/website/internal/meta"
+	"rafaelmartins.com/p/website/internal/ogimage"
+	"rafaelmartins.com/p/website/internal/runner"
+	"rafaelmartins.com/p/website/internal/tasks"
+	"rafaelmartins.com/p/website/internal/templates"
+	"rafaelmartins.com/p/website/internal/webserver"
 )
 
 var (

@@ -4,10 +4,10 @@ import (
 	"io"
 	"sync"
 
-	"github.com/rafaelmartins/website/internal/github"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/opentype"
 	"golang.org/x/image/font/sfnt"
+	"rafaelmartins.com/p/website/internal/github"
 )
 
 const (

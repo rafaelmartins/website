@@ -14,11 +14,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/rafaelmartins/website/internal/ogfont"
-	"github.com/rafaelmartins/website/internal/runner"
 	"golang.org/x/image/draw"
 	"golang.org/x/image/font"
 	"golang.org/x/image/math/fixed"
+	"rafaelmartins.com/p/website/internal/ogfont"
+	"rafaelmartins.com/p/website/internal/runner"
 )
 
 var (

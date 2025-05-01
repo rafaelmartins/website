@@ -10,11 +10,11 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/rafaelmartins/website/internal/content"
-	"github.com/rafaelmartins/website/internal/content/frontmatter"
-	"github.com/rafaelmartins/website/internal/ogimage"
-	"github.com/rafaelmartins/website/internal/runner"
-	"github.com/rafaelmartins/website/internal/templates"
+	"rafaelmartins.com/p/website/internal/content"
+	"rafaelmartins.com/p/website/internal/content/frontmatter"
+	"rafaelmartins.com/p/website/internal/ogimage"
+	"rafaelmartins.com/p/website/internal/runner"
+	"rafaelmartins.com/p/website/internal/templates"
 )
 
 type ContentSource struct {

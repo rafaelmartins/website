@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/rafaelmartins/website/internal/runner"
-	"github.com/rafaelmartins/website/internal/utils"
+	"rafaelmartins.com/p/website/internal/runner"
+	"rafaelmartins.com/p/website/internal/utils"
 )
 
 type Embed struct {

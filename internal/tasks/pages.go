@@ -4,9 +4,9 @@ import (
 	"path"
 	"path/filepath"
 
-	"github.com/rafaelmartins/website/internal/generators"
-	"github.com/rafaelmartins/website/internal/runner"
-	"github.com/rafaelmartins/website/internal/templates"
+	"rafaelmartins.com/p/website/internal/generators"
+	"rafaelmartins.com/p/website/internal/runner"
+	"rafaelmartins.com/p/website/internal/templates"
 )
 
 type pageTaskImpl struct {

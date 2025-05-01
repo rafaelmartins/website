@@ -3,8 +3,8 @@ package tasks
 import (
 	"path/filepath"
 
-	"github.com/rafaelmartins/website/internal/generators"
-	"github.com/rafaelmartins/website/internal/runner"
+	"rafaelmartins.com/p/website/internal/generators"
+	"rafaelmartins.com/p/website/internal/runner"
 )
 
 type fileTaskImpl string

@@ -1,4 +1,4 @@
-module github.com/rafaelmartins/website
+module rafaelmartins.com/p/website
 
 go 1.24
 

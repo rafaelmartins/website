@@ -11,10 +11,10 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/rafaelmartins/website/internal/cdocs"
-	"github.com/rafaelmartins/website/internal/config"
-	"github.com/rafaelmartins/website/internal/meta"
-	"github.com/rafaelmartins/website/internal/utils"
+	"rafaelmartins.com/p/website/internal/cdocs"
+	"rafaelmartins.com/p/website/internal/config"
+	"rafaelmartins.com/p/website/internal/meta"
+	"rafaelmartins.com/p/website/internal/utils"
 )
 
 var (

@@ -9,8 +9,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/rafaelmartins/website/internal/runner"
 	"github.com/skip2/go-qrcode"
+	"rafaelmartins.com/p/website/internal/runner"
 )
 
 type QRCode struct {

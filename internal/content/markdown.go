@@ -8,12 +8,12 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/rafaelmartins/website/internal/content/frontmatter"
 	"github.com/yuin/goldmark"
 	emoji "github.com/yuin/goldmark-emoji"
 	highlighting "github.com/yuin/goldmark-highlighting/v2"
 	"github.com/yuin/goldmark/extension"
 	"github.com/yuin/goldmark/parser"
+	"rafaelmartins.com/p/website/internal/content/frontmatter"
 )
 
 func mkdRender(src []byte, style string, pc parser.Context, ext ...goldmark.Extender) (string, *frontmatter.FrontMatter, error) {

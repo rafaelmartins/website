@@ -12,11 +12,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/rafaelmartins/website/internal/github"
-	"github.com/rafaelmartins/website/internal/ogimage"
-	"github.com/rafaelmartins/website/internal/runner"
-	"github.com/rafaelmartins/website/internal/templates"
 	"golang.org/x/net/html"
+	"rafaelmartins.com/p/website/internal/github"
+	"rafaelmartins.com/p/website/internal/ogimage"
+	"rafaelmartins.com/p/website/internal/runner"
+	"rafaelmartins.com/p/website/internal/templates"
 )
 
 type Project struct {

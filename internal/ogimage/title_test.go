@@ -5,7 +5,7 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/rafaelmartins/website/internal/ogfont"
+	"rafaelmartins.com/p/website/internal/ogfont"
 )
 
 func TestTitleSplit(t *testing.T) {

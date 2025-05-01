@@ -1,9 +1,9 @@
-name: 'Setup github.com/rafaelmartins/website'
-description: 'Setup github.com/rafaelmartins/website and add it to the PATH'
+name: 'Setup rafaelmartins.com/p/website'
+description: 'Setup rafaelmartins.com/p/website and add it to the PATH'
 
 inputs:
   website-ref:
-    description: 'The github.com/rafaelmartins/website Git ref to checkout'
+    description: 'The rafaelmartins.com/p/website Git ref to checkout'
     required: true
     default: 'main'
 

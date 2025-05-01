@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/rafaelmartins/website/internal/content/frontmatter"
+	"rafaelmartins.com/p/website/internal/content/frontmatter"
 )
 
 type html struct{}

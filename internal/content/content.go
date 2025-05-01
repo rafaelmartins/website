@@ -5,7 +5,7 @@ import (
 	"io"
 	"time"
 
-	"github.com/rafaelmartins/website/internal/content/frontmatter"
+	"rafaelmartins.com/p/website/internal/content/frontmatter"
 )
 
 type contentProvider interface {

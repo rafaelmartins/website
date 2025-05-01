@@ -14,8 +14,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/rafaelmartins/website/internal/postproc"
 	"golang.org/x/sync/semaphore"
+	"rafaelmartins.com/p/website/internal/postproc"
 )
 
 type GeneratorByProduct struct {

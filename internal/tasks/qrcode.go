@@ -4,8 +4,8 @@ import (
 	"errors"
 	"path/filepath"
 
-	"github.com/rafaelmartins/website/internal/generators"
-	"github.com/rafaelmartins/website/internal/runner"
+	"rafaelmartins.com/p/website/internal/generators"
+	"rafaelmartins.com/p/website/internal/runner"
 )
 
 type qrcodeTask struct {

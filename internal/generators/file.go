@@ -5,7 +5,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/rafaelmartins/website/internal/runner"
+	"rafaelmartins.com/p/website/internal/runner"
 )
 
 type File string

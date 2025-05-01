@@ -8,11 +8,11 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/rafaelmartins/website/internal/content"
-	"github.com/rafaelmartins/website/internal/generators"
-	"github.com/rafaelmartins/website/internal/ogimage"
-	"github.com/rafaelmartins/website/internal/runner"
-	"github.com/rafaelmartins/website/internal/templates"
+	"rafaelmartins.com/p/website/internal/content"
+	"rafaelmartins.com/p/website/internal/generators"
+	"rafaelmartins.com/p/website/internal/ogimage"
+	"rafaelmartins.com/p/website/internal/runner"
+	"rafaelmartins.com/p/website/internal/templates"
 )
 
 type paginationPost struct {

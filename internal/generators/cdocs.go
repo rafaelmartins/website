@@ -8,11 +8,11 @@ import (
 	"path"
 	"time"
 
-	"github.com/rafaelmartins/website/internal/cdocs"
-	"github.com/rafaelmartins/website/internal/github"
-	"github.com/rafaelmartins/website/internal/ogimage"
-	"github.com/rafaelmartins/website/internal/runner"
-	"github.com/rafaelmartins/website/internal/templates"
+	"rafaelmartins.com/p/website/internal/cdocs"
+	"rafaelmartins.com/p/website/internal/github"
+	"rafaelmartins.com/p/website/internal/ogimage"
+	"rafaelmartins.com/p/website/internal/runner"
+	"rafaelmartins.com/p/website/internal/templates"
 )
 
 type CDocs struct {

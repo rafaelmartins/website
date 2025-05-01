@@ -11,12 +11,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/rafaelmartins/website/internal/content/frontmatter"
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/ast"
 	"github.com/yuin/goldmark/parser"
 	"github.com/yuin/goldmark/text"
 	"github.com/yuin/goldmark/util"
+	"rafaelmartins.com/p/website/internal/content/frontmatter"
 )
 
 var pcTitleKey = parser.NewContextKey()
