@@ -24,7 +24,7 @@ var mimeTypes = []*mimeType{
 	{"application/json", []string{".json"}},
 	{"image/svg+xml", []string{".svg"}},
 	{"text/css", []string{".css"}},
-	{"text/html", []string{".html", ".htm"}},
+	// {"text/html", []string{".html", ".htm"}},
 	{"text/javascript", []string{".js", ".jsm"}},
 	{"text/xml", []string{".xml", ".xsl", ".rss", ".xslt", ".xsd", ".wsdl", ".wsf", ".atom"}},
 }
