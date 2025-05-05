@@ -53,7 +53,7 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 		runner.NewTaskGroup(
 			&tasks.NpmPackage{
 				Name:    "bulma",
-				Version: "1.0.3",
+				Version: "1.0.4",
 				Files: []string{
 					"css/versions/bulma-no-dark-mode.min.css",
 				},
