@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/goccy/go-yaml"
+	"go.yaml.in/yaml/v3"
 )
 
 type Config struct {
@@ -228,7 +228,8 @@ func New(file string) (*Config, error) {
 		return nil, err
 	}
 
-	dec := yaml.NewDecoder(f, yaml.DisallowUnknownField())
+	dec := yaml.NewDecoder(f)
+	dec.KnownFields(true)
 
 	rv := &Config{
 		file: file,

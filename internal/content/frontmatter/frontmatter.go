@@ -5,7 +5,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/goccy/go-yaml"
+	"go.yaml.in/yaml/v3"
 )
 
 type FrontMatterDate struct {
