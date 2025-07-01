@@ -12,9 +12,9 @@ type FrontMatterDate struct {
 	time.Time
 }
 
-func (d *FrontMatterDate) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (d *FrontMatterDate) UnmarshalYAML(node *yaml.Node) error {
 	s := ""
-	if err := unmarshal(&s); err != nil {
+	if err := node.Decode(&s); err != nil {
 		return err
 	}
 
