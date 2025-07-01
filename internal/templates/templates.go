@@ -94,7 +94,7 @@ type ContentEntry struct {
 	Post    *PostContentEntry
 	Project *ProjectContentEntry
 	CDocs   *cdocs.TemplateCtx
-	Extra   map[string]interface{}
+	Extra   map[string]any
 }
 
 type ContentPagination struct {
@@ -117,7 +117,7 @@ type ContentContext struct {
 	Entries     []*ContentEntry
 	Atom        *AtomContentEntry
 	Pagination  *ContentPagination
-	Extra       map[string]interface{}
+	Extra       map[string]any
 }
 
 var gen *meta.Metadata

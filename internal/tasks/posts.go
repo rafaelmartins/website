@@ -25,7 +25,7 @@ type postTaskImpl struct {
 	source          *generators.ContentSource
 	highlightStyle  string
 	template        string
-	templateCtx     map[string]interface{}
+	templateCtx     map[string]any
 	layoutCtx       *templates.LayoutContext
 }
 
@@ -58,7 +58,7 @@ type Posts struct {
 	HighlightStyle  string
 	BaseDestination string
 	Template        string
-	TemplateCtx     map[string]interface{}
+	TemplateCtx     map[string]any
 	WithSidebar     bool
 }
 

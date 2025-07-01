@@ -29,7 +29,7 @@ type paginationTaskImpl struct {
 	slug            string
 	highlightStyle  string
 	template        string
-	templateCtx     map[string]interface{}
+	templateCtx     map[string]any
 	pagination      *templates.ContentPagination
 	layoutCtx       *templates.LayoutContext
 
@@ -85,7 +85,7 @@ type Pagination struct {
 	HighlightStyle  string
 	BaseDestination string
 	Template        string
-	TemplateCtx     map[string]interface{}
+	TemplateCtx     map[string]any
 	WithSidebar     bool
 
 	OpenGraphTitle         string

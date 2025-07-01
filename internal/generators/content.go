@@ -32,7 +32,7 @@ type Content struct {
 	ExtraDependencies []string
 	HighlightStyle    string
 	Template          string
-	TemplateCtx       map[string]interface{}
+	TemplateCtx       map[string]any
 	Pagination        *templates.ContentPagination
 	LayoutCtx         *templates.LayoutContext
 

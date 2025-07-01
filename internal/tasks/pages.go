@@ -17,7 +17,7 @@ type pageTaskImpl struct {
 	highlightStyle    string
 	prettyURL         bool
 	template          string
-	templateCtx       map[string]interface{}
+	templateCtx       map[string]any
 	layoutCtx         *templates.LayoutContext
 
 	openGraphTitle         string
@@ -90,7 +90,7 @@ type Pages struct {
 	PrettyURL         bool
 	BaseDestination   string
 	Template          string
-	TemplateCtx       map[string]interface{}
+	TemplateCtx       map[string]any
 	WithSidebar       bool
 }
 

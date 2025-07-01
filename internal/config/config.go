@@ -143,27 +143,27 @@ type Config struct {
 				} `yaml:"image-gen"`
 			} `yaml:"opengraph"`
 		} `yaml:"sources"`
-		ExtraDependencies []string               `yaml:"extra-dependencies"`
-		HighlightStyle    string                 `yaml:"highlight-style"`
-		PrettyURL         *bool                  `yaml:"pretty-url"`
-		BaseDestination   string                 `yaml:"base-destination"`
-		Template          string                 `yaml:"template"`
-		TemplateCtx       map[string]interface{} `yaml:"template-context"`
-		WithSidebar       bool                   `yaml:"with-sidebar"`
+		ExtraDependencies []string       `yaml:"extra-dependencies"`
+		HighlightStyle    string         `yaml:"highlight-style"`
+		PrettyURL         *bool          `yaml:"pretty-url"`
+		BaseDestination   string         `yaml:"base-destination"`
+		Template          string         `yaml:"template"`
+		TemplateCtx       map[string]any `yaml:"template-context"`
+		WithSidebar       bool           `yaml:"with-sidebar"`
 	} `yaml:"pages"`
 
 	Posts struct {
-		Title              string                 `yaml:"title"`
-		Description        string                 `yaml:"description"`
-		PostsPerPage       int                    `yaml:"posts-per-page"`
-		PostsPerPageAtom   int                    `yaml:"posts-per-page-atom"`
-		SortReverse        *bool                  `yaml:"sort-reverse"`
-		HighlightStyle     string                 `yaml:"highlight-style"`
-		BaseDestination    string                 `yaml:"base-destination"`
-		TemplateAtom       string                 `yaml:"template-atom"`
-		TemplatePagination string                 `yaml:"template-pagination"`
-		TemplateCtx        map[string]interface{} `yaml:"template-context"`
-		WithSidebar        bool                   `yaml:"with-sidebar"`
+		Title              string         `yaml:"title"`
+		Description        string         `yaml:"description"`
+		PostsPerPage       int            `yaml:"posts-per-page"`
+		PostsPerPageAtom   int            `yaml:"posts-per-page-atom"`
+		SortReverse        *bool          `yaml:"sort-reverse"`
+		HighlightStyle     string         `yaml:"highlight-style"`
+		BaseDestination    string         `yaml:"base-destination"`
+		TemplateAtom       string         `yaml:"template-atom"`
+		TemplatePagination string         `yaml:"template-pagination"`
+		TemplateCtx        map[string]any `yaml:"template-context"`
+		WithSidebar        bool           `yaml:"with-sidebar"`
 		OpenGraph          struct {
 			Title       string `yaml:"title"`
 			Description string `yaml:"description"`
@@ -176,19 +176,19 @@ type Config struct {
 		} `yaml:"opengraph"`
 
 		Groups []*struct {
-			Title              string                 `yaml:"title"`
-			Description        string                 `yaml:"description"`
-			SourceDir          string                 `yaml:"source-dir"`
-			PostsPerPage       int                    `yaml:"posts-per-page"`
-			PostsPerPageAtom   int                    `yaml:"posts-per-page-atom"`
-			SortReverse        *bool                  `yaml:"sort-reverse"`
-			HighlightStyle     string                 `yaml:"highlight-style"`
-			BaseDestination    string                 `yaml:"base-destination"`
-			Template           string                 `yaml:"template"`
-			TemplateAtom       string                 `yaml:"template-atom"`
-			TemplatePagination string                 `yaml:"template-pagination"`
-			TemplateCtx        map[string]interface{} `yaml:"template-context"`
-			WithSidebar        bool                   `yaml:"with-sidebar"`
+			Title              string         `yaml:"title"`
+			Description        string         `yaml:"description"`
+			SourceDir          string         `yaml:"source-dir"`
+			PostsPerPage       int            `yaml:"posts-per-page"`
+			PostsPerPageAtom   int            `yaml:"posts-per-page-atom"`
+			SortReverse        *bool          `yaml:"sort-reverse"`
+			HighlightStyle     string         `yaml:"highlight-style"`
+			BaseDestination    string         `yaml:"base-destination"`
+			Template           string         `yaml:"template"`
+			TemplateAtom       string         `yaml:"template-atom"`
+			TemplatePagination string         `yaml:"template-pagination"`
+			TemplateCtx        map[string]any `yaml:"template-context"`
+			WithSidebar        bool           `yaml:"with-sidebar"`
 			OpenGraph          struct {
 				Title       string `yaml:"title"`
 				Description string `yaml:"description"`
