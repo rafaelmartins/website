@@ -13,6 +13,7 @@ import (
 	highlighting "github.com/yuin/goldmark-highlighting/v2"
 	"github.com/yuin/goldmark/extension"
 	"github.com/yuin/goldmark/parser"
+	rhtml "github.com/yuin/goldmark/renderer/html"
 	"rafaelmartins.com/p/website/internal/content/frontmatter"
 )
 
@@ -41,6 +42,7 @@ func mkdRender(src []byte, style string, pc parser.Context, ext ...goldmark.Exte
 		goldmark.WithParserOptions(
 			parser.WithAutoHeadingID(),
 		),
+		goldmark.WithRendererOptions(rhtml.WithUnsafe()),
 	)
 
 	if pc == nil {
