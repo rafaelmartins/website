@@ -25,7 +25,10 @@ func (*HTTP) GetID() string {
 
 func (h *HTTP) GetReader() (io.ReadCloser, error) {
 	resp, err := http.Get(h.Url)
-	return resp.Body, err
+	if err != nil {
+		return nil, err
+	}
+	return resp.Body, nil
 }
 
 func (h *HTTP) GetTimeStamps() ([]time.Time, error) {
