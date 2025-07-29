@@ -9,6 +9,15 @@ import (
 	"rafaelmartins.com/p/website/internal/runner"
 )
 
+type HttpError struct {
+	StatusCode int
+	Status     string
+}
+
+func (e *HttpError) Error() string {
+	return "http: " + e.Status
+}
+
 type HTTP struct {
 	Url       string
 	Header    http.Header
@@ -27,6 +36,13 @@ func (h *HTTP) GetReader() (io.ReadCloser, error) {
 	resp, err := http.Get(h.Url)
 	if err != nil {
 		return nil, err
+	}
+	if resp.StatusCode >= 400 {
+		resp.Body.Close()
+		return nil, &HttpError{
+			StatusCode: resp.StatusCode,
+			Status:     resp.Status,
+		}
 	}
 	return resp.Body, nil
 }
