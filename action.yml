@@ -54,7 +54,6 @@ runs:
       uses: actions/setup-go@v5
       with:
         go-version: stable
-        go-version-file: .build/website/go.mod
         cache-dependency-path: .build/website/go.sum
 
     - name: Build binary
