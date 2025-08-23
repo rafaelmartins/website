@@ -19,4 +19,4 @@ inputs:
 
 runs:
   using: docker
-  image: ghcr.io/rafaelmartins/website:latest
+  image: docker://ghcr.io/rafaelmartins/website:latest
