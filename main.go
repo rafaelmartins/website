@@ -9,6 +9,7 @@ import (
 	"rafaelmartins.com/p/website/internal/cdocs"
 	"rafaelmartins.com/p/website/internal/config"
 	"rafaelmartins.com/p/website/internal/generators"
+	"rafaelmartins.com/p/website/internal/kicad"
 	"rafaelmartins.com/p/website/internal/meta"
 	"rafaelmartins.com/p/website/internal/ogimage"
 	"rafaelmartins.com/p/website/internal/runner"
@@ -24,6 +25,7 @@ var (
 	fCDocs      = flag.String("x", "", "dump cdocs ast and template context for given header and exit")
 	fRunServer  = flag.Bool("r", false, "run development server")
 	fForce      = flag.Bool("f", false, "force re-running all tasks")
+	fKicad      = flag.Bool("k", false, "generate kicad pcb assets and exit")
 	fVersion    = flag.Bool("v", false, "show version and exit")
 
 	cfg        *config.Config      = nil
@@ -428,6 +430,23 @@ func main() {
 			log.Fatalf("error: %s", err)
 		}
 		fmt.Printf("%s\n", md)
+		return
+	}
+
+	if *fKicad {
+		cfg, err := kicad.NewConfig(*fConfigFile)
+		if err != nil {
+			log.Fatalf("error: %s", err)
+		}
+
+		k, err := kicad.GetTasksGroups(cfg)
+		if err != nil {
+			log.Fatalf("error: %s", err)
+		}
+
+		if err := runner.Run(k, *fBuildDir, nil, force); err != nil {
+			log.Fatalf("error: %s", err)
+		}
 		return
 	}
 
