@@ -9,6 +9,7 @@ import (
 	"rafaelmartins.com/p/website/internal/cdocs"
 	"rafaelmartins.com/p/website/internal/config"
 	"rafaelmartins.com/p/website/internal/generators"
+	"rafaelmartins.com/p/website/internal/kicad"
 	"rafaelmartins.com/p/website/internal/meta"
 	"rafaelmartins.com/p/website/internal/ogimage"
 	"rafaelmartins.com/p/website/internal/runner"
@@ -24,9 +25,11 @@ var (
 	fCDocs      = flag.String("x", "", "dump cdocs ast and template context for given header and exit")
 	fRunServer  = flag.Bool("r", false, "run development server")
 	fForce      = flag.Bool("f", false, "force re-running all tasks")
+	fKicad      = flag.Bool("k", false, "kicad assets mode")
 	fVersion    = flag.Bool("v", false, "show version and exit")
 
 	cfg        *config.Config      = nil
+	kcfg       *kicad.Config       = nil
 	taskGroups []*runner.TaskGroup = nil
 
 	force = false
@@ -415,6 +418,28 @@ func build() error {
 	return err
 }
 
+func buildKicad() error {
+	if force || kcfg == nil || !kcfg.IsUpToDate() {
+		var err error
+		kcfg, err = kicad.NewConfig(*fConfigFile)
+		if err != nil {
+			return err
+		}
+
+		tg, err := kicad.GetTasksGroups(kcfg)
+		if err != nil {
+			return err
+		}
+		taskGroups = tg
+	}
+	err := runner.Run(taskGroups, *fBuildDir, kcfg, force)
+	if force {
+		// force only first time
+		force = false
+	}
+	return err
+}
+
 func main() {
 	flag.Parse()
 
@@ -451,12 +476,17 @@ func main() {
 
 	force = *fForce
 
+	buildFunc := build
+	if *fKicad {
+		buildFunc = buildKicad
+	}
+
 	if *fRunServer {
-		if err := webserver.ListenAndServeWithReloader(*fListenAddr, *fBuildDir, build); err != nil {
+		if err := webserver.ListenAndServeWithReloader(*fListenAddr, *fBuildDir, buildFunc); err != nil {
 			log.Fatalf("error: %s", err)
 		}
 	} else {
-		if err := build(); err != nil {
+		if err := buildFunc(); err != nil {
 			log.Fatalf("error: %s", err)
 		}
 	}

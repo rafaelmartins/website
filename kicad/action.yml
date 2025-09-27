@@ -1,0 +1,22 @@
+name: 'Run rafaelmartins.com/p/website to generate Kicad assets'
+description: 'Run rafaelmartins.com/p/website to generate Kicad assets'
+
+inputs:
+  source:
+    description: 'Directory where the source files reside.'
+    required: false
+    default: .
+
+  destination:
+    description: 'Output directory of the build.'
+    required: false
+    default: _build
+
+  configuration:
+    description: 'Configuration file.'
+    required: false
+    default: config.yml
+
+runs:
+  using: docker
+  image: docker://ghcr.io/rafaelmartins/website:kicad-latest
