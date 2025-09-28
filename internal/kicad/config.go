@@ -18,13 +18,16 @@ func (x XYZ) String() string {
 }
 
 type PcbRenderConfig struct {
-	Width  int      `yaml:"width"`
-	Height int      `yaml:"height"`
-	Zoom   float64  `yaml:"zoom"`
-	Pan    *XYZ     `yaml:"pan"`
-	Rotate *XYZ     `yaml:"rotate"`
-	Scales []int    `yaml:"scales"`
-	Sides  []string `yaml:"sides"`
+	Width      int      `yaml:"width"`
+	Height     int      `yaml:"height"`
+	Zoom       float64  `yaml:"zoom"`
+	Pan        *XYZ     `yaml:"pan"`
+	Rotate     *XYZ     `yaml:"rotate"`
+	Scales     []int    `yaml:"scales"`
+	Sides      []string `yaml:"sides"`
+	PresetFile string   `yaml:"preset-file"`
+	IncludeDNP bool     `yaml:"include-dnp"`
+	preset     string
 }
 
 type SchExportPdfConfig struct {

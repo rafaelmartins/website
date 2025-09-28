@@ -81,6 +81,12 @@ func (t *Task) GetReader() (io.ReadCloser, error) {
 		data.SchExportPdf = t.Project.SchExportPdfFilename(t.Config.SchExportPdf)
 	}
 
+	var err error
+	t.Config.PcbRender.preset, err = Patch3dPreset(t.Project.cli, t.Config.PcbRender.PresetFile, t.Config.PcbRender.IncludeDNP)
+	if err != nil {
+		return nil, err
+	}
+
 	buf := &bytes.Buffer{}
 	if err := json.NewEncoder(buf).Encode(data); err != nil {
 		return nil, err

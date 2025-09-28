@@ -68,6 +68,10 @@ func (k *KicadProject) PcbRender(ch chan *runner.GeneratorByProduct, config *Pcb
 			"--side", side,
 		}
 
+		if config.preset != "" {
+			args = append(args, "--preset", config.preset)
+		}
+
 		if config.Pan != nil {
 			args = append(args, "--pan", config.Pan.String())
 		}
