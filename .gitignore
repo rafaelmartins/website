@@ -1,5 +1,5 @@
 # Binaries for programs and plugins
-website*
+/website*
 *.exe
 *.exe~
 *.dll

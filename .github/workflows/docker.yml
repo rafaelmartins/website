@@ -46,6 +46,7 @@ jobs:
       - uses: docker/build-push-action@v6
         with:
           context: .
+          file: cmd/website/Dockerfile
           push: true
           tags: ${{ steps.tags.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -74,7 +75,7 @@ jobs:
           mkdir -p "${{ matrix.source }}"
           echo "---" > "${{ matrix.config }}"
 
-      - uses: ./
+      - uses: ./cmd/website
         with:
           source: ${{ matrix.source }}
           destination: ${{ matrix.destination }}
