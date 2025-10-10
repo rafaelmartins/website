@@ -63,16 +63,12 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 		runner.NewTaskGroup(
 			&tasks.NpmPackage{
 				Name:    "@fortawesome/fontawesome-free",
-				Version: "6.7.2",
+				Version: "7.1.0",
 				Files: []string{
 					"css/all.min.css",
-					"webfonts/fa-brands-400.ttf",
 					"webfonts/fa-brands-400.woff2",
-					"webfonts/fa-regular-400.ttf",
 					"webfonts/fa-regular-400.woff2",
-					"webfonts/fa-solid-900.ttf",
 					"webfonts/fa-solid-900.woff2",
-					"webfonts/fa-v4compatibility.ttf",
 					"webfonts/fa-v4compatibility.woff2",
 				},
 				BaseDestination: assetsDir,
@@ -91,7 +87,7 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 		runner.NewTaskGroup(
 			&tasks.NpmPackage{
 				Name:    "@fontsource-variable/nunito",
-				Version: "5.2.6",
+				Version: "5.2.7",
 				Files: []string{
 					"wght.min.css",
 					"files/nunito-cyrillic-ext-wght-normal.woff2",

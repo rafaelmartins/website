@@ -63,7 +63,7 @@
           {{- range .Config.SocialLinks }}
           <a class="navbar-item is-hidden-desktop is-hidden-mobile" href="{{ requiredAttr .URL }}" aria-label="{{ requiredAttr .Label }}">
             <span class="icon">
-              <i class="fas fa-lg fa-brands fa-{{ requiredAttr .Icon }}"></i>
+              <i class="fa-lg fa-brands fa-{{ requiredAttr .Icon }}"></i>
             </span>
           </a>
           {{- end }}
@@ -99,7 +99,7 @@
             {{- range .Config.SocialLinks }}
             <a class="navbar-item is-hidden-touch" href="{{ requiredAttr .URL }}" aria-label="{{ requiredAttr .Label }}">
               <span class="icon">
-                <i class="fas fa-lg fa-brands fa-{{ requiredAttr .Icon }}"></i>
+                <i class="fa-lg fa-brands fa-{{ requiredAttr .Icon }}"></i>
               </span>
             </a>
             {{- end }}
@@ -127,7 +127,7 @@
           {{- range .Config.SocialLinks }}
           <a href="{{ requiredAttr .URL }}" aria-label="{{ requiredAttr .Label }}">
             <span class="icon is-large has-text-grey-dark">
-              <i class="fas fa-2x fa-brands fa-{{ requiredAttr .Icon }}"></i>
+              <i class="fa-2x fa-brands fa-{{ requiredAttr .Icon }}"></i>
             </span>
           </a>
           {{- end }}
