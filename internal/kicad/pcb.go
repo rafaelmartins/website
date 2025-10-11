@@ -84,7 +84,7 @@ func (k *KicadProject) PcbRender(ch chan *runner.GeneratorByProduct, cli *KicadC
 			)
 		} else {
 			args = append(args,
-				"--no-use-board-stackup-colors",
+				"--use-board-stackup-colors",
 			)
 		}
 
