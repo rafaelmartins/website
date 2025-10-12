@@ -6,6 +6,7 @@ import (
 	"io"
 	"time"
 
+	"rafaelmartins.com/p/website/internal/meta"
 	"rafaelmartins.com/p/website/internal/runner"
 )
 
@@ -75,20 +76,30 @@ func (*Task) GetID() string {
 }
 
 func (t *Task) GetReader() (io.ReadCloser, error) {
+	md, err := meta.GetMetadata()
+	if err != nil {
+		return nil, err
+	}
+
 	data := struct {
 		Version      int                         `json:"version"`
+		Name         string                      `json:"name"`
+		Revision     string                      `json:"revision"`
 		PcbRender    map[string][]*PcbRenderFile `json:"pcb-render"`
 		PcbIbom      string                      `json:"pcb-ibom"`
 		SchExportPdf string                      `json:"sch-export-pdf"`
 		Tools        map[string]string           `json:"tools"`
 	}{
 		Version:      1,
+		Name:         t.Project.Name(),
+		Revision:     t.Project.Revision(),
 		PcbRender:    t.Project.PcbRenderFiles(t.Config.PcbRender),
 		PcbIbom:      t.Project.PcbIbomFilename(t.Config.PcbIbom),
 		SchExportPdf: t.Project.SchExportPdfFilename(t.Config.SchExportPdf),
 		Tools: map[string]string{
 			"Kicad":              t.KicadCli.Version(),
 			"InteractiveHtmlBom": t.InteractiveHtmlBom.Version(),
+			md.Name:              md.Version,
 		},
 	}
 
