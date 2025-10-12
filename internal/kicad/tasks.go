@@ -103,7 +103,7 @@ func (t *Task) GetReader() (io.ReadCloser, error) {
 		},
 	}
 
-	preset, err := Patch3dPreset(t.KicadCli, t.Config.PcbRender.PresetFile, t.Config.PcbRender.IncludeDNP)
+	preset, err := Patch3dLayers(t.KicadCli, t.Config.PcbRender.PresetFile, t.Config.PcbRender.IncludeDNP)
 	if err != nil {
 		return nil, err
 	}

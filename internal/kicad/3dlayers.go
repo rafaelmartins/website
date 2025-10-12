@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-func Patch3dPreset(cli *KicadCli, presetFile string, includeDnp bool) (string, error) {
+func Patch3dLayers(cli *KicadCli, presetFile string, includeDnp bool) (string, error) {
 	if runtime.GOOS != "linux" || os.Getenv("CI") != "true" {
 		return "", nil
 	}
