@@ -59,20 +59,38 @@ type ProjectContentDocLink struct {
 	Icon  string
 }
 
+type ProjectContentKicadProjectPcbRenderFile struct {
+	Scale int
+	File  string
+}
+
+type ProjectContentKicadProject struct {
+	Name                string
+	Revision            string
+	PcbRenderTopMain    string
+	PcbRenderBottomMain string
+	PcbRenderTop        []*ProjectContentKicadProjectPcbRenderFile
+	PcbRenderBottom     []*ProjectContentKicadProjectPcbRenderFile
+	PcbIbom             string
+	SchExportPdf        string
+	Tools               map[string]string
+}
+
 type ProjectContentEntry struct {
-	Owner        string
-	Repo         string
-	URL          string
-	Description  string
-	DocLinks     []*ProjectContentDocLink
-	GoImport     string
-	GoRepo       string
-	CDocsEnabled bool
-	CDocsURL     string
-	Stars        int
-	Watching     int
-	Forks        int
-	License      struct {
+	Owner         string
+	Repo          string
+	URL           string
+	Description   string
+	DocLinks      []*ProjectContentDocLink
+	KicadProjects []*ProjectContentKicadProject
+	GoImport      string
+	GoRepo        string
+	CDocsEnabled  bool
+	CDocsURL      string
+	Stars         int
+	Watching      int
+	Forks         int
+	License       struct {
 		SPDX string
 		URL  string
 	}

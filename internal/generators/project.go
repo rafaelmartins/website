@@ -3,8 +3,10 @@ package generators
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
+	"net/http"
 	"net/url"
 	"path"
 	"path/filepath"
@@ -31,6 +33,8 @@ type Project struct {
 	GoRepo   string
 
 	CDocsURL string
+
+	KicadProjects []string
 
 	URL       string
 	Template  string
@@ -97,6 +101,14 @@ func (p *Project) GetReader() (io.ReadCloser, error) {
 		GoImport: p.GoImport,
 		GoRepo:   p.GoRepo,
 		CDocsURL: p.CDocsURL,
+	}
+
+	for _, url := range p.KicadProjects {
+		prj, err := getKicadProject(url)
+		if err != nil {
+			return nil, err
+		}
+		proj.KicadProjects = append(proj.KicadProjects, prj)
 	}
 
 	rbody, err := github.Request(nil, "GET", "repos/"+p.Owner+"/"+p.Repo, nil)
@@ -439,4 +451,118 @@ func fixSubPageHtmlImg(img string, subpage string) string {
 		absImg = path.Join(absSubpage, skipFolder, img)
 	}
 	return path.Join("images", absImg)
+}
+
+func getKicadProject(iurl string) (*templates.ProjectContentKicadProject, error) {
+	resp, err := http.Get(iurl)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode >= 400 {
+		return nil, fmt.Errorf("project: kicad: http error: %d - %s", resp.StatusCode, resp.Status)
+	}
+
+	data := map[string]any{}
+	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
+		return nil, err
+	}
+
+	version, ok := data["version"]
+	if !ok {
+		return nil, errors.New("project: kicad: version field not found")
+	}
+
+	fversion, ok := version.(float64)
+	if !ok {
+		return nil, errors.New("project: kicad: version is not an integer")
+	}
+	iversion := int(fversion)
+
+	rv := templates.ProjectContentKicadProject{}
+
+	switch iversion {
+	case 1:
+		rv.Name = data["name"].(string)
+		rv.Revision = data["revision"].(string)
+
+		if d, ok := data["sch-export-pdf"].(string); ok && d != "" {
+			sch, err := url.JoinPath(iurl, d)
+			if err != nil {
+				return nil, err
+			}
+			rv.SchExportPdf = sch
+		}
+
+		if d, ok := data["pcb-ibom"].(string); ok && d != "" {
+			ibom, err := url.JoinPath(iurl, d)
+			if err != nil {
+				return nil, err
+			}
+			rv.PcbIbom = ibom
+		}
+
+		if d, ok := data["pcb-render"].(map[string]any); ok && d != nil {
+			for side, v := range d {
+				if side != "top" && side != "bottom" {
+					continue
+				}
+
+				if l, ok := v.([]any); ok {
+					for _, m := range l {
+						if mm, ok := m.(map[string]any); ok {
+							img, err := url.JoinPath(iurl, mm["file"].(string))
+							if err != nil {
+								return nil, err
+							}
+
+							if side == "top" {
+								rv.PcbRenderTop = append(rv.PcbRenderTop, &templates.ProjectContentKicadProjectPcbRenderFile{
+									Scale: int(mm["scale"].(float64)),
+									File:  img,
+								})
+							} else {
+								rv.PcbRenderBottom = append(rv.PcbRenderBottom, &templates.ProjectContentKicadProjectPcbRenderFile{
+									Scale: int(mm["scale"].(float64)),
+									File:  img,
+								})
+							}
+						}
+					}
+				}
+			}
+		}
+
+		if d, ok := data["tools"].(map[string]any); ok {
+			tools := map[string]string{}
+			for tool, version := range d {
+				tools[tool] = version.(string)
+			}
+			rv.Tools = tools
+		}
+
+	default:
+		return nil, fmt.Errorf("project: kicad: unsupported version: %d", iversion)
+	}
+
+	scale := 0
+	for _, rf := range rv.PcbRenderTop {
+		if rf.Scale >= scale {
+			rv.PcbRenderTopMain = rf.File
+			scale = rf.Scale
+		}
+	}
+
+	scale = 0
+	for _, rf := range rv.PcbRenderBottom {
+		if rf.Scale >= scale {
+			rv.PcbRenderBottomMain = rf.File
+			scale = rf.Scale
+		}
+	}
+
+	fmt.Printf("%+v\n", rv)
+
+	return &rv, nil
 }

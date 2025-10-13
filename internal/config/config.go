@@ -101,7 +101,8 @@ type Config struct {
 					} `yaml:"image-gen"`
 				} `yaml:"opengraph"`
 			} `yaml:"c-docs"`
-			DocLinks []struct {
+			KicadProjects []string `yaml:"kicad-projects"`
+			DocLinks      []struct {
 				URL   string `yaml:"url"`
 				Label string `yaml:"label"`
 				Icon  string `yaml:"icon"`

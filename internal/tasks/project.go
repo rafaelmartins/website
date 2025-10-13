@@ -21,6 +21,8 @@ type projectTaskImpl struct {
 	subPages []string
 	docLinks []*templates.ProjectContentDocLink
 
+	kicadProjects []string
+
 	goImport string
 	goRepo   string
 
@@ -65,6 +67,8 @@ func (t *projectTaskImpl) GetGenerator() (runner.Generator, error) {
 
 		SubPages: t.subPages,
 		DocLinks: t.docLinks,
+
+		KicadProjects: t.kicadProjects,
 
 		GoImport: t.goImport,
 		GoRepo:   t.goRepo,
@@ -154,6 +158,8 @@ type Project struct {
 	SubPages []*ProjectSubPage
 	DocLinks []*templates.ProjectContentDocLink
 
+	KicadProjects []string
+
 	GoImport string
 	GoRepo   string
 
@@ -213,6 +219,7 @@ func (p *Project) GetTasks() ([]*runner.Task, error) {
 				repo:             p.Repo,
 				subPages:         subpages,
 				docLinks:         p.DocLinks,
+				kicadProjects:    p.KicadProjects,
 				goImport:         p.GoImport,
 				goRepo:           p.GoRepo,
 				cdocsDestination: cdocsDestination,

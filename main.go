@@ -331,6 +331,8 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 						SubPages: subPages,
 						DocLinks: docLinks,
 
+						KicadProjects: repo.KicadProjects,
+
 						GoImport: repo.Go.Import,
 						GoRepo:   repo.Go.Repo,
 
