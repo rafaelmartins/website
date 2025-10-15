@@ -1,6 +1,7 @@
 package tasks
 
 import (
+	"os"
 	"path/filepath"
 
 	"rafaelmartins.com/p/website/internal/generators"
@@ -34,7 +35,13 @@ func (f *Files) GetTasks() ([]*runner.Task, error) {
 			return nil, err
 		}
 		for _, pp := range ps {
-			rv = append(rv, runner.NewTask(f, fileTaskImpl(pp)))
+			st, err := os.Stat(pp)
+			if err != nil {
+				return nil, err
+			}
+			if st.Mode().IsRegular() {
+				rv = append(rv, runner.NewTask(f, fileTaskImpl(pp)))
+			}
 		}
 	}
 	return rv, nil
