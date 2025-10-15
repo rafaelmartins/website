@@ -5,6 +5,7 @@ import (
 	"io"
 	"path/filepath"
 	"slices"
+	"sync"
 
 	"github.com/tdewolff/minify/v2"
 	"github.com/tdewolff/minify/v2/css"
@@ -30,10 +31,11 @@ var mimeTypes = []*mimeType{
 }
 
 type Minify struct {
-	m *minify.M
+	m  sync.Mutex
+	mi *minify.M
 }
 
-func (Minify) Supported(ext string) bool {
+func (*Minify) Supported(ext string) bool {
 	for _, mt := range mimeTypes {
 		if slices.Contains(mt.extensions, ext) {
 			return true
@@ -43,29 +45,32 @@ func (Minify) Supported(ext string) bool {
 }
 
 func (m *Minify) Run(dstFn string, dst io.Writer, src io.Reader) error {
-	if m.m == nil {
-		m.m = minify.New()
+	m.m.Lock()
+	defer m.m.Unlock()
 
-		m.m.Add("application/json", &json.Minifier{})
-		m.m.Add("image/svg+xml", &svg.Minifier{
+	if m.mi == nil {
+		m.mi = minify.New()
+
+		m.mi.Add("application/json", &json.Minifier{})
+		m.mi.Add("image/svg+xml", &svg.Minifier{
 			KeepComments: false,
 			Precision:    0,
 		})
-		m.m.Add("text/css", &css.Minifier{
+		m.mi.Add("text/css", &css.Minifier{
 			Precision: 0,
 			KeepCSS2:  true,
 		})
-		m.m.Add("text/html", &html.Minifier{
+		m.mi.Add("text/html", &html.Minifier{
 			KeepDocumentTags:    true,
 			KeepSpecialComments: true,
 			KeepEndTags:         true,
 			KeepDefaultAttrVals: true,
 			KeepWhitespace:      false,
 		})
-		m.m.Add("text/javascript", &js.Minifier{
+		m.mi.Add("text/javascript", &js.Minifier{
 			Version: 2022,
 		})
-		m.m.Add("text/xml", &xml.Minifier{
+		m.mi.Add("text/xml", &xml.Minifier{
 			KeepWhitespace: false,
 		})
 	}
@@ -85,5 +90,5 @@ func (m *Minify) Run(dstFn string, dst io.Writer, src io.Reader) error {
 	if mtt == "" {
 		return fmt.Errorf("postproc: minify: invalid extension: %s", ext)
 	}
-	return m.m.Minify(mtt, dst, src)
+	return m.mi.Minify(mtt, dst, src)
 }
