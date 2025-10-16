@@ -57,16 +57,12 @@ func GetMetadata() (*Metadata, error) {
 		return nil, errors.New("version: build info not available")
 	}
 
-	isGit := false
 	rv := &Metadata{}
-
 	for _, s := range bi.Settings {
 		switch s.Key {
 
 		case "vcs":
-			if s.Value == "git" {
-				isGit = true
-			} else {
+			if s.Value != "git" {
 				return nil, errors.New("meta: vcs is not git")
 			}
 
@@ -86,11 +82,6 @@ func GetMetadata() (*Metadata, error) {
 		case "GOOS":
 			rv.Go.OS = s.Value
 		}
-	}
-
-	if !isGit {
-		// assume that we are on a different worktree during development
-		rv.Git.Revision = "0000000"
 	}
 
 	rv.Name = bi.Path
