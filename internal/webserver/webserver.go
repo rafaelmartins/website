@@ -2,6 +2,7 @@ package webserver
 
 import (
 	"errors"
+	"io/fs"
 	"log"
 	"net/http"
 	"runtime"
@@ -28,19 +29,46 @@ func (w *rwWrapper) WriteHeader(statusCode int) {
 	w.rw.WriteHeader(statusCode)
 }
 
+type fsWrapper struct {
+	dir http.FileSystem
+}
+
+func (f *fsWrapper) Open(name string) (http.File, error) {
+	fp, err := f.dir.Open(name)
+	if err == nil {
+		return fp, nil
+	}
+	if !errors.Is(err, fs.ErrNotExist) {
+		return nil, err
+	}
+
+	efp, eerr := f.dir.Open("404.html")
+	if eerr != nil {
+		efp, eerr = f.dir.Open("404/index.html")
+		if eerr != nil {
+			return nil, err // original error
+		}
+	}
+	return efp, nil
+}
+
 func ListenAndServeWithReloader(addr string, dir string, cb func() error) error {
 	exit := make(chan error)
 	reload := make(chan bool)
+
+	mux := http.NewServeMux()
+	mux.Handle("/", http.FileServer(&fsWrapper{
+		dir: http.Dir(dir),
+	}))
 
 	server := &http.Server{
 		Addr: addr,
 		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			rw := &rwWrapper{rw: w}
-			http.DefaultServeMux.ServeHTTP(rw, r)
+			mux.ServeHTTP(rw, r)
 			log.Printf("[HTTP] %s - %s %q %s - %d", r.RemoteAddr, r.Method, r.URL, r.Proto, rw.statusCode)
 		}),
 	}
-	http.Handle("/", http.FileServer(http.Dir(dir)))
 
 	go func() {
 		log.Printf("Listening on %s ...", addr)
