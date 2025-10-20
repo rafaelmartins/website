@@ -1,0 +1,67 @@
+name: Docker (kicad)
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+
+concurrency:
+  group: docker-kicad-base
+  cancel-in-progress: true
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-and-push-image:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - id: tags
+        run: |
+          if [[ "${{ github.ref_name }}" == "main" ]]; then
+            tags="${REGISTRY}/${IMAGE_NAME}:kicad-base-latest"
+          else
+            tags="${REGISTRY}/${IMAGE_NAME}:kicad-base-${{ github.ref_name }}"
+          fi
+          echo "tags=${tags}" >> $GITHUB_OUTPUT
+
+      - id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./kicad/base/Dockerfile
+          push: true
+          tags: ${{ steps.tags.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+  # TODO: test
+
+  cleanup-images:
+    runs-on: ubuntu-latest
+    needs: build-and-push-image
+
+    steps:
+      - id: image
+        run: echo "name=$(echo "${IMAGE_NAME}" | cut -d/ -f2)" >> $GITHUB_OUTPUT
+
+      - uses: actions/delete-package-versions@v5
+        with:
+          package-name: ${{ steps.image.outputs.name }}
+          package-type: 'container'
+          delete-only-untagged-versions: 'true'
