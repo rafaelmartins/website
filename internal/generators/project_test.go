@@ -302,3 +302,48 @@ func TestFixHtmlImg(t *testing.T) {
 		}
 	}
 }
+
+func TestHandleHideComments(t *testing.T) {
+	args := []struct {
+		mkd string
+		rv  string
+	}{
+		{"# Foo\n", "# Foo\n"},
+		{"# Foo\n\n<!-- website-hide -->qweqwe<!-- /website-hide -->\n", "# Foo\n\n\n"},
+
+		{"<!-- website-hide -->hidden content<!-- /website-hide -->\n# Foo\n", "\n# Foo\n"},
+		{"<!-- website-hide -->multiple\nlines\nhidden<!-- /website-hide --># Visible", "# Visible"},
+
+		{"# Foo\n\nVisible content\n<!-- website-hide -->hidden at end<!-- /website-hide -->", "# Foo\n\nVisible content\n"},
+
+		{"# Foo\n<!-- website-hide -->hide1<!-- /website-hide -->\nVisible\n<!-- website-hide -->hide2<!-- /website-hide -->\nEnd", "# Foo\n\nVisible\n\nEnd"},
+		{"<!-- website-hide -->start<!-- /website-hide -->middle<!-- website-hide -->end<!-- /website-hide -->", "middle"},
+
+		{"# Title\n\n<!-- website-hide -->\n## Hidden Section\n\nHidden paragraph\n\n<!-- /website-hide -->\n\n## Visible Section", "# Title\n\n\n\n## Visible Section"},
+
+		{"# Foo\n<!-- website-hide --><!-- /website-hide -->\n# Bar", "# Foo\n\n# Bar"},
+		{"<!-- website-hide -->\n\n<!-- /website-hide -->Content", "Content"},
+
+		{"# Foo\n<!--   website-hide   -->content<!--   /website-hide   -->\n", "# Foo\n\n"},
+		{"Pre<!--website-hide\n-->\n  spaced content  \n<!-- /website-hide -->Post", "PrePost"},
+
+		{"Start<!-- website-hide -->hide1<!-- /website-hide --><!-- website-hide -->hide2<!-- /website-hide -->End", "StartEnd"},
+
+		{"# Test\n<!-- website-hide -->Special: !@#$%^&*()<!-- /website-hide -->\nNormal", "# Test\n\nNormal"},
+
+		{"<!-- website-hide -->Everything is hidden<!-- /website-hide -->", ""},
+
+		{"Start\n<!-- website-hide -->hide1<!-- /website-hide -->\nMiddle\n<!-- website-hide -->hide2<!-- /website-hide -->\nEnd", "Start\n\nMiddle\n\nEnd"},
+
+		{"# Foo\n<!-- website-hide -->unclosed\n# Bar", "# Foo\n"},
+		{"# Foo\nunopened<!-- /website-hide -->\n# Bar", "# Foo\nunopened\n# Bar"},
+
+		{"# Foo\n<!-- website-hide -->\n<!-- website-hide -->nested<!-- /website-hide -->\n<!-- /website-hide -->\n# Bar", "# Foo\n\n\n# Bar"},
+	}
+
+	for i, tt := range args {
+		if rv := handleHideComments(tt.mkd); rv != tt.rv {
+			t.Errorf("%d: bad rv: got %q, want %q", i, rv, tt.rv)
+		}
+	}
+}

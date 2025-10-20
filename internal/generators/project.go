@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"path"
 	"path/filepath"
+	"regexp"
 	"slices"
 	"strings"
 	"time"
@@ -20,6 +21,8 @@ import (
 	"rafaelmartins.com/p/website/internal/runner"
 	"rafaelmartins.com/p/website/internal/templates"
 )
+
+var reHideComments = regexp.MustCompile(`<!--\s*(/?)website-hide\s*-->`)
 
 type Project struct {
 	Owner   string
@@ -82,7 +85,7 @@ func (p *Project) GetReader() (io.ReadCloser, error) {
 		}
 	}
 
-	mkr, err := github.Markdown(nil, p.Owner, p.Repo, mks)
+	mkr, err := github.Markdown(nil, p.Owner, p.Repo, handleHideComments(mks))
 	if err != nil {
 		return nil, err
 	}
@@ -451,6 +454,33 @@ func fixSubPageHtmlImg(img string, subpage string) string {
 		absImg = path.Join(absSubpage, skipFolder, img)
 	}
 	return path.Join("images", absImg)
+}
+
+func handleHideComments(mkd string) string {
+	m := reHideComments.FindAllStringSubmatchIndex(mkd, -1)
+	if m == nil {
+		return mkd
+	}
+
+	idx := 0
+	hiding := false
+	buf := bytes.Buffer{}
+	for _, match := range m {
+		if len(match) != 4 {
+			continue
+		}
+
+		if match[0] > idx && !hiding {
+			buf.WriteString(mkd[idx:match[0]])
+		}
+
+		idx = match[1]
+		hiding = match[2] == match[3]
+	}
+	if !hiding {
+		buf.WriteString(mkd[idx:])
+	}
+	return buf.String()
 }
 
 func getKicadProject(iurl string) (*templates.ProjectContentKicadProject, error) {
