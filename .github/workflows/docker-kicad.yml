@@ -9,7 +9,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: docker
+  group: docker-kicad
   cancel-in-progress: true
 
 env:
