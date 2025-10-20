@@ -10,7 +10,7 @@ require (
 	github.com/alecthomas/repr v0.5.2
 	github.com/cenkalti/backoff/v4 v4.3.0
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
-	github.com/tdewolff/minify/v2 v2.24.3
+	github.com/tdewolff/minify/v2 v2.24.4
 	github.com/yuin/goldmark v1.7.13
 	github.com/yuin/goldmark-emoji v1.0.6
 	github.com/yuin/goldmark-highlighting/v2 v2.0.0-20230729083705-37449abec8cc
@@ -22,6 +22,6 @@ require (
 
 require (
 	github.com/dlclark/regexp2 v1.11.5 // indirect
-	github.com/tdewolff/parse/v2 v2.8.3 // indirect
+	github.com/tdewolff/parse/v2 v2.8.4 // indirect
 	golang.org/x/text v0.30.0 // indirect
 )
