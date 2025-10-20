@@ -1,4 +1,4 @@
-name: Docker (kicad)
+name: Docker (kicad-base)
 on:
   workflow_dispatch:
 
