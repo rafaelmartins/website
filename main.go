@@ -48,7 +48,7 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 				Name:    "anchor-js",
 				Version: "5.0.0",
 				Files: []string{
-					"anchor.min.js",
+					"anchor.js",
 				},
 				BaseDestination: assetsDir,
 			},
@@ -58,7 +58,7 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 				Name:    "bulma",
 				Version: "1.0.4",
 				Files: []string{
-					"css/versions/bulma-no-dark-mode.min.css",
+					"css/versions/bulma-no-dark-mode.css",
 				},
 				BaseDestination: assetsDir,
 			},
@@ -68,7 +68,7 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 				Name:    "@fortawesome/fontawesome-free",
 				Version: "7.1.0",
 				Files: []string{
-					"css/all.min.css",
+					"css/all.css",
 					"webfonts/fa-brands-400.woff2",
 					"webfonts/fa-regular-400.woff2",
 					"webfonts/fa-solid-900.woff2",
@@ -82,22 +82,37 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 				Name:    "github-markdown-css",
 				Version: "5.8.1",
 				Files: []string{
-					"github-markdown-light.min.css",
+					"github-markdown-light.css",
 				},
 				BaseDestination: assetsDir,
 			},
 		),
 		runner.NewTaskGroup(
 			&tasks.NpmPackage{
-				Name:    "@fontsource-variable/nunito",
-				Version: "5.2.7",
+				Name:    "@fontsource-variable/atkinson-hyperlegible-next",
+				Version: "5.2.6",
 				Files: []string{
-					"wght.min.css",
-					"files/nunito-cyrillic-ext-wght-normal.woff2",
-					"files/nunito-cyrillic-wght-normal.woff2",
-					"files/nunito-vietnamese-wght-normal.woff2",
-					"files/nunito-latin-ext-wght-normal.woff2",
-					"files/nunito-latin-wght-normal.woff2",
+					"wght.css",
+					"wght-italic.css",
+					"files/atkinson-hyperlegible-next-latin-wght-normal.woff2",
+					"files/atkinson-hyperlegible-next-latin-wght-italic.woff2",
+					"files/atkinson-hyperlegible-next-latin-ext-wght-normal.woff2",
+					"files/atkinson-hyperlegible-next-latin-ext-wght-italic.woff2",
+				},
+				BaseDestination: assetsDir,
+			},
+		),
+		runner.NewTaskGroup(
+			&tasks.NpmPackage{
+				Name:    "@fontsource-variable/atkinson-hyperlegible-mono",
+				Version: "5.2.5",
+				Files: []string{
+					"wght.css",
+					"wght-italic.css",
+					"files/atkinson-hyperlegible-mono-latin-wght-normal.woff2",
+					"files/atkinson-hyperlegible-mono-latin-wght-italic.woff2",
+					"files/atkinson-hyperlegible-mono-latin-ext-wght-normal.woff2",
+					"files/atkinson-hyperlegible-mono-latin-ext-wght-italic.woff2",
 				},
 				BaseDestination: assetsDir,
 			},
