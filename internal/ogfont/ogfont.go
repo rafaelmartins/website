@@ -11,9 +11,9 @@ import (
 )
 
 const (
-	fontOwner = "vernnobile"
-	fontRepo  = "NunitoFont"
-	fontFile  = "version-2.0/Nunito-ExtraBold.ttf"
+	fontOwner = "googlefonts"
+	fontRepo  = "atkinson-hyperlegible-next"
+	fontFile  = "fonts/ttf/AtkinsonHyperlegibleNext-ExtraBold.ttf"
 )
 
 type Font struct {

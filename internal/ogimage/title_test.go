@@ -27,13 +27,13 @@ func TestTitleSplit(t *testing.T) {
 		err    error
 	}{
 		{"", []string{}, 0, nil},
-		{"bola", []string{"bola"}, 94, nil},
+		{"bola", []string{"bola"}, 95, nil},
 
-		{"bola guda", []string{"bola guda"}, 94, nil},
-		{"bola gudaaaaaaaaa aa", []string{"bola gudaaaaaaaaa", "aa"}, 200, nil},
-		{"bola gudaaaaaaaaaaa", []string{"bola", "gudaaaaaaaaaaa"}, 200, nil},
-		{"bola gudaaaaaaaaa aaaaaaa aaaaaa 1234", []string{"bola gudaaaaaaaaa", "aaaaaaa aaaaaa", "1234"}, 306, nil},
-		{"bola gudaaaaaaaaa aaaaaaaaaaaaaa aaaaaaaaaaaaaa aaaaaaaaaaaaaa", []string{"bola gudaaaaaaaaa", "aaaaaaaaaaaaaa", "aaaaaaaaaaaaaa", "aaaaaaaaaaaaaa"}, 412, nil},
+		{"bola guda", []string{"bola guda"}, 95, nil},
+		{"bola gudaaaaaaaaa aa", []string{"bola", "gudaaaaaaaaa aa"}, 202, nil},
+		{"bola gudaaaaaaaaaaa", []string{"bola", "gudaaaaaaaaaaa"}, 202, nil},
+		{"bola gudaaaaaaaaa aaaaaaa aaaaaa 1234", []string{"bola", "gudaaaaaaaaa", "aaaaaaa aaaaaa", "1234"}, 416, nil},
+		{"bola gudaaaaaaaaa aaaaaaaaaaaaaa aaaaaaaaaaaaaa", []string{"bola", "gudaaaaaaaaa", "aaaaaaaaaaaaaa", "aaaaaaaaaaaaaa"}, 416, nil},
 		{"bola gudaaaaaaaaa aaaaaaaaaaaaaaaaaa 1234", []string{}, 0, errTitleTooLongWidth},
 		{"bola gudaaaaaaaaa aaaaaaaaaaaaaa aaaaaaaaaaaaaa aaaaaaaaaaaaaa aaaaaaaaaaaaaa", []string{}, 0, errTitleTooLongHeight},
 	}
