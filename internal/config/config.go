@@ -69,7 +69,7 @@ type Config struct {
 			Owner    string `yaml:"owner"`
 			Repo     string `yaml:"repo"`
 			SubPages []struct {
-				SubPage     string
+				SubPage     string `yaml:"subpage"`
 				Template    string `yaml:"template"`
 				WithSidebar *bool  `yaml:"with-sidebar"`
 				OpenGraph   struct {

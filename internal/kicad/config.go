@@ -15,7 +15,7 @@ type XYZ struct {
 }
 
 func (x XYZ) String() string {
-	return fmt.Sprintf("%f,%f,%f", x.X, x.Y, x.Z)
+	return fmt.Sprintf("'%f,%f,%f'", x.X, x.Y, x.Z)
 }
 
 type PcbRenderConfig struct {
