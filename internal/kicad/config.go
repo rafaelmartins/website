@@ -21,7 +21,7 @@ func (x XYZ) String() string {
 type PcbRenderConfig struct {
 	Width      int      `yaml:"width"`
 	Height     int      `yaml:"height"`
-	Zoom       float64  `yaml:"zoom"`
+	Zoom       *float64 `yaml:"zoom"`
 	Pan        *XYZ     `yaml:"pan"`
 	Rotate     *XYZ     `yaml:"rotate"`
 	Scales     []int    `yaml:"scales"`

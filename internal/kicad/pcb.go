@@ -65,6 +65,11 @@ func (k *KicadProject) PcbRender(ch chan *runner.GeneratorByProduct, cli *KicadC
 	}
 	defer os.RemoveAll(tmpd)
 
+	zoom := 1.
+	if config.Zoom != nil {
+		zoom = *config.Zoom
+	}
+
 	for _, side := range config.Sides {
 		args := []string{
 			"pcb", "render",
@@ -72,7 +77,7 @@ func (k *KicadProject) PcbRender(ch chan *runner.GeneratorByProduct, cli *KicadC
 			"--background", "opaque",
 			"--width", fmt.Sprint(config.Width),
 			"--height", fmt.Sprint(config.Height),
-			"--zoom", fmt.Sprint(config.Zoom),
+			"--zoom", fmt.Sprint(zoom),
 			"--side", side,
 		}
 
