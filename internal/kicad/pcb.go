@@ -37,7 +37,7 @@ type PcbRenderFile struct {
 }
 
 func (k *KicadProject) PcbRenderFiles(config *PcbRenderConfig) map[string][]*PcbRenderFile {
-	if k.pcb == "" || config == nil {
+	if k.pcb == "" || config == nil || !config.Enable {
 		return map[string][]*PcbRenderFile{}
 	}
 
@@ -62,7 +62,7 @@ func (k *KicadProject) PcbRenderFiles(config *PcbRenderConfig) map[string][]*Pcb
 }
 
 func (k *KicadProject) PcbRender(ch chan *runner.GeneratorByProduct, cli *KicadCli, config *PcbRenderConfig) {
-	if k.pcb == "" || ch == nil || cli == nil || config == nil {
+	if k.pcb == "" || ch == nil || cli == nil || config == nil || !config.Enable {
 		return
 	}
 
