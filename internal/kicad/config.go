@@ -36,6 +36,11 @@ type PcbIbomConfig struct {
 	Blacklist string `yaml:"blacklist"`
 }
 
+type PcbGerberConfig struct {
+	Enable      bool   `yaml:"enable"`
+	CopyPattern string `yaml:"copy-pattern"`
+}
+
 type SchExportPdfConfig struct {
 	Enable bool `yaml:"enable"`
 }
@@ -45,6 +50,7 @@ type ProjectConfig struct {
 	File            string              `yaml:"file"`
 	PcbRender       *PcbRenderConfig    `yaml:"pcb-render"`
 	PcbIbom         *PcbIbomConfig      `yaml:"pcb-ibom"`
+	PcbGerber       *PcbGerberConfig    `yaml:"pcb-gerber"`
 	SchExportPdf    *SchExportPdfConfig `yaml:"sch-export-pdf"`
 }
 

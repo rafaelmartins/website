@@ -2,7 +2,9 @@ package kicad
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
+	"image"
 	"io"
 	"os"
 	"path/filepath"
@@ -16,7 +18,13 @@ func (k *KicadProject) PcbRenderFilename(side string, scale int) string {
 		return ""
 	}
 
-	fn := k.name + "_" + side
+	fn := k.name
+	if k.revision != "" {
+		fn += "_" + k.revision
+	}
+	if side != "" {
+		fn += "_" + side
+	}
 	if scale != 0 {
 		fn += "_" + strconv.Itoa(scale)
 	}
@@ -34,7 +42,7 @@ func (k *KicadProject) PcbRenderFiles(config *PcbRenderConfig) map[string][]*Pcb
 	}
 
 	rv := map[string][]*PcbRenderFile{}
-	for _, side := range config.Sides {
+	for _, side := range append([]string{""}, config.Sides...) {
 		if len(config.Scales) == 0 {
 			rv[side] = append(rv[side], &PcbRenderFile{
 				Scale: 0,
@@ -69,6 +77,8 @@ func (k *KicadProject) PcbRender(ch chan *runner.GeneratorByProduct, cli *KicadC
 	if config.Zoom != nil {
 		zoom = *config.Zoom
 	}
+
+	montageSrc := []image.Image{}
 
 	for _, side := range config.Sides {
 		args := []string{
@@ -121,9 +131,17 @@ func (k *KicadProject) PcbRender(ch chan *runner.GeneratorByProduct, cli *KicadC
 		}
 		defer fp.Close()
 
+		src, _, err := image.Decode(fp)
+		if err != nil {
+			ch <- &runner.GeneratorByProduct{Err: err}
+			return
+		}
+
+		montageSrc = append(montageSrc, src)
+
 		for _, scale := range config.Scales {
 			buf := &bytes.Buffer{}
-			if err := resize(buf, fp, scale); err != nil {
+			if err := resize(buf, src, scale); err != nil {
 				ch <- &runner.GeneratorByProduct{Err: err}
 			} else {
 				ch <- &runner.GeneratorByProduct{
@@ -133,13 +151,36 @@ func (k *KicadProject) PcbRender(ch chan *runner.GeneratorByProduct, cli *KicadC
 			}
 		}
 	}
+
+	m, err := montage(montageSrc)
+	if err != nil {
+		ch <- &runner.GeneratorByProduct{Err: err}
+		return
+	}
+
+	for _, scale := range config.Scales {
+		buf := &bytes.Buffer{}
+		if err := resize(buf, m, scale); err != nil {
+			ch <- &runner.GeneratorByProduct{Err: err}
+		} else {
+			ch <- &runner.GeneratorByProduct{
+				Filename: k.PcbRenderFilename("", scale),
+				Reader:   io.NopCloser(buf),
+			}
+		}
+	}
 }
 
 func (k *KicadProject) PcbIbomFilename(config *PcbIbomConfig) string {
 	if k.pcb == "" || config == nil || !config.Enable {
 		return ""
 	}
-	return k.name + ".html"
+
+	fn := k.name
+	if k.revision != "" {
+		fn += "_" + k.revision
+	}
+	return fn + ".html"
 }
 
 func (k *KicadProject) PcbIbom(ch chan *runner.GeneratorByProduct, ibom *InteractiveHtmlBom, config *PcbIbomConfig) {
@@ -171,7 +212,7 @@ func (k *KicadProject) PcbIbom(ch chan *runner.GeneratorByProduct, ibom *Interac
 		return
 	}
 
-	fp, err := os.Open(filepath.Join(tmpd, k.PcbIbomFilename(config)))
+	fp, err := os.Open(filepath.Join(tmpd, k.name+".html"))
 	if err != nil {
 		ch <- &runner.GeneratorByProduct{Err: err}
 		return
@@ -179,6 +220,57 @@ func (k *KicadProject) PcbIbom(ch chan *runner.GeneratorByProduct, ibom *Interac
 
 	ch <- &runner.GeneratorByProduct{
 		Filename: k.PcbIbomFilename(config),
+		Reader:   fp,
+	}
+}
+
+func (k *KicadProject) PcbGerberFilename(config *PcbGerberConfig) string {
+	if k.pcb == "" || config == nil || !config.Enable {
+		return ""
+	}
+
+	fn := k.name
+	if k.revision != "" {
+		fn += "_" + k.revision
+	}
+	return fn + ".zip"
+}
+
+func (k *KicadProject) PcbGerber(ch chan *runner.GeneratorByProduct, config *PcbGerberConfig) {
+	if k.pcb == "" || ch == nil || config == nil || !config.Enable {
+		return
+	}
+	if config.CopyPattern == "" {
+		ch <- &runner.GeneratorByProduct{Err: errors.New("kicad: gerber: missing copy pattern")}
+		return
+	}
+	if filepath.IsAbs(config.CopyPattern) {
+		ch <- &runner.GeneratorByProduct{Err: errors.New("kicad: gerber: copy pattern must be relative to project folder")}
+		return
+	}
+
+	m, err := filepath.Glob(filepath.Join(filepath.Dir(k.pcb), config.CopyPattern))
+	if err != nil {
+		ch <- &runner.GeneratorByProduct{Err: err}
+		return
+	}
+	if len(m) == 0 {
+		ch <- &runner.GeneratorByProduct{Err: errors.New("kicad: gerber-copy: no gerber file found")}
+		return
+	}
+	if len(m) > 1 {
+		ch <- &runner.GeneratorByProduct{Err: errors.New("kicad: gerber-copy: multiple gerber files found")}
+		return
+	}
+
+	fp, err := os.Open(m[0])
+	if err != nil {
+		ch <- &runner.GeneratorByProduct{Err: err}
+		return
+	}
+
+	ch <- &runner.GeneratorByProduct{
+		Filename: k.PcbGerberFilename(config),
 		Reader:   fp,
 	}
 }

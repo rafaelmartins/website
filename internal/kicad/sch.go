@@ -11,7 +11,12 @@ func (k *KicadProject) SchExportPdfFilename(config *SchExportPdfConfig) string {
 	if k.sch == "" || config == nil || !config.Enable {
 		return ""
 	}
-	return k.name + ".pdf"
+
+	fn := k.name
+	if k.revision != "" {
+		fn += "_" + k.revision
+	}
+	return fn + ".pdf"
 }
 
 func (k *KicadProject) SchExportPdf(ch chan *runner.GeneratorByProduct, cli *KicadCli, config *SchExportPdfConfig) {

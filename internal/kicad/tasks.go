@@ -87,14 +87,16 @@ func (t *Task) GetReader() (io.ReadCloser, error) {
 		Revision     string                      `json:"revision"`
 		PcbRender    map[string][]*PcbRenderFile `json:"pcb-render"`
 		PcbIbom      string                      `json:"pcb-ibom"`
+		PcbGerber    string                      `json:"pcb-gerber"`
 		SchExportPdf string                      `json:"sch-export-pdf"`
 		Tools        map[string]string           `json:"tools"`
 	}{
-		Version:      1,
+		Version:      2,
 		Name:         t.Project.Name(),
 		Revision:     t.Project.Revision(),
 		PcbRender:    t.Project.PcbRenderFiles(t.Config.PcbRender),
 		PcbIbom:      t.Project.PcbIbomFilename(t.Config.PcbIbom),
+		PcbGerber:    t.Project.PcbGerberFilename(t.Config.PcbGerber),
 		SchExportPdf: t.Project.SchExportPdfFilename(t.Config.SchExportPdf),
 		Tools: map[string]string{
 			"Kicad":              t.KicadCli.Version(),
@@ -131,6 +133,7 @@ func (t *Task) GetByProducts(ch chan *runner.GeneratorByProduct) {
 
 	t.Project.PcbRender(ch, t.KicadCli, t.Config.PcbRender)
 	t.Project.PcbIbom(ch, t.InteractiveHtmlBom, t.Config.PcbIbom)
+	t.Project.PcbGerber(ch, t.Config.PcbGerber)
 	t.Project.SchExportPdf(ch, t.KicadCli, t.Config.SchExportPdf)
 
 	close(ch)

@@ -33,6 +33,11 @@ func getRevision(f string) (string, error) {
 }
 
 func NewKicadProject(pro string) (*KicadProject, error) {
+	pro, err := filepath.Abs(pro)
+	if err != nil {
+		return nil, err
+	}
+
 	ext := filepath.Ext(pro)
 	if ext != ".kicad_pro" {
 		return nil, fmt.Errorf("kicad: invalid project file: %s", pro)
