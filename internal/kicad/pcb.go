@@ -180,7 +180,7 @@ func (k *KicadProject) PcbIbomFilename(config *PcbIbomConfig) string {
 	if k.revision != "" {
 		fn += "_" + k.revision
 	}
-	return fn + ".html"
+	return fn + "_ibom.html"
 }
 
 func (k *KicadProject) PcbIbom(ch chan *runner.GeneratorByProduct, ibom *InteractiveHtmlBom, config *PcbIbomConfig) {
@@ -233,7 +233,7 @@ func (k *KicadProject) PcbGerberFilename(config *PcbGerberConfig) string {
 	if k.revision != "" {
 		fn += "_" + k.revision
 	}
-	return fn + ".zip"
+	return fn + "_gerber.zip"
 }
 
 func (k *KicadProject) PcbGerber(ch chan *runner.GeneratorByProduct, config *PcbGerberConfig) {
