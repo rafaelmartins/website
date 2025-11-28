@@ -91,7 +91,7 @@ func (t *Task) GetReader() (io.ReadCloser, error) {
 		SchExportPdf string                      `json:"sch-export-pdf"`
 		Tools        map[string]string           `json:"tools"`
 	}{
-		Version:      2,
+		Version:      1,
 		Name:         t.Project.Name(),
 		Revision:     t.Project.Revision(),
 		PcbRender:    t.Project.PcbRenderFiles(t.Config.PcbRender),
