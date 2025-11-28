@@ -533,6 +533,14 @@ func getKicadProject(iurl string) (*templates.ProjectContentKicadProject, error)
 			rv.PcbIbom = ibom
 		}
 
+		if d, ok := data["pcb-gerber"].(string); ok && d != "" {
+			gerber, err := url.JoinPath(iurl, d)
+			if err != nil {
+				return nil, err
+			}
+			rv.PcbGerber = gerber
+		}
+
 		if d, ok := data["pcb-render"].(map[string]any); ok && d != nil {
 			for side, v := range d {
 				if side != "top" && side != "bottom" {
@@ -547,12 +555,20 @@ func getKicadProject(iurl string) (*templates.ProjectContentKicadProject, error)
 								return nil, err
 							}
 
-							if side == "top" {
+							switch side {
+							case "":
+								rv.PcbRenderMontage = append(rv.PcbRenderMontage, &templates.ProjectContentKicadProjectPcbRenderFile{
+									Scale: int(mm["scale"].(float64)),
+									File:  img,
+								})
+
+							case "top":
 								rv.PcbRenderTop = append(rv.PcbRenderTop, &templates.ProjectContentKicadProjectPcbRenderFile{
 									Scale: int(mm["scale"].(float64)),
 									File:  img,
 								})
-							} else {
+
+							case "bottom":
 								rv.PcbRenderBottom = append(rv.PcbRenderBottom, &templates.ProjectContentKicadProjectPcbRenderFile{
 									Scale: int(mm["scale"].(float64)),
 									File:  img,

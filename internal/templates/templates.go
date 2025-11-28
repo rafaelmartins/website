@@ -69,9 +69,11 @@ type ProjectContentKicadProject struct {
 	Revision            string
 	PcbRenderTopMain    string
 	PcbRenderBottomMain string
+	PcbRenderMontage    []*ProjectContentKicadProjectPcbRenderFile
 	PcbRenderTop        []*ProjectContentKicadProjectPcbRenderFile
 	PcbRenderBottom     []*ProjectContentKicadProjectPcbRenderFile
 	PcbIbom             string
+	PcbGerber           string
 	SchExportPdf        string
 	Tools               map[string]string
 }
