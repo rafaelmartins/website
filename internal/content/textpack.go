@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"rafaelmartins.com/p/website/internal/content/frontmatter"
+	"rafaelmartins.com/p/website/internal/frontmatter"
 )
 
 type textPack struct{}
@@ -73,11 +73,7 @@ func (*textPack) Render(f string, style string, baseurl string) (string, *frontm
 	}
 	defer fp.Close()
 
-	data, err := io.ReadAll(fp)
-	if err != nil {
-		return "", nil, err
-	}
-	return tbRender(data, style, baseurl)
+	return tbRender(fp, style, baseurl)
 }
 
 func (*textPack) GetTimeStamps(f string) ([]time.Time, error) {

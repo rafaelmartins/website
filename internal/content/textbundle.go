@@ -16,7 +16,8 @@ import (
 	"github.com/yuin/goldmark/parser"
 	"github.com/yuin/goldmark/text"
 	"github.com/yuin/goldmark/util"
-	"rafaelmartins.com/p/website/internal/content/frontmatter"
+	"rafaelmartins.com/p/website/internal/frontmatter"
+	"rafaelmartins.com/p/website/internal/markdown"
 )
 
 var pcTitleKey = parser.NewContextKey()
@@ -53,10 +54,14 @@ func (te *tbExtension) Extend(m goldmark.Markdown) {
 	))
 }
 
-func tbRender(src []byte, style string, baseurl string) (string, *frontmatter.FrontMatter, error) {
-	pc := parser.NewContext()
+func tbRender(r io.Reader, style string, baseurl string) (string, *frontmatter.FrontMatter, error) {
+	meta, src, err := frontmatter.Parse(r)
+	if err != nil {
+		return "", nil, err
+	}
 
-	rendered, meta, err := mkdRender(src, style, pc, &tbExtension{baseurl})
+	pc := parser.NewContext()
+	rendered, err := markdown.Render(src, style, pc, &tbExtension{baseurl})
 	if err != nil {
 		return "", nil, err
 	}
@@ -129,11 +134,13 @@ func (tb *textBundle) Render(f string, style string, baseurl string) (string, *f
 		return "", nil, err
 	}
 
-	src, err := os.ReadFile(srcf)
+	fp, err := os.Open(srcf)
 	if err != nil {
 		return "", nil, err
 	}
-	return tbRender(src, style, baseurl)
+	defer fp.Close()
+
+	return tbRender(fp, style, baseurl)
 }
 
 func (tb *textBundle) GetTimeStamps(f string) ([]time.Time, error) {

@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"rafaelmartins.com/p/website/internal/content/frontmatter"
+	"rafaelmartins.com/p/website/internal/frontmatter"
 )
 
 type html struct{}
@@ -18,12 +18,13 @@ func (*html) IsSupported(f string) bool {
 }
 
 func (*html) Render(f string, style string, baseurl string) (string, *frontmatter.FrontMatter, error) {
-	src, err := os.ReadFile(f)
+	fp, err := os.Open(f)
 	if err != nil {
 		return "", nil, err
 	}
+	defer fp.Close()
 
-	meta, src, err := frontmatter.Parse(src)
+	meta, src, err := frontmatter.Parse(fp)
 	if err != nil {
 		return "", nil, err
 	}

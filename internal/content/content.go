@@ -5,7 +5,7 @@ import (
 	"io"
 	"time"
 
-	"rafaelmartins.com/p/website/internal/content/frontmatter"
+	"rafaelmartins.com/p/website/internal/frontmatter"
 )
 
 type contentProvider interface {
@@ -17,7 +17,7 @@ type contentProvider interface {
 }
 
 var providers = []contentProvider{
-	&markdown{},
+	&mkd{},
 	&textBundle{},
 	&textPack{},
 	&html{},

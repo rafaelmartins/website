@@ -1,79 +1,43 @@
 package content
 
 import (
-	"bytes"
 	"errors"
 	"io"
 	"os"
 	"path/filepath"
 	"time"
 
-	"github.com/yuin/goldmark"
-	emoji "github.com/yuin/goldmark-emoji"
-	highlighting "github.com/yuin/goldmark-highlighting/v2"
-	"github.com/yuin/goldmark/extension"
-	"github.com/yuin/goldmark/parser"
-	rhtml "github.com/yuin/goldmark/renderer/html"
-	"rafaelmartins.com/p/website/internal/content/frontmatter"
+	"rafaelmartins.com/p/website/internal/frontmatter"
+	"rafaelmartins.com/p/website/internal/markdown"
 )
 
-func mkdRender(src []byte, style string, pc parser.Context, ext ...goldmark.Extender) (string, *frontmatter.FrontMatter, error) {
-	meta, src, err := frontmatter.Parse(src)
-	if err != nil {
-		return "", nil, err
-	}
+type mkd struct{}
 
-	opt := []highlighting.Option{}
-	if style != "" {
-		opt = append(opt, highlighting.WithStyle(style))
-	}
-
-	mkd := goldmark.New(
-		goldmark.WithExtensions(
-			append(
-				[]goldmark.Extender{
-					extension.GFM,
-					emoji.Emoji,
-					highlighting.NewHighlighting(opt...),
-				},
-				ext...,
-			)...,
-		),
-		goldmark.WithParserOptions(
-			parser.WithAutoHeadingID(),
-		),
-		goldmark.WithRendererOptions(rhtml.WithUnsafe()),
-	)
-
-	if pc == nil {
-		pc = parser.NewContext()
-	}
-
-	buf := &bytes.Buffer{}
-	if err := mkd.Convert(src, buf, parser.WithContext(pc)); err != nil {
-		return "", nil, err
-	}
-
-	return buf.String(), meta, nil
-}
-
-type markdown struct{}
-
-func (*markdown) IsSupported(f string) bool {
+func (*mkd) IsSupported(f string) bool {
 	e := filepath.Ext(f)
 	return e == ".md" || e == ".markdown"
 }
 
-func (*markdown) Render(f string, style string, baseurl string) (string, *frontmatter.FrontMatter, error) {
-	src, err := os.ReadFile(f)
+func (*mkd) Render(f string, style string, baseurl string) (string, *frontmatter.FrontMatter, error) {
+	fp, err := os.Open(f)
+	if err != nil {
+		return "", nil, err
+	}
+	defer fp.Close()
+
+	meta, src, err := frontmatter.Parse(fp)
 	if err != nil {
 		return "", nil, err
 	}
 
-	return mkdRender(src, style, nil)
+	m, err := markdown.Render(src, style, nil)
+	if err != nil {
+		return "", nil, err
+	}
+	return m, meta, nil
 }
 
-func (*markdown) GetTimeStamps(f string) ([]time.Time, error) {
+func (*mkd) GetTimeStamps(f string) ([]time.Time, error) {
 	st, err := os.Stat(f)
 	if err != nil {
 		return nil, err
@@ -81,10 +45,10 @@ func (*markdown) GetTimeStamps(f string) ([]time.Time, error) {
 	return []time.Time{st.ModTime().UTC()}, nil
 }
 
-func (*markdown) ListAssets(f string) ([]string, error) {
+func (*mkd) ListAssets(f string) ([]string, error) {
 	return nil, nil
 }
 
-func (*markdown) OpenAsset(f string, a string) (string, io.ReadCloser, error) {
+func (*mkd) OpenAsset(f string, a string) (string, io.ReadCloser, error) {
 	return "", nil, errors.New("content: markdown: assets not supported")
 }

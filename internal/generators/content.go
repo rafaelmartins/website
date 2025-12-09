@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"rafaelmartins.com/p/website/internal/content"
-	"rafaelmartins.com/p/website/internal/content/frontmatter"
+	"rafaelmartins.com/p/website/internal/frontmatter"
 	"rafaelmartins.com/p/website/internal/ogimage"
 	"rafaelmartins.com/p/website/internal/runner"
 	"rafaelmartins.com/p/website/internal/templates"
