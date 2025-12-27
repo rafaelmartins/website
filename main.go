@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"rafaelmartins.com/p/website/internal/cdocs"
 	"rafaelmartins.com/p/website/internal/config"
@@ -19,11 +20,37 @@ import (
 	"rafaelmartins.com/p/website/internal/webserver"
 )
 
+type stringMapFlag map[string]string
+
+func (s *stringMapFlag) String() string {
+	return fmt.Sprint(*s)
+}
+
+func (s *stringMapFlag) Set(value string) error {
+	p := strings.SplitN(value, "=", 2)
+	if len(p) != 2 {
+		return fmt.Errorf("failed to parse value, missing '=': %s", value)
+	}
+
+	if *s == nil {
+		*s = stringMapFlag{}
+	}
+	map[string]string(*s)[p[0]] = p[1]
+	return nil
+}
+
+func stringSlice(name string, usage string) *stringMapFlag {
+	rv := new(stringMapFlag)
+	flag.Var(rv, name, usage)
+	return rv
+}
+
 var (
 	fBuildDir   = flag.String("d", "_build", "build directory")
 	fConfigFile = flag.String("c", "config.yml", "configuration file")
 	fListenAddr = flag.String("a", ":3000", "development web server listen address")
 	fCDocs      = flag.String("x", "", "dump cdocs ast and template context for given header and exit")
+	fLocalDir   = stringSlice("l", "use local git repository for given project (format \"owner/repo=dir\")")
 	fRunServer  = flag.Bool("r", false, "run development server")
 	fForce      = flag.Bool("f", false, "force re-running all tasks")
 	fKicad      = flag.Bool("k", false, "kicad assets mode")
@@ -298,6 +325,12 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 		}
 
 		for _, repo := range pj.Repositories {
+			localDir := (*string)(nil)
+			if v, ok := map[string]string(*fLocalDir)[repo.Owner+"/"+repo.Repo]; ok {
+				log.Printf("project %s/%s using local directory: %s", repo.Owner, repo.Repo, v)
+				localDir = &v
+			}
+
 			// immutable by default, only disable manually for development
 			immutable := true
 			if repo.Immutable != nil && !*repo.Immutable {
@@ -319,6 +352,7 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 						GoRepo:   repo.Go.Repo,
 
 						Force:                  *fForce,
+						LocalDirectory:         localDir,
 						BaseDestination:        pj.BaseDestination,
 						Template:               pj.Template,
 						Immutable:              immutable,
@@ -333,7 +367,6 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 						CDocsDestination:            repo.CDocs.Destination,
 						CDocsHeaders:                repo.CDocs.Headers,
 						CDocsBaseDirectory:          repo.CDocs.BaseDirectory,
-						CDocsLocalDirectory:         repo.CDocs.LocalDirectory,
 						CDocsTemplate:               repo.CDocs.Template,
 						CDocsWithSidebar:            dsidebar,
 						CDocsOpenGraphTitle:         repo.CDocs.OpenGraph.Title,

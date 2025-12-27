@@ -19,6 +19,7 @@ type Project struct {
 	GoRepo   string
 
 	Force                  bool
+	LocalDirectory         *string
 	BaseDestination        string
 	Template               string
 	Immutable              bool
@@ -33,7 +34,6 @@ type Project struct {
 	CDocsDestination            string
 	CDocsHeaders                []string
 	CDocsBaseDirectory          *string
-	CDocsLocalDirectory         string // FIXME
 	CDocsTemplate               string
 	CDocsWithSidebar            bool
 	CDocsOpenGraphTitle         string
@@ -58,7 +58,7 @@ func (p *Project) init() error {
 	}
 	p.initialized = true
 
-	proj, err := github.GetRepository(p.Owner, p.Repo, p.CDocsBaseDirectory)
+	proj, err := github.GetRepository(p.Owner, p.Repo, p.CDocsBaseDirectory, p.LocalDirectory)
 	if err != nil {
 		return err
 	}

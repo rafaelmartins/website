@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"os"
 	"path"
 	"path/filepath"
 	"time"
@@ -29,6 +30,14 @@ func (c *cDocs) GetGenerator() (runner.Generator, error) {
 
 func (*cDocs) GetID() string {
 	return "CDOCS"
+}
+
+func (c *cDocs) getTemplate() string {
+	rv := c.proj.CDocsTemplate
+	if rv == "" {
+		rv = "cdocs.html"
+	}
+	return rv
 }
 
 func (c *cDocs) GetReader() (io.ReadCloser, error) {
@@ -83,17 +92,12 @@ func (c *cDocs) GetReader() (io.ReadCloser, error) {
 		c.otitle = c.proj.CDocsOpenGraphTitle
 	}
 
-	tmpl := c.proj.CDocsTemplate
-	if tmpl == "" {
-		tmpl = "cdocs.html"
-	}
-
 	lctx := &templates.LayoutContext{
 		WithSidebar: c.proj.CDocsWithSidebar,
 	}
 
 	buf := &bytes.Buffer{}
-	if err := templates.Execute(buf, tmpl, nil, lctx, &templates.ContentContext{
+	if err := templates.Execute(buf, c.getTemplate(), nil, lctx, &templates.ContentContext{
 		Title: title,
 		URL:   c.proj.cdocsUrl,
 		OpenGraph: templates.OpenGraphEntry{
@@ -112,13 +116,23 @@ func (c *cDocs) GetReader() (io.ReadCloser, error) {
 }
 
 func (c *cDocs) GetTimeStamps() ([]time.Time, error) {
-	if c.proj.Immutable {
+	if c.proj.Immutable && c.proj.LocalDirectory == nil {
 		return nil, nil
 	}
 
-	rv, err := templates.GetTimestamps(c.proj.CDocsTemplate, !c.proj.Immutable)
+	rv, err := templates.GetTimestamps(c.getTemplate(), true)
 	if err != nil {
 		return nil, err
+	}
+
+	if c.proj.LocalDirectory != nil {
+		for _, header := range c.proj.proj.Headers {
+			st, err := os.Stat(filepath.Join(*c.proj.LocalDirectory, header.Name))
+			if err != nil {
+				return nil, err
+			}
+			rv = append(rv, st.ModTime().UTC())
+		}
 	}
 
 	og, err := ogimage.GetTimeStamps()
@@ -131,7 +145,7 @@ func (c *cDocs) GetTimeStamps() ([]time.Time, error) {
 }
 
 func (c *cDocs) GetImmutable() bool {
-	return c.proj.Immutable
+	return c.proj.Immutable && c.proj.LocalDirectory == nil
 }
 
 func (c *cDocs) GetByProducts(ch chan *runner.GeneratorByProduct) {

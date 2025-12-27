@@ -175,9 +175,9 @@ func Run(groups []*TaskGroup, basedir string, cfg Config, force bool) error {
 				continue
 			}
 
-			if implf, ok := group.impl.(interface{ GetSkipIfExists() string }); ok && !force {
-				if skip := implf.GetSkipIfExists(); skip != "" {
-					if _, err := os.Stat(path.Join(basedir, skip)); err == nil {
+			if implf, ok := group.impl.(interface{ GetSkipIfExists() *string }); ok && !force {
+				if skip := implf.GetSkipIfExists(); skip != nil {
+					if _, err := os.Stat(path.Join(basedir, *skip)); err == nil {
 						continue
 					}
 				}
@@ -210,7 +210,6 @@ func Run(groups []*TaskGroup, basedir string, cfg Config, force bool) error {
 
 	for job := range queue {
 		if job.err != nil {
-			close(queue)
 			return job.err
 		}
 

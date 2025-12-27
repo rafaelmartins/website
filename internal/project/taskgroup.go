@@ -13,8 +13,13 @@ func (p *Project) GetBaseDestination() string {
 	return p.BaseDestination
 }
 
-func (p *Project) GetSkipIfExists() string {
-	return filepath.Join(p.GetBaseDestination(), p.Repo, "index.html")
+func (p *Project) GetSkipIfExists() *string {
+	if p.LocalDirectory != nil {
+		return nil
+	}
+
+	rv := filepath.Join(p.GetBaseDestination(), p.Repo, "index.html")
+	return &rv
 }
 
 func (p *Project) GetTasks() ([]*runner.Task, error) {

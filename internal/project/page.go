@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"os"
 	"path"
 	"path/filepath"
 	"slices"
@@ -58,38 +59,43 @@ func newPage(proj *Project, file *github.RepositoryFile, isReadme bool, isRoot b
 		}
 	}
 
-	src, err := file.Read()
-	if err != nil {
-		return nil, err
-	}
-
-	meta, data, err := frontmatter.Parse(src)
-	if err != nil {
-		return nil, err
-	}
-
-	title := meta.Title
-	if title == "" {
-		t, err := markdown.GetTitle(src)
-		if err != nil {
-			return nil, err
-		}
-		title = t
-	}
-
-	return &ProjectPage{
+	rv := &ProjectPage{
 		idx:    idx,
 		name:   name,
-		title:  title,
 		src:    file.Name,
 		isRoot: isRoot,
 
-		meta: meta,
-		data: data,
-
 		proj: proj,
 		file: file,
-	}, nil
+	}
+
+	if err := rv.read(); err != nil {
+		return nil, err
+	}
+	return rv, nil
+}
+
+func (pp *ProjectPage) read() error {
+	src, err := pp.file.Read()
+	if err != nil {
+		return err
+	}
+
+	pp.meta, pp.data, err = frontmatter.Parse(src)
+	if err != nil {
+		return err
+	}
+
+	title := pp.meta.Title
+	if title == "" {
+		t, err := markdown.GetTitle(src)
+		if err != nil {
+			return err
+		}
+		title = t
+	}
+	pp.title = title
+	return nil
 }
 
 func (pp *ProjectPage) resolveUrl(current string) string {
@@ -118,6 +124,14 @@ func (pp *ProjectPage) GetGenerator() (runner.Generator, error) {
 
 func (*ProjectPage) GetID() string {
 	return "PROJECT"
+}
+
+func (pp *ProjectPage) getTemplate() string {
+	rv := pp.proj.Template
+	if rv == "" {
+		rv = "project.html"
+	}
+	return rv
 }
 
 func (pp *ProjectPage) GetReader() (io.ReadCloser, error) {
@@ -181,6 +195,12 @@ func (pp *ProjectPage) GetReader() (io.ReadCloser, error) {
 	pc.Set(pcBaseUrlKey, "https://github.com/"+pp.proj.Owner+"/"+pp.proj.Repo+"/blob/"+pp.proj.proj.Head)
 	pc.Set(pcCurrentPageKey, pp.name)
 
+	if pp.proj.LocalDirectory != nil {
+		if err := pp.read(); err != nil {
+			return nil, err
+		}
+	}
+
 	body, err := markdown.Render(gmMarkdown, pp.data, pc)
 	if err != nil {
 		return nil, err
@@ -218,11 +238,6 @@ func (pp *ProjectPage) GetReader() (io.ReadCloser, error) {
 		}
 	}
 
-	ttmpl := pp.proj.Template
-	if ttmpl == "" {
-		ttmpl = "project.html"
-	}
-
 	purl := path.Join(pp.proj.url, pp.name)
 	if purl != "/" {
 		purl += "/"
@@ -233,7 +248,7 @@ func (pp *ProjectPage) GetReader() (io.ReadCloser, error) {
 	}
 
 	buf := &bytes.Buffer{}
-	if err := templates.Execute(buf, ttmpl, nil, lctx, &templates.ContentContext{
+	if err := templates.Execute(buf, pp.getTemplate(), nil, lctx, &templates.ContentContext{
 		Title:       title,
 		Description: pp.proj.proj.Description,
 		URL:         purl,
@@ -254,13 +269,21 @@ func (pp *ProjectPage) GetReader() (io.ReadCloser, error) {
 }
 
 func (pp *ProjectPage) GetTimeStamps() ([]time.Time, error) {
-	if pp.proj.Immutable {
+	if pp.proj.Immutable && pp.proj.LocalDirectory == nil {
 		return nil, nil
 	}
 
-	rv, err := templates.GetTimestamps(pp.proj.Template, !pp.proj.Immutable)
+	rv, err := templates.GetTimestamps(pp.getTemplate(), true)
 	if err != nil {
 		return nil, err
+	}
+
+	if pp.proj.LocalDirectory != nil {
+		st, err := os.Stat(filepath.Join(*pp.proj.LocalDirectory, pp.file.Name))
+		if err != nil {
+			return nil, err
+		}
+		rv = append(rv, st.ModTime().UTC())
 	}
 
 	og, err := ogimage.GetTimeStamps()
@@ -271,7 +294,7 @@ func (pp *ProjectPage) GetTimeStamps() ([]time.Time, error) {
 }
 
 func (pp *ProjectPage) GetImmutable() bool {
-	return pp.proj.Immutable
+	return pp.proj.Immutable && pp.proj.LocalDirectory == nil
 }
 
 func (pp *ProjectPage) GetByProducts(ch chan *runner.GeneratorByProduct) {

@@ -1,14 +1,17 @@
 package github
 
 import (
+	"errors"
 	"fmt"
 	"io"
+	"io/fs"
+	"os"
 	"path"
 	"path/filepath"
 )
 
 var getRepository = `
-query GetRepository($owner: String!, $repo: String!, $headersref: String){
+query GetRepository($owner: String!, $repo: String!, $licenseref: String, $copyingref: String, $readmeref: String, $docsref: String, $headersref: String) {
 	repository(owner: $owner, name: $repo) {
 		description
 		homepageUrl
@@ -31,14 +34,14 @@ query GetRepository($owner: String!, $repo: String!, $headersref: String){
 		licenseInfo {
 			spdxId
 		}
-		license: object(expression: "HEAD:LICENSE") {
+		license: object(expression: $licenseref) {
 			... on Blob {
 				text
 				isBinary
 				isTruncated
 			}
 		}
-		copying: object(expression: "HEAD:COPYING") {
+		copying: object(expression: $copyingref) {
 			... on Blob {
 				text
 				isBinary
@@ -66,14 +69,14 @@ query GetRepository($owner: String!, $repo: String!, $headersref: String){
 			}
 			totalCount
 		}
-		readme: object(expression: "HEAD:README.md") {
+		readme: object(expression: $readmeref) {
 			... on Blob {
 				text
 				isBinary
 				isTruncated
 			}
 		}
-		docs: object(expression: "HEAD:docs") {
+		docs: object(expression: $docsref) {
 			... on Tree {
 				entries {
 					name
@@ -141,6 +144,8 @@ type RepositoryFile struct {
 	ref   string
 
 	data []byte
+
+	localDir *string
 }
 
 type Repository struct {
@@ -166,15 +171,16 @@ type repositoryBlob struct {
 	IsTruncated bool    `json:"isTruncated"`
 }
 
-func newRepositoryFile(owner string, repo string, path string, ref string, blob *repositoryBlob) *RepositoryFile {
+func newRepositoryFile(owner string, repo string, path string, ref string, blob *repositoryBlob, localDir *string) *RepositoryFile {
 	rv := &RepositoryFile{
-		Name:  path,
-		owner: owner,
-		repo:  repo,
-		ref:   ref,
+		Name:     path,
+		owner:    owner,
+		repo:     repo,
+		ref:      ref,
+		localDir: localDir,
 	}
 
-	if blob.Text != nil && !blob.IsBinary && !blob.IsTruncated {
+	if localDir != nil && blob != nil && blob.Text != nil && !blob.IsBinary && !blob.IsTruncated {
 		rv.data = []byte(*blob.Text)
 	}
 	return rv
@@ -185,21 +191,32 @@ func (r *RepositoryFile) Read() ([]byte, error) {
 		return r.data, nil
 	}
 
-	v, err := GetRepositoryFile(r.owner, r.repo, r.Name, r.ref)
+	var (
+		fp  io.ReadCloser
+		err error
+	)
+	if r.localDir != nil {
+		fp, err = os.Open(filepath.Join(*r.localDir, r.Name))
+	} else {
+		fp, err = GetRepositoryFile(r.owner, r.repo, r.Name, r.ref)
+	}
 	if err != nil {
 		return nil, err
 	}
-	defer v.Close()
+	defer fp.Close()
 
-	rv, err := io.ReadAll(v)
+	rv, err := io.ReadAll(fp)
 	if err != nil {
 		return nil, err
 	}
-	r.data = rv
-	return r.data, nil
+
+	if r.localDir == nil {
+		r.data = rv
+	}
+	return rv, nil
 }
 
-func GetRepository(owner string, repo string, headersDir *string) (*Repository, error) {
+func GetRepository(owner string, repo string, headersDir *string, localDir *string) (*Repository, error) {
 	o := struct {
 		Repository struct {
 			Description      string `json:"description"`
@@ -273,11 +290,17 @@ func GetRepository(owner string, repo string, headersDir *string) (*Repository, 
 		"owner": owner,
 		"repo":  repo,
 	}
-	if headersDir != nil {
-		if *headersDir == "." {
-			variables["headersref"] = "HEAD:"
-		} else {
-			variables["headersref"] = "HEAD:" + filepath.ToSlash(filepath.Clean(*headersDir))
+	if localDir == nil {
+		variables["licenseref"] = "HEAD:LICENSE"
+		variables["copyingref"] = "HEAD:COPYING"
+		variables["readmeref"] = "HEAD:README.md"
+		variables["docsref"] = "HEAD:docs"
+		if headersDir != nil {
+			if *headersDir == "." {
+				variables["headersref"] = "HEAD:"
+			} else {
+				variables["headersref"] = "HEAD:" + filepath.ToSlash(filepath.Clean(*headersDir))
+			}
 		}
 	}
 
@@ -314,16 +337,6 @@ func GetRepository(owner string, repo string, headersDir *string) (*Repository, 
 		Watchers:      o.Repository.Watchers.TotalCount,
 	}
 
-	if o.Repository.LicenseInfo != nil && o.Repository.LicenseInfo.SpdxId != "NOASSERTION" {
-		rv.LicenseSpdx = o.Repository.LicenseInfo.SpdxId
-	} else if o.Repository.License != nil {
-		rv.LicenseData = newRepositoryFile(owner, repo, "LICENSE", o.Repository.Head.Oid, o.Repository.License)
-	} else if o.Repository.Copying != nil {
-		rv.LicenseData = newRepositoryFile(owner, repo, "COPYING", o.Repository.Head.Oid, o.Repository.Copying)
-	} else {
-		return nil, fmt.Errorf("github: repository: %s/%s: failed to find license", owner, repo)
-	}
-
 	if o.Repository.LatestRelease != nil {
 		rv.LatestRelease = &RepositoryLatestRelease{
 			Name:        o.Repository.LatestRelease.Name,
@@ -342,8 +355,73 @@ func GetRepository(owner string, repo string, headersDir *string) (*Repository, 
 		}
 	}
 
+	if o.Repository.LicenseInfo != nil && o.Repository.LicenseInfo.SpdxId != "NOASSERTION" {
+		rv.LicenseSpdx = o.Repository.LicenseInfo.SpdxId
+	}
+
+	if localDir != nil {
+		if _, err := os.Stat(filepath.Join(*localDir, "LICENSE")); err == nil {
+			rv.LicenseData = newRepositoryFile(owner, repo, "LICENSE", "", nil, localDir)
+		} else if _, err := os.Stat(filepath.Join(*localDir, "COPYING")); err == nil {
+			rv.LicenseData = newRepositoryFile(owner, repo, "COPYING", "", nil, localDir)
+		} else {
+			return nil, fmt.Errorf("github: repository: %s/%s: failed to find license", owner, repo)
+		}
+
+		if _, err := os.Stat(filepath.Join(*localDir, "README.md")); err == nil {
+			rv.Readme = newRepositoryFile(owner, repo, "README.md", "", nil, localDir)
+		}
+
+		l, err := os.ReadDir(filepath.Join(*localDir, "docs"))
+		if err != nil && !errors.Is(err, fs.ErrNotExist) {
+			return nil, err
+		}
+		for _, e := range l {
+			if e.Type().IsRegular() {
+				rv.Docs = append(rv.Docs, newRepositoryFile(owner, repo, path.Join("docs", e.Name()), "", nil, localDir))
+			}
+		}
+
+		prefix := ""
+		if headersDir != nil {
+			prefix = *headersDir
+		}
+		l, err = os.ReadDir(filepath.Join(*localDir, prefix))
+		if err != nil && !errors.Is(err, fs.ErrNotExist) {
+			return nil, err
+		}
+		for _, e := range l {
+			if e.IsDir() {
+				l2, err := os.ReadDir(filepath.Join(*localDir, prefix, e.Name()))
+				if err != nil {
+					return nil, err
+				}
+
+				for _, e2 := range l2 {
+					if e2.Type().IsRegular() {
+						rv.Headers = append(rv.Headers, newRepositoryFile(owner, repo, path.Join(prefix, e.Name(), e2.Name()), "", nil, localDir))
+					}
+				}
+			}
+			if e.Type().IsRegular() {
+				rv.Headers = append(rv.Headers, newRepositoryFile(owner, repo, path.Join(prefix, e.Name()), "", nil, localDir))
+			}
+		}
+		return rv, nil
+	}
+
+	if rv.LicenseSpdx == "" {
+		if o.Repository.License != nil {
+			rv.LicenseData = newRepositoryFile(owner, repo, "LICENSE", o.Repository.Head.Oid, o.Repository.License, localDir)
+		} else if o.Repository.Copying != nil {
+			rv.LicenseData = newRepositoryFile(owner, repo, "COPYING", o.Repository.Head.Oid, o.Repository.Copying, localDir)
+		} else {
+			return nil, fmt.Errorf("github: repository: %s/%s: failed to find license", owner, repo)
+		}
+	}
+
 	if o.Repository.Readme != nil {
-		rv.Readme = newRepositoryFile(owner, repo, "README.md", o.Repository.Head.Oid, o.Repository.Readme)
+		rv.Readme = newRepositoryFile(owner, repo, "README.md", o.Repository.Head.Oid, o.Repository.Readme, nil)
 	}
 
 	if o.Repository.Docs != nil {
@@ -351,7 +429,7 @@ func GetRepository(owner string, repo string, headersDir *string) (*Repository, 
 			if doc.Type != "blob" || (path.Ext(doc.Name) != ".md" && path.Ext(doc.Name) != ".markdown") {
 				continue
 			}
-			rv.Docs = append(rv.Docs, newRepositoryFile(owner, repo, path.Join("docs", doc.Name), o.Repository.Head.Oid, &doc.Object))
+			rv.Docs = append(rv.Docs, newRepositoryFile(owner, repo, path.Join("docs", doc.Name), o.Repository.Head.Oid, &doc.Object, nil))
 		}
 	}
 
@@ -366,7 +444,7 @@ func GetRepository(owner string, repo string, headersDir *string) (*Repository, 
 					if subEntry.Type != "blob" || path.Ext(subEntry.Name) != ".h" {
 						continue
 					}
-					rv.Headers = append(rv.Headers, newRepositoryFile(owner, repo, path.Join(prefix, entry.Name, subEntry.Name), o.Repository.Head.Oid, &subEntry.Object))
+					rv.Headers = append(rv.Headers, newRepositoryFile(owner, repo, path.Join(prefix, entry.Name, subEntry.Name), o.Repository.Head.Oid, &subEntry.Object, nil))
 				}
 				continue
 			}
@@ -374,7 +452,7 @@ func GetRepository(owner string, repo string, headersDir *string) (*Repository, 
 			if entry.Type != "blob" || path.Ext(entry.Name) != ".h" {
 				continue
 			}
-			rv.Headers = append(rv.Headers, newRepositoryFile(owner, repo, path.Join(prefix, entry.Name), o.Repository.Head.Oid, &entry.Object.repositoryBlob))
+			rv.Headers = append(rv.Headers, newRepositoryFile(owner, repo, path.Join(prefix, entry.Name), o.Repository.Head.Oid, &entry.Object.repositoryBlob, nil))
 		}
 	}
 	return rv, nil
