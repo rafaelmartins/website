@@ -14,7 +14,6 @@ type pageTaskImpl struct {
 	slug              string
 	source            string
 	extraDependencies []string
-	highlightStyle    string
 	prettyURL         bool
 	template          string
 	templateCtx       map[string]any
@@ -55,7 +54,6 @@ func (t *pageTaskImpl) GetGenerator() (runner.Generator, error) {
 			},
 		},
 		ExtraDependencies: t.extraDependencies,
-		HighlightStyle:    t.highlightStyle,
 		Template:          t.template,
 		TemplateCtx:       t.templateCtx,
 		LayoutCtx:         t.layoutCtx,
@@ -86,7 +84,6 @@ type PageSource struct {
 type Pages struct {
 	Sources           []*PageSource
 	ExtraDependencies []string
-	HighlightStyle    string
 	PrettyURL         bool
 	BaseDestination   string
 	Template          string
@@ -102,11 +99,6 @@ func (p *Pages) GetTasks() ([]*runner.Task, error) {
 	tmpl := p.Template
 	if tmpl == "" {
 		tmpl = "entry.html"
-	}
-
-	style := p.HighlightStyle
-	if style == "" {
-		style = "github"
 	}
 
 	deps := []string{}
@@ -127,7 +119,6 @@ func (p *Pages) GetTasks() ([]*runner.Task, error) {
 					slug:              v.Slug,
 					source:            v.File,
 					extraDependencies: deps,
-					highlightStyle:    style,
 					prettyURL:         p.PrettyURL,
 					template:          tmpl,
 					templateCtx:       p.TemplateCtx,

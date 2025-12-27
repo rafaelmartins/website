@@ -11,13 +11,13 @@ import (
 	"github.com/yuin/goldmark/renderer/html"
 )
 
-func Render(src []byte, style string, pc parser.Context, ext ...goldmark.Extender) (string, error) {
+func New(style string, ext ...goldmark.Extender) goldmark.Markdown {
 	opt := []highlighting.Option{}
 	if style != "" {
 		opt = append(opt, highlighting.WithStyle(style))
 	}
 
-	mkd := goldmark.New(
+	return goldmark.New(
 		goldmark.WithExtensions(
 			append(
 				[]goldmark.Extender{
@@ -37,7 +37,9 @@ func Render(src []byte, style string, pc parser.Context, ext ...goldmark.Extende
 			html.WithUnsafe(),
 		),
 	)
+}
 
+func Render(mkd goldmark.Markdown, src []byte, pc parser.Context) (string, error) {
 	if pc == nil {
 		pc = parser.NewContext()
 	}

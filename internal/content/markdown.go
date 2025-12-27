@@ -11,6 +11,8 @@ import (
 	"rafaelmartins.com/p/website/internal/markdown"
 )
 
+var gmMarkdown = markdown.New("github")
+
 type mkd struct{}
 
 func (*mkd) IsSupported(f string) bool {
@@ -18,19 +20,24 @@ func (*mkd) IsSupported(f string) bool {
 	return e == ".md" || e == ".markdown"
 }
 
-func (*mkd) Render(f string, style string, baseurl string) (string, *frontmatter.FrontMatter, error) {
+func (*mkd) Render(f string, baseurl string) (string, *frontmatter.FrontMatter, error) {
 	fp, err := os.Open(f)
 	if err != nil {
 		return "", nil, err
 	}
 	defer fp.Close()
 
-	meta, src, err := frontmatter.Parse(fp)
+	src, err := io.ReadAll(fp)
 	if err != nil {
 		return "", nil, err
 	}
 
-	m, err := markdown.Render(src, style, nil)
+	meta, src, err := frontmatter.Parse(src)
+	if err != nil {
+		return "", nil, err
+	}
+
+	m, err := markdown.Render(gmMarkdown, src, nil)
 	if err != nil {
 		return "", nil, err
 	}

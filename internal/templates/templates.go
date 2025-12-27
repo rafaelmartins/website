@@ -53,10 +53,9 @@ type ProjectContentLatestRelease struct {
 	Files []*ProjectContentLatestReleaseFile
 }
 
-type ProjectContentDocLink struct {
+type ProjectContentDocumentation struct {
 	URL   string
 	Label string
-	Icon  string
 }
 
 type ProjectContentKicadProjectPcbRenderFile struct {
@@ -83,7 +82,6 @@ type ProjectContentEntry struct {
 	Repo          string
 	URL           string
 	Description   string
-	DocLinks      []*ProjectContentDocLink
 	KicadProjects []*ProjectContentKicadProject
 	GoImport      string
 	GoRepo        string
@@ -95,6 +93,7 @@ type ProjectContentEntry struct {
 	License       struct {
 		SPDX string
 		URL  string
+		Data string
 	}
 	LatestRelease *ProjectContentLatestRelease
 	Date          time.Time

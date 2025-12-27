@@ -21,7 +21,7 @@ func (*textPack) IsSupported(f string) bool {
 	return filepath.Ext(f) == ".textpack"
 }
 
-func (*textPack) Render(f string, style string, baseurl string) (string, *frontmatter.FrontMatter, error) {
+func (*textPack) Render(f string, baseurl string) (string, *frontmatter.FrontMatter, error) {
 	r, err := zip.OpenReader(f)
 	if err != nil {
 		return "", nil, err
@@ -73,7 +73,7 @@ func (*textPack) Render(f string, style string, baseurl string) (string, *frontm
 	}
 	defer fp.Close()
 
-	return tbRender(fp, style, baseurl)
+	return tbRender(fp, baseurl)
 }
 
 func (*textPack) GetTimeStamps(f string) ([]time.Time, error) {

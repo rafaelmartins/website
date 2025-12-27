@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"path"
 	"path/filepath"
 	"runtime"
 	"slices"
@@ -15,6 +16,7 @@ import (
 	"time"
 
 	"golang.org/x/sync/semaphore"
+	"rafaelmartins.com/p/website/internal/github"
 	"rafaelmartins.com/p/website/internal/postproc"
 )
 
@@ -110,17 +112,18 @@ func (t *Task) run(basedir string, cfg Config, force bool) (bool, error) {
 		return true, err
 	}
 
-	ch := make(chan *GeneratorByProduct)
-	go gen.GetByProducts(ch)
-
 	tmp := filepath.Base(t.impl.GetDestination())
 	tmp = strings.TrimSuffix(tmp, filepath.Ext(tmp))
 
-	bpDir := filepath.Join(basedir, t.group.GetBaseDestination(), filepath.Dir(t.impl.GetDestination()))
+	relDir := ""
 	if tmp != "index" {
-		bpDir = filepath.Join(bpDir, tmp)
+		relDir = tmp
 	}
 
+	ch := make(chan *GeneratorByProduct)
+	go gen.GetByProducts(ch)
+
+	bpDir := filepath.Join(basedir, t.group.GetBaseDestination(), filepath.Dir(t.impl.GetDestination()), relDir)
 	for bp := range ch {
 		if bp.Err != nil {
 			return true, bp.Err
@@ -158,30 +161,46 @@ type Config interface {
 	GetTimeStamp() (time.Time, error)
 }
 
+type taskJob struct {
+	task *Task
+	err  error
+}
+
 func Run(groups []*TaskGroup, basedir string, cfg Config, force bool) error {
-	allTasks := []*Task{}
-	for _, group := range groups {
-		if group == nil {
-			continue
-		}
+	queue := make(chan *taskJob, 100)
 
-		if group.impl == nil {
-			continue
-		}
-
-		var tasks []*Task
-		if group.tasks == nil {
-			var err error
-			tasks, err = group.impl.GetTasks()
-			if err != nil {
-				return err
+	go func() {
+		for _, group := range groups {
+			if group == nil || group.impl == nil {
+				continue
 			}
-			group.tasks = tasks
-		} else {
-			tasks = group.tasks
+
+			if implf, ok := group.impl.(interface{ GetSkipIfExists() string }); ok && !force {
+				if skip := implf.GetSkipIfExists(); skip != "" {
+					if _, err := os.Stat(path.Join(basedir, skip)); err == nil {
+						continue
+					}
+				}
+			}
+
+			if group.tasks == nil {
+				tasks, err := group.impl.GetTasks()
+				if err != nil {
+					queue <- &taskJob{
+						err: err,
+					}
+					break
+				}
+				group.tasks = tasks
+			}
+			for _, task := range group.tasks {
+				queue <- &taskJob{
+					task: task,
+				}
+			}
 		}
-		allTasks = append(allTasks, tasks...)
-	}
+		close(queue)
+	}()
 
 	ctx := context.Background()
 	nworkers := int64(runtime.NumCPU())
@@ -189,7 +208,12 @@ func Run(groups []*TaskGroup, basedir string, cfg Config, force bool) error {
 	failures := atomic.Int32{}
 	outdated := atomic.Int32{}
 
-	for _, t := range allTasks {
+	for job := range queue {
+		if job.err != nil {
+			close(queue)
+			return job.err
+		}
+
 		if err := sem.Acquire(ctx, 1); err != nil {
 			return err
 		}
@@ -203,7 +227,7 @@ func Run(groups []*TaskGroup, basedir string, cfg Config, force bool) error {
 			} else if outd {
 				outdated.Add(1)
 			}
-		}(t)
+		}(job.task)
 	}
 
 	if err := sem.Acquire(ctx, nworkers); err != nil {
@@ -215,6 +239,8 @@ func Run(groups []*TaskGroup, basedir string, cfg Config, force bool) error {
 	}
 
 	if outdated.Load() > 0 {
+		log.Printf("--------------------------------------------------------------------------------")
+		github.DumpRatelimit()
 		log.Printf("--------------------------------------------------------------------------------")
 	}
 

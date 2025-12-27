@@ -58,7 +58,7 @@ func (m *Minify) Run(dstFn string, dst io.Writer, src io.Reader) error {
 		})
 		m.mi.Add("text/css", &css.Minifier{
 			Precision: 0,
-			KeepCSS2:  true,
+			Version:   2,
 		})
 		m.mi.Add("text/html", &html.Minifier{
 			KeepDocumentTags:    true,

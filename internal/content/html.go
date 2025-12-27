@@ -17,14 +17,19 @@ func (*html) IsSupported(f string) bool {
 	return e == ".htm" || e == ".html"
 }
 
-func (*html) Render(f string, style string, baseurl string) (string, *frontmatter.FrontMatter, error) {
+func (*html) Render(f string, baseurl string) (string, *frontmatter.FrontMatter, error) {
 	fp, err := os.Open(f)
 	if err != nil {
 		return "", nil, err
 	}
 	defer fp.Close()
 
-	meta, src, err := frontmatter.Parse(fp)
+	src, err := io.ReadAll(fp)
+	if err != nil {
+		return "", nil, err
+	}
+
+	meta, src, err := frontmatter.Parse(src)
 	if err != nil {
 		return "", nil, err
 	}

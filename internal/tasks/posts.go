@@ -23,7 +23,6 @@ type postTaskImpl struct {
 	baseDestination string
 	slug            string
 	source          *generators.ContentSource
-	highlightStyle  string
 	template        string
 	templateCtx     map[string]any
 	layoutCtx       *templates.LayoutContext
@@ -40,14 +39,13 @@ func (t *postTaskImpl) GetGenerator() (runner.Generator, error) {
 	}
 
 	return &generators.Content{
-		URL:            url,
-		Slug:           t.slug,
-		Sources:        []*generators.ContentSource{t.source},
-		IsPost:         true,
-		HighlightStyle: t.highlightStyle,
-		Template:       t.template,
-		TemplateCtx:    t.templateCtx,
-		LayoutCtx:      t.layoutCtx,
+		URL:         url,
+		Slug:        t.slug,
+		Sources:     []*generators.ContentSource{t.source},
+		IsPost:      true,
+		Template:    t.template,
+		TemplateCtx: t.templateCtx,
+		LayoutCtx:   t.layoutCtx,
 
 		OpenGraphImageGenerate: true,
 	}, nil
@@ -55,7 +53,6 @@ func (t *postTaskImpl) GetGenerator() (runner.Generator, error) {
 
 type Posts struct {
 	SourceDir       string
-	HighlightStyle  string
 	BaseDestination string
 	Template        string
 	TemplateCtx     map[string]any
@@ -122,11 +119,6 @@ func (p *Posts) GetTasks() ([]*runner.Task, error) {
 		tmpl = "entry.html"
 	}
 
-	style := p.HighlightStyle
-	if style == "" {
-		style = "github"
-	}
-
 	srcs, err := p.getSources()
 	if err != nil {
 		return nil, err
@@ -140,7 +132,6 @@ func (p *Posts) GetTasks() ([]*runner.Task, error) {
 					baseDestination: p.BaseDestination,
 					slug:            src.slug,
 					source:          src.source,
-					highlightStyle:  style,
 					template:        tmpl,
 					templateCtx:     p.TemplateCtx,
 					layoutCtx: &templates.LayoutContext{

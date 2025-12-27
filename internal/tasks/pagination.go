@@ -27,7 +27,6 @@ type paginationTaskImpl struct {
 	description     string
 	sources         []*generators.ContentSource
 	slug            string
-	highlightStyle  string
 	template        string
 	templateCtx     map[string]any
 	pagination      *templates.ContentPagination
@@ -52,17 +51,16 @@ func (t *paginationTaskImpl) GetDestination() string {
 
 func (t *paginationTaskImpl) GetGenerator() (runner.Generator, error) {
 	return &generators.Content{
-		Title:          t.title,
-		Description:    t.description,
-		URL:            path.Join("/", t.baseDestination, t.slug) + "/",
-		Slug:           t.slug,
-		Sources:        t.sources,
-		IsPost:         true,
-		HighlightStyle: t.highlightStyle,
-		Template:       t.template,
-		TemplateCtx:    t.templateCtx,
-		Pagination:     t.pagination,
-		LayoutCtx:      t.layoutCtx,
+		Title:       t.title,
+		Description: t.description,
+		URL:         path.Join("/", t.baseDestination, t.slug) + "/",
+		Slug:        t.slug,
+		Sources:     t.sources,
+		IsPost:      true,
+		Template:    t.template,
+		TemplateCtx: t.templateCtx,
+		Pagination:  t.pagination,
+		LayoutCtx:   t.layoutCtx,
 
 		OpenGraphTitle:         t.openGraphTitle,
 		OpenGraphDescription:   t.openGraphDescription,
@@ -82,7 +80,6 @@ type Pagination struct {
 	Sources         []*generators.ContentSource
 	PostsPerPage    int
 	SortReverse     bool
-	HighlightStyle  string
 	BaseDestination string
 	Template        string
 	TemplateCtx     map[string]any
@@ -111,11 +108,6 @@ func (p *Pagination) GetTasks() ([]*runner.Task, error) {
 		if p.Atom {
 			tmpl = "atom.xml"
 		}
-	}
-
-	style := p.HighlightStyle
-	if style == "" {
-		style = "github"
 	}
 
 	posts := []*paginationPost{}
@@ -162,7 +154,6 @@ func (p *Pagination) GetTasks() ([]*runner.Task, error) {
 					description:     p.Description,
 					sources:         nil,
 					slug:            "",
-					highlightStyle:  style,
 					template:        tmpl,
 					templateCtx:     p.TemplateCtx,
 					pagination: &templates.ContentPagination{
@@ -214,7 +205,6 @@ func (p *Pagination) GetTasks() ([]*runner.Task, error) {
 						description:     p.Description,
 						sources:         srcs,
 						slug:            "",
-						highlightStyle:  style,
 						template:        tmpl,
 						templateCtx:     p.TemplateCtx,
 						pagination:      pagination,
@@ -248,7 +238,6 @@ func (p *Pagination) GetTasks() ([]*runner.Task, error) {
 					description:     p.Description,
 					sources:         srcs,
 					slug:            path.Join("page", strconv.FormatInt(int64(page), 10)),
-					highlightStyle:  style,
 					template:        tmpl,
 					templateCtx:     p.TemplateCtx,
 					pagination:      pagination,

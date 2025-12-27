@@ -30,7 +30,6 @@ type Content struct {
 	Sources           []*ContentSource
 	IsPost            bool
 	ExtraDependencies []string
-	HighlightStyle    string
 	Template          string
 	TemplateCtx       map[string]any
 	Pagination        *templates.ContentPagination
@@ -92,7 +91,7 @@ func (h *Content) GetReader() (io.ReadCloser, error) {
 			continue
 		}
 
-		body, metadata, err := content.Render(src.File, h.HighlightStyle, h.URL)
+		body, metadata, err := content.Render(src.File, h.URL)
 		if err != nil {
 			return nil, err
 		}

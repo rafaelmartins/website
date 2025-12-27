@@ -20,48 +20,53 @@ import (
 	"rafaelmartins.com/p/website/internal/markdown"
 )
 
-var pcTitleKey = parser.NewContextKey()
+var (
+	gmTextBundle = markdown.New("github", &tbExtension{})
 
-type tbTransformer struct {
-	baseurl string
+	pcBaseUrl  = parser.NewContextKey()
+	pcTitleKey = parser.NewContextKey()
+)
+
+type tbExtension struct{}
+
+func (te *tbExtension) Extend(m goldmark.Markdown) {
+	m.Parser().AddOptions(parser.WithASTTransformers(util.Prioritized(te, 0)))
 }
 
-func (tt *tbTransformer) Transform(node *ast.Document, reader text.Reader, pc parser.Context) {
+func (*tbExtension) Transform(node *ast.Document, reader text.Reader, pc parser.Context) {
 	if fc := node.FirstChild(); pc != nil && fc != nil && fc.Kind() == ast.KindHeading {
 		pc.Set(pcTitleKey, string(fc.(*ast.Heading).Lines().Value(reader.Source())))
 		node.RemoveChild(node, fc)
 	}
 
+	baseurl := pc.Get(pcBaseUrl).(string)
+
 	ast.Walk(node, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
 		if entering && n.Kind() == ast.KindImage {
 			img := n.(*ast.Image)
-			if s := string(img.Destination); tt.baseurl != "" && strings.HasPrefix(s, "assets/") {
-				img.Destination = []byte(filepath.Join(tt.baseurl, s))
-				return ast.WalkStop, nil
+			if s := string(img.Destination); baseurl != "" && strings.HasPrefix(s, "assets/") {
+				img.Destination = []byte(filepath.Join(baseurl, s))
+				return ast.WalkContinue, nil
 			}
 		}
 		return ast.WalkContinue, nil
 	})
 }
 
-type tbExtension struct {
-	baseurl string
-}
+func tbRender(r io.Reader, baseurl string) (string, *frontmatter.FrontMatter, error) {
+	src, err := io.ReadAll(r)
+	if err != nil {
+		return "", nil, err
+	}
 
-func (te *tbExtension) Extend(m goldmark.Markdown) {
-	m.Parser().AddOptions(parser.WithASTTransformers(
-		util.Prioritized(&tbTransformer{te.baseurl}, 0),
-	))
-}
-
-func tbRender(r io.Reader, style string, baseurl string) (string, *frontmatter.FrontMatter, error) {
-	meta, src, err := frontmatter.Parse(r)
+	meta, src, err := frontmatter.Parse(src)
 	if err != nil {
 		return "", nil, err
 	}
 
 	pc := parser.NewContext()
-	rendered, err := markdown.Render(src, style, pc, &tbExtension{baseurl})
+	pc.Set(pcBaseUrl, baseurl)
+	rendered, err := markdown.Render(gmTextBundle, src, pc)
 	if err != nil {
 		return "", nil, err
 	}
@@ -120,7 +125,7 @@ func (*textBundle) getSource(f string) (string, error) {
 	return srcs[0], nil
 }
 
-func (tb *textBundle) Render(f string, style string, baseurl string) (string, *frontmatter.FrontMatter, error) {
+func (tb *textBundle) Render(f string, baseurl string) (string, *frontmatter.FrontMatter, error) {
 	info, err := os.ReadFile(filepath.Join(f, "info.json"))
 	if err != nil {
 		return "", nil, err
@@ -140,7 +145,7 @@ func (tb *textBundle) Render(f string, style string, baseurl string) (string, *f
 	}
 	defer fp.Close()
 
-	return tbRender(fp, style, baseurl)
+	return tbRender(fp, baseurl)
 }
 
 func (tb *textBundle) GetTimeStamps(f string) ([]time.Time, error) {

@@ -10,7 +10,7 @@ import (
 
 type contentProvider interface {
 	IsSupported(f string) bool
-	Render(f string, style string, baseurl string) (string, *frontmatter.FrontMatter, error)
+	Render(f string, baseurl string) (string, *frontmatter.FrontMatter, error)
 	GetTimeStamps(f string) ([]time.Time, error)
 	ListAssets(f string) ([]string, error)
 	OpenAsset(f string, a string) (string, io.ReadCloser, error)
@@ -36,12 +36,12 @@ func IsSupported(f string) bool {
 	return getProvider(f) != nil
 }
 
-func Render(f string, style string, baseurl string) (string, *frontmatter.FrontMatter, error) {
+func Render(f string, baseurl string) (string, *frontmatter.FrontMatter, error) {
 	p := getProvider(f)
 	if p == nil {
 		return "", nil, fmt.Errorf("content: no provider found: %s", f)
 	}
-	return p.Render(f, style, baseurl)
+	return p.Render(f, baseurl)
 }
 
 func GetTimeStamps(f string) ([]time.Time, error) {
@@ -69,6 +69,6 @@ func OpenAsset(f string, a string) (string, io.ReadCloser, error) {
 }
 
 func GetMetadata(f string) (*frontmatter.FrontMatter, error) {
-	_, md, err := Render(f, "", "")
+	_, md, err := Render(f, "")
 	return md, err
 }

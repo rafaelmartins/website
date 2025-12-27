@@ -14,6 +14,7 @@ const (
 	fontOwner = "googlefonts"
 	fontRepo  = "atkinson-hyperlegible-next"
 	fontFile  = "fonts/ttf/AtkinsonHyperlegibleNext-ExtraBold.ttf"
+	fontRef   = "main"
 )
 
 type Font struct {
@@ -22,7 +23,7 @@ type Font struct {
 }
 
 func New() (*Font, error) {
-	resp, _, err := github.Contents(nil, fontOwner, fontRepo, fontFile, true)
+	resp, err := github.GetRepositoryFile(fontOwner, fontRepo, fontFile, fontRef)
 	if err != nil {
 		return nil, err
 	}

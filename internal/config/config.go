@@ -86,7 +86,7 @@ type Config struct {
 			CDocs struct {
 				Destination    string   `yaml:"destination"`
 				Headers        []string `yaml:"headers"`
-				BaseDirectory  string   `yaml:"base-directory"`
+				BaseDirectory  *string  `yaml:"base-directory"`
 				LocalDirectory string   `yaml:"local-directory"`
 				Template       string   `yaml:"template"`
 				WithSidebar    *bool    `yaml:"with-sidebar"`
@@ -102,12 +102,7 @@ type Config struct {
 				} `yaml:"opengraph"`
 			} `yaml:"c-docs"`
 			KicadProjects []string `yaml:"kicad-projects"`
-			DocLinks      []struct {
-				URL   string `yaml:"url"`
-				Label string `yaml:"label"`
-				Icon  string `yaml:"icon"`
-			} `yaml:"doc-links"`
-			Go struct {
+			Go            struct {
 				Import string `yaml:"import"`
 				Repo   string `yaml:"repo"`
 			} `yaml:"go"`
@@ -145,7 +140,6 @@ type Config struct {
 			} `yaml:"opengraph"`
 		} `yaml:"sources"`
 		ExtraDependencies []string       `yaml:"extra-dependencies"`
-		HighlightStyle    string         `yaml:"highlight-style"`
 		PrettyURL         *bool          `yaml:"pretty-url"`
 		BaseDestination   string         `yaml:"base-destination"`
 		Template          string         `yaml:"template"`
@@ -159,7 +153,6 @@ type Config struct {
 		PostsPerPage       int            `yaml:"posts-per-page"`
 		PostsPerPageAtom   int            `yaml:"posts-per-page-atom"`
 		SortReverse        *bool          `yaml:"sort-reverse"`
-		HighlightStyle     string         `yaml:"highlight-style"`
 		BaseDestination    string         `yaml:"base-destination"`
 		TemplateAtom       string         `yaml:"template-atom"`
 		TemplatePagination string         `yaml:"template-pagination"`
@@ -183,7 +176,6 @@ type Config struct {
 			PostsPerPage       int            `yaml:"posts-per-page"`
 			PostsPerPageAtom   int            `yaml:"posts-per-page-atom"`
 			SortReverse        *bool          `yaml:"sort-reverse"`
-			HighlightStyle     string         `yaml:"highlight-style"`
 			BaseDestination    string         `yaml:"base-destination"`
 			Template           string         `yaml:"template"`
 			TemplateAtom       string         `yaml:"template-atom"`

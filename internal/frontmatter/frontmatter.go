@@ -3,7 +3,6 @@ package frontmatter
 import (
 	"bytes"
 	"errors"
-	"io"
 	"time"
 
 	"go.yaml.in/yaml/v3"
@@ -54,12 +53,7 @@ type FrontMatter struct {
 	Extra map[string]any `yaml:"extra"`
 }
 
-func Parse(r io.Reader) (*FrontMatter, []byte, error) {
-	src, err := io.ReadAll(r)
-	if err != nil {
-		return nil, nil, err
-	}
-
+func Parse(src []byte) (*FrontMatter, []byte, error) {
 	fm := []byte{}
 	rest := []byte{}
 	level := 0

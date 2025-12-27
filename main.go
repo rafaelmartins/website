@@ -12,6 +12,7 @@ import (
 	"rafaelmartins.com/p/website/internal/kicad"
 	"rafaelmartins.com/p/website/internal/meta"
 	"rafaelmartins.com/p/website/internal/ogimage"
+	"rafaelmartins.com/p/website/internal/project"
 	"rafaelmartins.com/p/website/internal/runner"
 	"rafaelmartins.com/p/website/internal/tasks"
 	"rafaelmartins.com/p/website/internal/templates"
@@ -73,16 +74,6 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 					"webfonts/fa-regular-400.woff2",
 					"webfonts/fa-solid-900.woff2",
 					"webfonts/fa-v4compatibility.woff2",
-				},
-				BaseDestination: assetsDir,
-			},
-		),
-		runner.NewTaskGroup(
-			&tasks.NpmPackage{
-				Name:    "github-markdown-css",
-				Version: "5.8.1",
-				Files: []string{
-					"github-markdown-light.css",
 				},
 				BaseDestination: assetsDir,
 			},
@@ -175,7 +166,6 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 				&tasks.Pages{
 					Sources:           src,
 					ExtraDependencies: pg.ExtraDependencies,
-					HighlightStyle:    pg.HighlightStyle,
 					PrettyURL:         prettyURL,
 					BaseDestination:   pg.BaseDestination,
 					Template:          pg.Template,
@@ -195,7 +185,6 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 
 		posts := &tasks.Posts{
 			SourceDir:       ps.SourceDir,
-			HighlightStyle:  ps.HighlightStyle,
 			BaseDestination: ps.BaseDestination,
 			Template:        ps.Template,
 			TemplateCtx:     ps.TemplateCtx,
@@ -216,7 +205,6 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 					Sources:         postsSources,
 					PostsPerPage:    ps.PostsPerPage,
 					SortReverse:     sortReverse,
-					HighlightStyle:  ps.HighlightStyle,
 					BaseDestination: ps.BaseDestination,
 					Template:        ps.TemplatePagination,
 					TemplateCtx:     ps.TemplateCtx,
@@ -238,7 +226,6 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 					PostsPerPage:    ps.PostsPerPageAtom,
 					SortReverse:     true,
 					Atom:            true,
-					HighlightStyle:  ps.HighlightStyle,
 					BaseDestination: ps.BaseDestination,
 					Template:        ps.TemplateAtom,
 					TemplateCtx:     ps.TemplateCtx,
@@ -260,7 +247,6 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 				Sources:         globalPostSources,
 				PostsPerPage:    c.Posts.PostsPerPage,
 				SortReverse:     sortReverse,
-				HighlightStyle:  c.Posts.HighlightStyle,
 				BaseDestination: c.Posts.BaseDestination,
 				Template:        c.Posts.TemplatePagination,
 				TemplateCtx:     c.Posts.TemplateCtx,
@@ -282,13 +268,28 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 				PostsPerPage:    c.Posts.PostsPerPageAtom,
 				SortReverse:     true,
 				Atom:            true,
-				HighlightStyle:  c.Posts.HighlightStyle,
 				BaseDestination: c.Posts.BaseDestination,
 				Template:        c.Posts.TemplateAtom,
 				TemplateCtx:     c.Posts.TemplateCtx,
 			},
 		),
 	)
+
+	for _, qr := range c.QRCode {
+		rv = append(rv,
+			runner.NewTaskGroup(
+				&tasks.QRCode{
+					SourceFile:      qr.SourceFile,
+					SourceContent:   qr.SourceContent,
+					DestinationFile: qr.DestinationFile,
+					Size:            qr.Size,
+					ForegroundColor: qr.ForegroundColor,
+					BackgroundColor: qr.BackgroundColor,
+					WithoutBorders:  qr.WithoutBorders,
+				},
+			),
+		)
+	}
 
 	for _, pj := range c.Projects {
 		sidebar := true
@@ -308,48 +309,26 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 				dsidebar = false
 			}
 
-			subPages := []*tasks.ProjectSubPage{}
-			for _, sp := range repo.SubPages {
-				sidebar := true
-				if sp.WithSidebar != nil && !*sp.WithSidebar {
-					sidebar = false
-				}
-
-				subPages = append(subPages, &tasks.ProjectSubPage{
-					SubPage:                sp.SubPage,
-					Template:               sp.Template,
-					WithSidebar:            sidebar,
-					OpenGraphTitle:         sp.OpenGraph.Title,
-					OpenGraphDescription:   sp.OpenGraph.Description,
-					OpenGraphImage:         sp.OpenGraph.Image,
-					OpenGraphImageGenColor: sp.OpenGraph.ImageGen.Color,
-					OpenGraphImageGenDPI:   sp.OpenGraph.ImageGen.DPI,
-					OpenGraphImageGenSize:  sp.OpenGraph.ImageGen.Size,
-				})
-			}
-
-			docLinks := []*templates.ProjectContentDocLink{}
-			for _, docLink := range repo.DocLinks {
-				docLinks = append(docLinks, &templates.ProjectContentDocLink{
-					URL:   docLink.URL,
-					Label: docLink.Label,
-					Icon:  docLink.Icon,
-				})
-			}
-
 			rv = append(rv,
 				runner.NewTaskGroup(
-					&tasks.Project{
+					&project.Project{
 						Owner: repo.Owner,
 						Repo:  repo.Repo,
 
-						SubPages: subPages,
-						DocLinks: docLinks,
-
-						KicadProjects: repo.KicadProjects,
-
 						GoImport: repo.Go.Import,
 						GoRepo:   repo.Go.Repo,
+
+						Force:                  *fForce,
+						BaseDestination:        pj.BaseDestination,
+						Template:               pj.Template,
+						Immutable:              immutable,
+						WithSidebar:            sidebar,
+						OpenGraphTitle:         repo.OpenGraph.Title,
+						OpenGraphDescription:   repo.OpenGraph.Description,
+						OpenGraphImage:         repo.OpenGraph.Image,
+						OpenGraphImageGenColor: repo.OpenGraph.ImageGen.Color,
+						OpenGraphImageGenDPI:   repo.OpenGraph.ImageGen.DPI,
+						OpenGraphImageGenSize:  repo.OpenGraph.ImageGen.Size,
 
 						CDocsDestination:            repo.CDocs.Destination,
 						CDocsHeaders:                repo.CDocs.Headers,
@@ -363,39 +342,11 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 						CDocsOpenGraphImageGenColor: repo.CDocs.OpenGraph.ImageGen.Color,
 						CDocsOpenGraphImageGenDPI:   repo.CDocs.OpenGraph.ImageGen.DPI,
 						CDocsOpenGraphImageGenSize:  repo.CDocs.OpenGraph.ImageGen.Size,
-
-						BaseDestination:        pj.BaseDestination,
-						Template:               pj.Template,
-						Immutable:              immutable,
-						WithSidebar:            sidebar,
-						OpenGraphTitle:         repo.OpenGraph.Title,
-						OpenGraphDescription:   repo.OpenGraph.Description,
-						OpenGraphImage:         repo.OpenGraph.Image,
-						OpenGraphImageGenColor: repo.OpenGraph.ImageGen.Color,
-						OpenGraphImageGenDPI:   repo.OpenGraph.ImageGen.DPI,
-						OpenGraphImageGenSize:  repo.OpenGraph.ImageGen.Size,
 					},
 				),
 			)
 		}
 	}
-
-	for _, qr := range c.QRCode {
-		rv = append(rv,
-			runner.NewTaskGroup(
-				&tasks.QRCode{
-					SourceFile:      qr.SourceFile,
-					SourceContent:   qr.SourceContent,
-					DestinationFile: qr.DestinationFile,
-					Size:            qr.Size,
-					ForegroundColor: qr.ForegroundColor,
-					BackgroundColor: qr.BackgroundColor,
-					WithoutBorders:  qr.WithoutBorders,
-				},
-			),
-		)
-	}
-
 	return rv, nil
 }
 
