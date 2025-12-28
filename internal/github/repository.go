@@ -360,12 +360,14 @@ func GetRepository(owner string, repo string, headersDir *string, localDir *stri
 	}
 
 	if localDir != nil {
-		if _, err := os.Stat(filepath.Join(*localDir, "LICENSE")); err == nil {
-			rv.LicenseData = newRepositoryFile(owner, repo, "LICENSE", "", nil, localDir)
-		} else if _, err := os.Stat(filepath.Join(*localDir, "COPYING")); err == nil {
-			rv.LicenseData = newRepositoryFile(owner, repo, "COPYING", "", nil, localDir)
-		} else {
-			return nil, fmt.Errorf("github: repository: %s/%s: failed to find license", owner, repo)
+		if rv.LicenseSpdx == "" {
+			if _, err := os.Stat(filepath.Join(*localDir, "LICENSE")); err == nil {
+				rv.LicenseData = newRepositoryFile(owner, repo, "LICENSE", "", nil, localDir)
+			} else if _, err := os.Stat(filepath.Join(*localDir, "COPYING")); err == nil {
+				rv.LicenseData = newRepositoryFile(owner, repo, "COPYING", "", nil, localDir)
+			} else {
+				return nil, fmt.Errorf("github: repository: %s/%s: failed to find license", owner, repo)
+			}
 		}
 
 		if _, err := os.Stat(filepath.Join(*localDir, "README.md")); err == nil {
