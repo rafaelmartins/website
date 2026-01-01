@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"errors"
 	"io"
-	"os"
 	"path/filepath"
 	"slices"
 	"text/template"
@@ -154,56 +153,33 @@ func (h *Content) GetReader() (io.ReadCloser, error) {
 	return io.NopCloser(buf), nil
 }
 
-func (h *Content) GetTimeStamps() ([]time.Time, error) {
-	rv, err := templates.GetTimestamps(h.Template, true)
+func (h *Content) GetPaths() ([]string, error) {
+	rv, err := templates.GetPaths(h.Template)
 	if err != nil {
 		return nil, err
 	}
 
-	og, err := ogimage.GetTimeStamps()
+	og, err := ogimage.GetPaths()
 	if err != nil {
 		return nil, err
 	}
 	rv = append(rv, og...)
 
-	dirs := []string{}
 	for _, src := range h.Sources {
 		if src.File == "" {
 			continue
 		}
 
 		if h.Pagination != nil {
-			if fd := filepath.Dir(src.File); !slices.Contains(dirs, fd) {
-				dirs = append(dirs, fd)
+			if fd := filepath.Dir(src.File); !slices.Contains(rv, fd) {
+				rv = append(rv, fd)
 			}
 		}
 
-		ts, err := content.GetTimeStamps(src.File)
-		if err != nil {
-			return nil, err
-		}
-		rv = append(rv, ts...)
+		rv = append(rv, src.File)
 	}
 
-	if len(dirs) > 0 {
-		for _, dir := range dirs {
-			st, err := os.Stat(dir)
-			if err != nil {
-				return nil, err
-			}
-			rv = append(rv, st.ModTime().UTC())
-		}
-	}
-
-	for _, dep := range h.ExtraDependencies {
-		st, err := os.Stat(dep)
-		if err != nil {
-			return nil, err
-		}
-		rv = append(rv, st.ModTime().UTC())
-	}
-
-	return rv, nil
+	return append(rv, h.ExtraDependencies...), nil
 }
 
 func (*Content) GetImmutable() bool {

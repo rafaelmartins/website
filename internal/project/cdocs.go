@@ -4,10 +4,8 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"os"
 	"path"
 	"path/filepath"
-	"time"
 
 	"rafaelmartins.com/p/website/internal/cdocs"
 	"rafaelmartins.com/p/website/internal/ogimage"
@@ -115,33 +113,27 @@ func (c *cDocs) GetReader() (io.ReadCloser, error) {
 	return io.NopCloser(buf), nil
 }
 
-func (c *cDocs) GetTimeStamps() ([]time.Time, error) {
+func (c *cDocs) GetPaths() ([]string, error) {
 	if c.proj.Immutable && c.proj.LocalDirectory == nil {
 		return nil, nil
 	}
 
-	rv, err := templates.GetTimestamps(c.getTemplate(), true)
+	rv, err := templates.GetPaths(c.getTemplate())
 	if err != nil {
 		return nil, err
 	}
 
 	if c.proj.LocalDirectory != nil {
 		for _, header := range c.proj.proj.Headers {
-			st, err := os.Stat(filepath.Join(*c.proj.LocalDirectory, header.Name))
-			if err != nil {
-				return nil, err
-			}
-			rv = append(rv, st.ModTime().UTC())
+			rv = append(rv, filepath.Join(*c.proj.LocalDirectory, header.Name))
 		}
 	}
 
-	og, err := ogimage.GetTimeStamps()
+	og, err := ogimage.GetPaths()
 	if err != nil {
 		return nil, err
 	}
-	rv = append(rv, og...)
-
-	return rv, nil
+	return append(rv, og...), nil
 }
 
 func (c *cDocs) GetImmutable() bool {

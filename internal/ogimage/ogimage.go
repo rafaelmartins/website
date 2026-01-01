@@ -12,7 +12,6 @@ import (
 	"os"
 	"path"
 	"strings"
-	"time"
 
 	"golang.org/x/image/draw"
 	"golang.org/x/image/font"
@@ -112,18 +111,12 @@ func SetGlobals(template string, minX *int, minY *int, maxX *int, maxY *int, def
 	return nil
 }
 
-func GetTimeStamps() ([]time.Time, error) {
-	rv := []time.Time{}
+func GetPaths() ([]string, error) {
+	rv := []string{}
 	if !available {
 		return rv, nil
 	}
-
-	st, err := os.Stat(tmpl)
-	if err != nil {
-		return nil, err
-	}
-	rv = append(rv, st.ModTime().UTC())
-	return rv, nil
+	return append(rv, tmpl), nil
 }
 
 func Generate(text string, c color.Color, dpi *float64, size *float64) (io.ReadCloser, error) {

@@ -3,31 +3,22 @@ package utils
 import (
 	"os"
 	"path/filepath"
-	"time"
 )
 
-func ExecutableTimestamp() (time.Time, error) {
+func Executables() ([]string, error) {
 	lexe, err := os.Executable()
 	if err != nil {
-		return time.Time{}, err
+		return nil, err
 	}
 
 	exe, err := filepath.EvalSymlinks(lexe)
 	if err != nil {
-		return time.Time{}, err
+		return nil, err
 	}
 
-	st, err := os.Stat(exe)
-	if err != nil {
-		return time.Time{}, err
-	}
-	return st.ModTime().UTC(), nil
-}
-
-func ExecutableTimestamps() ([]time.Time, error) {
-	ts, err := ExecutableTimestamp()
+	aexe, err := filepath.Abs(exe)
 	if err != nil {
 		return nil, err
 	}
-	return []time.Time{ts}, nil
+	return []string{aexe}, nil
 }

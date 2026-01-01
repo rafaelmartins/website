@@ -14,9 +14,39 @@ import (
 	"rafaelmartins.com/p/website/internal/templates"
 )
 
-type postSource struct {
-	source *generators.ContentSource
-	slug   string
+type PostsSources struct {
+	Dir             string
+	BaseDestination string
+}
+
+func (p *PostsSources) List() ([]*generators.ContentSource, error) {
+	if p.Dir == "" {
+		return nil, fmt.Errorf("posts: source dir not defined")
+	}
+
+	srcs, err := os.ReadDir(p.Dir)
+	if err != nil {
+		if !errors.Is(err, os.ErrNotExist) {
+			return nil, err
+		}
+	}
+
+	rv := []*generators.ContentSource{}
+	for _, src := range srcs {
+		fpath := filepath.Join(p.Dir, src.Name())
+		if !content.IsSupported(fpath) {
+			continue
+		}
+
+		slug := strings.TrimSuffix(src.Name(), filepath.Ext(src.Name()))
+		rv = append(rv,
+			&generators.ContentSource{
+				File: fpath,
+				URL:  path.Join("/", p.BaseDestination, slug) + "/",
+			},
+		)
+	}
+	return rv, nil
 }
 
 type postTaskImpl struct {
@@ -52,65 +82,18 @@ func (t *postTaskImpl) GetGenerator() (runner.Generator, error) {
 }
 
 type Posts struct {
-	SourceDir       string
-	BaseDestination string
-	Template        string
-	TemplateCtx     map[string]any
-	WithSidebar     bool
+	SourceDir   PostsSources
+	Template    string
+	TemplateCtx map[string]any
+	WithSidebar bool
 }
 
 func (p *Posts) GetBaseDestination() string {
-	return p.BaseDestination
-}
-
-func (p *Posts) getSources() ([]*postSource, error) {
-	if p.SourceDir == "" {
-		return nil, fmt.Errorf("posts: source dir not defined")
-	}
-
-	srcs, err := os.ReadDir(p.SourceDir)
-	if err != nil {
-		if !errors.Is(err, os.ErrNotExist) {
-			return nil, err
-		}
-	}
-
-	rv := []*postSource{}
-	for _, src := range srcs {
-		fpath := filepath.Join(p.SourceDir, src.Name())
-		if !content.IsSupported(fpath) {
-			continue
-		}
-
-		slug := strings.TrimSuffix(src.Name(), filepath.Ext(src.Name()))
-		rv = append(rv,
-			&postSource{
-				source: &generators.ContentSource{
-					File: fpath,
-					URL:  path.Join("/", p.BaseDestination, slug) + "/",
-				},
-				slug: slug,
-			},
-		)
-	}
-	return rv, nil
-}
-
-func (p *Posts) GetSources() ([]*generators.ContentSource, error) {
-	srcs, err := p.getSources()
-	if err != nil {
-		return nil, err
-	}
-
-	rv := []*generators.ContentSource{}
-	for _, src := range srcs {
-		rv = append(rv, src.source)
-	}
-	return rv, nil
+	return p.SourceDir.BaseDestination
 }
 
 func (p *Posts) GetTasks() ([]*runner.Task, error) {
-	if p.SourceDir == "" {
+	if p.SourceDir.Dir == "" {
 		return nil, fmt.Errorf("posts: source dir not defined")
 	}
 
@@ -119,19 +102,21 @@ func (p *Posts) GetTasks() ([]*runner.Task, error) {
 		tmpl = "entry.html"
 	}
 
-	srcs, err := p.getSources()
+	srcs, err := p.SourceDir.List()
 	if err != nil {
 		return nil, err
 	}
 
 	rv := []*runner.Task{}
 	for _, src := range srcs {
+		name := filepath.Base(src.File)
+		slug := strings.TrimSuffix(name, filepath.Ext(name))
 		rv = append(rv,
 			runner.NewTask(p,
 				&postTaskImpl{
-					baseDestination: p.BaseDestination,
-					slug:            src.slug,
-					source:          src.source,
+					baseDestination: p.SourceDir.BaseDestination,
+					slug:            slug,
+					source:          src,
 					template:        tmpl,
 					templateCtx:     p.TemplateCtx,
 					layoutCtx: &templates.LayoutContext{

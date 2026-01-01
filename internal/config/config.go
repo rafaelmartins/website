@@ -1,8 +1,6 @@
 package config
 
 import (
-	"errors"
-	"io/fs"
 	"os"
 	"time"
 
@@ -243,20 +241,8 @@ func (c *Config) GetTimeStamp() (time.Time, error) {
 
 func (c *Config) IsUpToDate() bool {
 	ts, err := c.GetTimeStamp()
-	if err != nil || ts.Compare(c.ts) > 0 {
+	if err != nil {
 		return false
 	}
-	for _, pg := range c.Posts.Groups {
-		st, err := os.Stat(pg.SourceDir)
-		if err != nil {
-			if errors.Is(err, fs.ErrNotExist) {
-				continue
-			}
-			return false
-		}
-		if st.ModTime().UTC().Compare(c.ts) > 0 {
-			return false
-		}
-	}
-	return true
+	return ts.Equal(c.ts) || ts.Before(c.ts)
 }

@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
-	"time"
 
 	"rafaelmartins.com/p/website/internal/meta"
 	"rafaelmartins.com/p/website/internal/runner"
@@ -118,8 +117,8 @@ func (t *Task) GetReader() (io.ReadCloser, error) {
 	return io.NopCloser(buf), nil
 }
 
-func (t *Task) GetTimeStamps() ([]time.Time, error) {
-	return t.Project.GetTimeStamps()
+func (t *Task) GetPaths() ([]string, error) {
+	return t.Project.GetPaths()
 }
 
 func (*Task) GetImmutable() bool {

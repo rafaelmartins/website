@@ -6,7 +6,6 @@ import (
 	"io"
 	"io/fs"
 	"path/filepath"
-	"time"
 
 	"rafaelmartins.com/p/website/internal/runner"
 	"rafaelmartins.com/p/website/internal/utils"
@@ -28,8 +27,8 @@ func (s *Embed) GetReader() (io.ReadCloser, error) {
 	return s.FS.Open(s.Name)
 }
 
-func (s *Embed) GetTimeStamps() ([]time.Time, error) {
-	return utils.ExecutableTimestamps()
+func (s *Embed) GetPaths() ([]string, error) {
+	return utils.Executables()
 }
 
 func (*Embed) GetImmutable() bool {

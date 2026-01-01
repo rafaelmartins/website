@@ -9,7 +9,6 @@ import (
 
 	"rafaelmartins.com/p/website/internal/cdocs"
 	"rafaelmartins.com/p/website/internal/config"
-	"rafaelmartins.com/p/website/internal/generators"
 	"rafaelmartins.com/p/website/internal/kicad"
 	"rafaelmartins.com/p/website/internal/meta"
 	"rafaelmartins.com/p/website/internal/ogimage"
@@ -203,7 +202,7 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 		)
 	}
 
-	globalPostSources := []*generators.ContentSource{}
+	globalPostSources := []*tasks.PostsSources{}
 	for _, ps := range c.Posts.Groups {
 		sortReverse := true
 		if ps.SortReverse != nil && !*ps.SortReverse {
@@ -211,17 +210,19 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 		}
 
 		posts := &tasks.Posts{
-			SourceDir:       ps.SourceDir,
+			SourceDir: tasks.PostsSources{
+				Dir:             ps.SourceDir,
+				BaseDestination: ps.BaseDestination,
+			},
+			Template:    ps.Template,
+			TemplateCtx: ps.TemplateCtx,
+			WithSidebar: ps.WithSidebar,
+		}
+		postsSources := &tasks.PostsSources{
+			Dir:             ps.SourceDir,
 			BaseDestination: ps.BaseDestination,
-			Template:        ps.Template,
-			TemplateCtx:     ps.TemplateCtx,
-			WithSidebar:     ps.WithSidebar,
 		}
-		postsSources, err := posts.GetSources()
-		if err != nil {
-			return nil, err
-		}
-		globalPostSources = append(globalPostSources, postsSources...)
+		globalPostSources = append(globalPostSources, postsSources)
 
 		rv = append(rv,
 			runner.NewTaskGroup(posts),
@@ -229,7 +230,7 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 				&tasks.Pagination{
 					Title:           ps.Title,
 					Description:     ps.Description,
-					Sources:         postsSources,
+					SourceDirs:      []*tasks.PostsSources{postsSources},
 					PostsPerPage:    ps.PostsPerPage,
 					SortReverse:     sortReverse,
 					BaseDestination: ps.BaseDestination,
@@ -249,7 +250,7 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 				&tasks.Pagination{
 					Title:           ps.Title,
 					Description:     ps.Description,
-					Sources:         postsSources,
+					SourceDirs:      []*tasks.PostsSources{postsSources},
 					PostsPerPage:    ps.PostsPerPageAtom,
 					SortReverse:     true,
 					Atom:            true,
@@ -271,7 +272,7 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 			&tasks.Pagination{
 				Title:           c.Posts.Title,
 				Description:     c.Posts.Description,
-				Sources:         globalPostSources,
+				SourceDirs:      globalPostSources,
 				PostsPerPage:    c.Posts.PostsPerPage,
 				SortReverse:     sortReverse,
 				BaseDestination: c.Posts.BaseDestination,
@@ -291,7 +292,7 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 			&tasks.Pagination{
 				Title:           c.Posts.Title,
 				Description:     c.Posts.Description,
-				Sources:         globalPostSources,
+				SourceDirs:      globalPostSources,
 				PostsPerPage:    c.Posts.PostsPerPageAtom,
 				SortReverse:     true,
 				Atom:            true,

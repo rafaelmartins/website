@@ -7,7 +7,6 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
-	"time"
 )
 
 type KicadProject struct {
@@ -77,27 +76,13 @@ func NewKicadProject(pro string) (*KicadProject, error) {
 	return rv, nil
 }
 
-func (k *KicadProject) GetTimeStamps() ([]time.Time, error) {
-	st, err := os.Stat(k.pro)
-	if err != nil {
-		return nil, err
-	}
-	rv := []time.Time{st.ModTime().UTC()}
-
+func (k *KicadProject) GetPaths() ([]string, error) {
+	rv := []string{k.pro}
 	if k.sch != "" {
-		st, err := os.Stat(k.sch)
-		if err != nil {
-			return nil, err
-		}
-		rv = append(rv, st.ModTime().UTC())
+		rv = append(rv, k.sch)
 	}
-
 	if k.pcb != "" {
-		st, err := os.Stat(k.pcb)
-		if err != nil {
-			return nil, err
-		}
-		rv = append(rv, st.ModTime().UTC())
+		rv = append(rv, k.pcb)
 	}
 	return rv, nil
 }

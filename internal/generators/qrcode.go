@@ -7,7 +7,6 @@ import (
 	"image/png"
 	"io"
 	"os"
-	"time"
 
 	"github.com/skip2/go-qrcode"
 	"rafaelmartins.com/p/website/internal/runner"
@@ -78,16 +77,12 @@ func (s *QRCode) GetReader() (io.ReadCloser, error) {
 	return io.NopCloser(buf), nil
 }
 
-func (s *QRCode) GetTimeStamps() ([]time.Time, error) {
+func (s *QRCode) GetPaths() ([]string, error) {
 	if s.File == "" {
 		return nil, nil
 	}
 
-	st, err := os.Stat(s.File)
-	if err != nil {
-		return nil, err
-	}
-	return []time.Time{st.ModTime().UTC()}, nil
+	return []string{s.File}, nil
 }
 
 func (QRCode) GetImmutable() bool {

@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"os"
 	"path"
 	"path/filepath"
 	"slices"
@@ -268,25 +267,26 @@ func (pp *ProjectPage) GetReader() (io.ReadCloser, error) {
 	return io.NopCloser(buf), nil
 }
 
-func (pp *ProjectPage) GetTimeStamps() ([]time.Time, error) {
+func (pp *ProjectPage) GetPaths() ([]string, error) {
 	if pp.proj.Immutable && pp.proj.LocalDirectory == nil {
 		return nil, nil
 	}
 
-	rv, err := templates.GetTimestamps(pp.getTemplate(), true)
+	rv, err := templates.GetPaths(pp.getTemplate())
 	if err != nil {
 		return nil, err
 	}
 
 	if pp.proj.LocalDirectory != nil {
-		st, err := os.Stat(filepath.Join(*pp.proj.LocalDirectory, pp.file.Name))
-		if err != nil {
-			return nil, err
+		if pp.proj.proj.Docs != nil {
+			rv = append(rv, filepath.Join(*pp.proj.LocalDirectory, "docs"))
 		}
-		rv = append(rv, st.ModTime().UTC())
+		if pp.proj.proj.Readme != nil {
+			rv = append(rv, filepath.Join(*pp.proj.LocalDirectory, "README.md"))
+		}
 	}
 
-	og, err := ogimage.GetTimeStamps()
+	og, err := ogimage.GetPaths()
 	if err != nil {
 		return nil, err
 	}

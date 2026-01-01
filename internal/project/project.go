@@ -43,7 +43,6 @@ type Project struct {
 	CDocsOpenGraphImageGenDPI   *float64
 	CDocsOpenGraphImageGenSize  *float64
 
-	initialized      bool
 	proj             *github.Repository
 	subdir           string
 	pages            []*ProjectPage
@@ -53,15 +52,18 @@ type Project struct {
 }
 
 func (p *Project) init() error {
-	if p.initialized {
-		return nil
+	if p.proj != nil {
+		if err := p.proj.ReloadLocalDir(); err != nil {
+			return err
+		}
+		return p.reload()
 	}
-	p.initialized = true
 
 	proj, err := github.GetRepository(p.Owner, p.Repo, p.CDocsBaseDirectory, p.LocalDirectory)
 	if err != nil {
 		return err
 	}
+	p.proj = proj
 
 	p.url = path.Join("/", p.GetBaseDestination(), p.Repo)
 	if p.url != "/" {
@@ -80,22 +82,28 @@ func (p *Project) init() error {
 			p.cdocsUrl += "/"
 		}
 	}
+	return p.reload()
+}
 
-	docs := proj.Docs
-	subdir := "docs"
-	if len(proj.Docs) == 0 {
-		if proj.Readme == nil {
-			return fmt.Errorf("project: missing readme")
-		}
-		docs = []*github.RepositoryFile{proj.Readme}
-		subdir = ""
+func (p *Project) reload() error {
+	if p.proj == nil {
+		return nil
 	}
 
-	p.proj = proj
+	docs := p.proj.Docs
+	subdir := "docs"
+	if len(p.proj.Docs) == 0 {
+		if p.proj.Readme == nil {
+			return fmt.Errorf("project: missing readme")
+		}
+		docs = []*github.RepositoryFile{p.proj.Readme}
+		subdir = ""
+	}
 	p.subdir = subdir
 
+	p.pages = nil
 	for idx, doc := range docs {
-		pp, err := newPage(p, doc, doc == proj.Readme, idx == 0)
+		pp, err := newPage(p, doc, doc == p.proj.Readme, idx == 0)
 		if err != nil {
 			return err
 		}

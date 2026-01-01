@@ -153,21 +153,16 @@ func SetConfig(cfg *config.Config) {
 	ccfg = cfg
 }
 
-func GetTimestamps(name string, withEmbed bool) ([]time.Time, error) {
-	rv := []time.Time{}
-
-	if withEmbed {
-		// we always load the base.hml template, even if it is overwritten completely later
-		// then we must always include the executable timestamp, as this template is embedded.
-		ts, err := utils.ExecutableTimestamp()
-		if err != nil {
-			return nil, err
-		}
-		rv = append(rv, ts)
+func GetPaths(name string) ([]string, error) {
+	// we always load the base.html template, even if it is overwritten completely later
+	// then we must always include the executable timestamp, as this template is embedded.
+	rv, err := utils.Executables()
+	if err != nil {
+		return nil, err
 	}
 
-	if st, err := os.Stat(name); err == nil {
-		rv = append(rv, st.ModTime().UTC())
+	if _, err := os.Stat(name); err == nil {
+		rv = append(rv, name)
 	} else if _, err := content.Open("embed/" + name); err == nil {
 		// do nothing, executable timestamp already included
 	} else {
@@ -175,13 +170,7 @@ func GetTimestamps(name string, withEmbed bool) ([]time.Time, error) {
 	}
 
 	if ccfg != nil {
-		for _, tmpl := range ccfg.TemplatePartials {
-			st, err := os.Stat(tmpl)
-			if err != nil {
-				return nil, err
-			}
-			rv = append(rv, st.ModTime().UTC())
-		}
+		rv = append(rv, ccfg.TemplatePartials...)
 	}
 
 	return rv, nil

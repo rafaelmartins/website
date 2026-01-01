@@ -163,6 +163,11 @@ type Repository struct {
 	Readme        *RepositoryFile
 	Docs          []*RepositoryFile
 	Headers       []*RepositoryFile
+
+	owner      string
+	repo       string
+	headersDir *string
+	localDir   *string
 }
 
 type repositoryBlob struct {
@@ -335,6 +340,11 @@ func GetRepository(owner string, repo string, headersDir *string, localDir *stri
 		Forks:         o.Repository.ForkCount,
 		Stars:         o.Repository.StargazerCount,
 		Watchers:      o.Repository.Watchers.TotalCount,
+
+		owner:      owner,
+		repo:       repo,
+		headersDir: headersDir,
+		localDir:   localDir,
 	}
 
 	if o.Repository.LatestRelease != nil {
@@ -360,54 +370,8 @@ func GetRepository(owner string, repo string, headersDir *string, localDir *stri
 	}
 
 	if localDir != nil {
-		if rv.LicenseSpdx == "" {
-			if _, err := os.Stat(filepath.Join(*localDir, "LICENSE")); err == nil {
-				rv.LicenseData = newRepositoryFile(owner, repo, "LICENSE", "", nil, localDir)
-			} else if _, err := os.Stat(filepath.Join(*localDir, "COPYING")); err == nil {
-				rv.LicenseData = newRepositoryFile(owner, repo, "COPYING", "", nil, localDir)
-			} else {
-				return nil, fmt.Errorf("github: repository: %s/%s: failed to find license", owner, repo)
-			}
-		}
-
-		if _, err := os.Stat(filepath.Join(*localDir, "README.md")); err == nil {
-			rv.Readme = newRepositoryFile(owner, repo, "README.md", "", nil, localDir)
-		}
-
-		l, err := os.ReadDir(filepath.Join(*localDir, "docs"))
-		if err != nil && !errors.Is(err, fs.ErrNotExist) {
+		if err := rv.ReloadLocalDir(); err != nil {
 			return nil, err
-		}
-		for _, e := range l {
-			if e.Type().IsRegular() {
-				rv.Docs = append(rv.Docs, newRepositoryFile(owner, repo, path.Join("docs", e.Name()), "", nil, localDir))
-			}
-		}
-
-		prefix := ""
-		if headersDir != nil {
-			prefix = *headersDir
-		}
-		l, err = os.ReadDir(filepath.Join(*localDir, prefix))
-		if err != nil && !errors.Is(err, fs.ErrNotExist) {
-			return nil, err
-		}
-		for _, e := range l {
-			if e.IsDir() {
-				l2, err := os.ReadDir(filepath.Join(*localDir, prefix, e.Name()))
-				if err != nil {
-					return nil, err
-				}
-
-				for _, e2 := range l2 {
-					if e2.Type().IsRegular() {
-						rv.Headers = append(rv.Headers, newRepositoryFile(owner, repo, path.Join(prefix, e.Name(), e2.Name()), "", nil, localDir))
-					}
-				}
-			}
-			if e.Type().IsRegular() {
-				rv.Headers = append(rv.Headers, newRepositoryFile(owner, repo, path.Join(prefix, e.Name()), "", nil, localDir))
-			}
 		}
 		return rv, nil
 	}
@@ -458,6 +422,67 @@ func GetRepository(owner string, repo string, headersDir *string, localDir *stri
 		}
 	}
 	return rv, nil
+}
+
+func (r *Repository) ReloadLocalDir() error {
+	if r.localDir == nil {
+		return nil
+	}
+
+	r.LicenseData = nil
+	if r.LicenseSpdx == "" {
+		if _, err := os.Stat(filepath.Join(*r.localDir, "LICENSE")); err == nil {
+			r.LicenseData = newRepositoryFile(r.owner, r.repo, "LICENSE", "", nil, r.localDir)
+		} else if _, err := os.Stat(filepath.Join(*r.localDir, "COPYING")); err == nil {
+			r.LicenseData = newRepositoryFile(r.owner, r.repo, "COPYING", "", nil, r.localDir)
+		} else {
+			return fmt.Errorf("github: repository: %s/%s: failed to find license", r.owner, r.repo)
+		}
+	}
+
+	r.Readme = nil
+	if _, err := os.Stat(filepath.Join(*r.localDir, "README.md")); err == nil {
+		r.Readme = newRepositoryFile(r.owner, r.repo, "README.md", "", nil, r.localDir)
+	}
+
+	r.Docs = nil
+	l, err := os.ReadDir(filepath.Join(*r.localDir, "docs"))
+	if err != nil && !errors.Is(err, fs.ErrNotExist) {
+		return err
+	}
+	for _, e := range l {
+		if e.Type().IsRegular() {
+			r.Docs = append(r.Docs, newRepositoryFile(r.owner, r.repo, path.Join("docs", e.Name()), "", nil, r.localDir))
+		}
+	}
+
+	r.Headers = nil
+	prefix := ""
+	if r.headersDir != nil {
+		prefix = *r.headersDir
+	}
+	l, err = os.ReadDir(filepath.Join(*r.localDir, prefix))
+	if err != nil && !errors.Is(err, fs.ErrNotExist) {
+		return err
+	}
+	for _, e := range l {
+		if e.IsDir() {
+			l2, err := os.ReadDir(filepath.Join(*r.localDir, prefix, e.Name()))
+			if err != nil {
+				return err
+			}
+
+			for _, e2 := range l2 {
+				if e2.Type().IsRegular() {
+					r.Headers = append(r.Headers, newRepositoryFile(r.owner, r.repo, path.Join(prefix, e.Name(), e2.Name()), "", nil, r.localDir))
+				}
+			}
+		}
+		if e.Type().IsRegular() {
+			r.Headers = append(r.Headers, newRepositoryFile(r.owner, r.repo, path.Join(prefix, e.Name()), "", nil, r.localDir))
+		}
+	}
+	return nil
 }
 
 func GetRepositoryFile(owner string, repo string, ppath string, ref string) (io.ReadCloser, error) {

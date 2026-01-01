@@ -77,7 +77,7 @@ type Pagination struct {
 	Atom            bool
 	Title           string
 	Description     string
-	Sources         []*generators.ContentSource
+	SourceDirs      []*PostsSources
 	PostsPerPage    int
 	SortReverse     bool
 	BaseDestination string
@@ -111,18 +111,25 @@ func (p *Pagination) GetTasks() ([]*runner.Task, error) {
 	}
 
 	posts := []*paginationPost{}
-	for _, src := range p.Sources {
-		post := &paginationPost{
-			Source: src,
-		}
-
-		m, err := content.GetMetadata(post.Source.File)
+	for _, dir := range p.SourceDirs {
+		srcs, err := dir.List()
 		if err != nil {
 			return nil, err
 		}
 
-		post.Date = m.Date.Time
-		posts = append(posts, post)
+		for _, src := range srcs {
+			post := &paginationPost{
+				Source: src,
+			}
+
+			m, err := content.GetMetadata(post.Source.File)
+			if err != nil {
+				return nil, err
+			}
+
+			post.Date = m.Date.Time
+			posts = append(posts, post)
+		}
 	}
 
 	slices.SortStableFunc(posts, func(a *paginationPost, b *paginationPost) int {
