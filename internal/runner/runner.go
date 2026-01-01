@@ -84,6 +84,16 @@ func (t *Task) outdated(basedir string, cfg Config, force bool) (bool, error) {
 		return false, err
 	}
 
+	dts := time.Time{}
+	if st, err := os.Stat(t.destination(basedir)); err == nil {
+		if gen.GetImmutable() {
+			return false, nil
+		}
+		dts = st.ModTime().UTC()
+	} else {
+		return true, nil
+	}
+
 	ts := []time.Time{}
 	cts, err := cfg.GetTimeStamp()
 	if err != nil {
@@ -114,11 +124,6 @@ func (t *Task) outdated(basedir string, cfg Config, force bool) (bool, error) {
 			continue
 		}
 		ts = append(ts, st.ModTime().UTC())
-	}
-
-	dts := time.Time{}
-	if st, err := os.Stat(t.destination(basedir)); err == nil {
-		dts = st.ModTime().UTC()
 	}
 
 	for _, e := range ts {

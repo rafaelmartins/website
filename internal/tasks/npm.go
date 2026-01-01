@@ -21,7 +21,7 @@ func (t *npmTask) GetDestination() string {
 func (t npmTask) GetGenerator() (runner.Generator, error) {
 	return &generators.HTTP{
 		Url:       fmt.Sprintf("https://cdn.jsdelivr.net/npm/%s@%s/%s", t.name, t.version, t.file),
-		Immutable: true,
+		Immutable: false,
 	}, nil
 }
 
