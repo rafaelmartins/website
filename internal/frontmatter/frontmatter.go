@@ -36,6 +36,7 @@ type FrontMatter struct {
 	Title       string          `yaml:"title"`
 	Description string          `yaml:"description"`
 	Date        FrontMatterDate `yaml:"date"`
+	Menu        string          `yaml:"menu"`
 	Author      struct {
 		Name  string `yaml:"name"`
 		Email string `yaml:"email"`

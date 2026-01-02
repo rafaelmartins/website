@@ -24,6 +24,7 @@ type ProjectPage struct {
 	idx    int
 	name   string
 	title  string
+	menu   string
 	src    string
 	isRoot bool
 
@@ -85,15 +86,19 @@ func (pp *ProjectPage) read() error {
 		return err
 	}
 
-	title := pp.meta.Title
-	if title == "" {
-		t, err := markdown.GetTitle(src)
+	pp.title = pp.meta.Title
+	if pp.title == "" {
+		t, err := markdown.GetTitle(pp.data)
 		if err != nil {
 			return err
 		}
-		title = t
+		pp.title = t
 	}
-	pp.title = title
+
+	pp.menu = pp.title
+	if pp.meta.Menu != "" {
+		pp.menu = pp.meta.Menu
+	}
 	return nil
 }
 
@@ -217,6 +222,9 @@ func (pp *ProjectPage) GetReader() (io.ReadCloser, error) {
 	if t := pc.Get(pcTitleKey); t != nil {
 		title = t.(string)
 	}
+	if pp.title != "" {
+		title = pp.title
+	}
 
 	pp.otitle = title
 	if pp.proj.OpenGraphTitle != "" {
@@ -244,6 +252,15 @@ func (pp *ProjectPage) GetReader() (io.ReadCloser, error) {
 
 	lctx := &templates.LayoutContext{
 		WithSidebar: pp.proj.WithSidebar,
+	}
+
+	tmpl.Menus = nil
+	for _, p := range pp.proj.pages {
+		tmpl.Menus = append(tmpl.Menus, &templates.ProjectContentMenu{
+			Active: p.name == pp.name,
+			URL:    p.resolveUrl(pp.name),
+			Title:  p.menu,
+		})
 	}
 
 	buf := &bytes.Buffer{}

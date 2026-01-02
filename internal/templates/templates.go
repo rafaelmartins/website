@@ -77,11 +77,18 @@ type ProjectContentKicadProject struct {
 	Tools               map[string]string
 }
 
+type ProjectContentMenu struct {
+	Active bool
+	URL    string
+	Title  string
+}
+
 type ProjectContentEntry struct {
 	Owner         string
 	Repo          string
 	URL           string
 	Description   string
+	Menus         []*ProjectContentMenu
 	KicadProjects []*ProjectContentKicadProject
 	GoImport      string
 	GoRepo        string

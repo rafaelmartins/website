@@ -7,6 +7,15 @@
 {{- end }}
 
 {{ define "main" -}}
+{{- if .Content.Entry.Project.Menus }}
+<div class="tabs">
+  <ul class="m-0">
+    {{- range .Content.Entry.Project.Menus }}
+    <li{{ if .Active }} class="is-active"{{ end }}><a href="{{ .URL }}">{{ .Title }}</a></li>
+    {{- end }}
+  </ul>
+</div>
+{{- end }}
 <article class="anchor">
   <h1 class="title">{{ required .Content.Entry.Title }}</h1>
 {{ .Content.Entry.Body }}
@@ -58,7 +67,6 @@
     </tr>
   </tbody>
 </table>
-
 {{- if or .Content.Entry.Project.GoImport .Content.Entry.Project.CDocsURL }}
 <table class="table is-fullwidth">
   <thead>
