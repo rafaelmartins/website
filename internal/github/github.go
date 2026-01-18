@@ -21,13 +21,13 @@ var (
 	rlRest    *int
 )
 
-type RequestError struct {
+type Error struct {
 	StatusCode int
 	Status     string
 	Message    string
 }
 
-func (e *RequestError) Error() string {
+func (e *Error) Error() string {
 	s := "github: http: " + e.Status
 	if e.Message != "" {
 		s += ": " + e.Message
@@ -115,7 +115,7 @@ func RequestWithContext(ctx *RequestContext, method string, path string, headers
 	if resp.StatusCode >= 400 {
 		defer resp.Body.Close()
 
-		err := &RequestError{
+		err := &Error{
 			StatusCode: resp.StatusCode,
 			Status:     resp.Status,
 		}
