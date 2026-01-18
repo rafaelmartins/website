@@ -7,7 +7,7 @@
 {{- end }}
 
 {{ define "main" -}}
-{{- if .Content.Entry.Project.Menus }}
+{{- if gt (len .Content.Entry.Project.Menus) 1 }}
 <div class="tabs">
   <ul class="m-0">
     {{- range .Content.Entry.Project.Menus }}
