@@ -58,25 +58,6 @@ type ProjectContentDocumentation struct {
 	Label string
 }
 
-type ProjectContentKicadProjectPcbRenderFile struct {
-	Scale int
-	File  string
-}
-
-type ProjectContentKicadProject struct {
-	Name                string
-	Revision            string
-	PcbRenderTopMain    string
-	PcbRenderBottomMain string
-	PcbRenderMontage    []*ProjectContentKicadProjectPcbRenderFile
-	PcbRenderTop        []*ProjectContentKicadProjectPcbRenderFile
-	PcbRenderBottom     []*ProjectContentKicadProjectPcbRenderFile
-	PcbIbom             string
-	PcbGerber           string
-	SchExportPdf        string
-	Tools               map[string]string
-}
-
 type ProjectContentMenu struct {
 	Active bool
 	URL    string
@@ -84,20 +65,19 @@ type ProjectContentMenu struct {
 }
 
 type ProjectContentEntry struct {
-	Owner         string
-	Repo          string
-	URL           string
-	Description   string
-	Menus         []*ProjectContentMenu
-	KicadProjects []*ProjectContentKicadProject
-	GoImport      string
-	GoRepo        string
-	CDocsEnabled  bool
-	CDocsURL      string
-	Stars         int
-	Watching      int
-	Forks         int
-	License       struct {
+	Owner        string
+	Repo         string
+	URL          string
+	Description  string
+	Menus        []*ProjectContentMenu
+	GoImport     string
+	GoRepo       string
+	CDocsEnabled bool
+	CDocsURL     string
+	Stars        int
+	Watching     int
+	Forks        int
+	License      struct {
 		SPDX string
 		URL  string
 		Data string

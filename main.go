@@ -379,6 +379,23 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 					},
 				),
 			)
+
+			for _, kicadProject := range repo.Kicad.Projects {
+				rv = append(rv,
+					runner.NewTaskGroup(
+						&tasks.Kicad{
+							Owner:    repo.Owner,
+							Repo:     repo.Repo,
+							UrlOrTag: kicadProject,
+
+							BaseDestination:     pj.BaseDestination,
+							Destination:         repo.Kicad.Destination,
+							IncludeNameRevision: repo.Kicad.IncludeNameRevision,
+							Immutable:           immutable,
+						},
+					),
+				)
+			}
 		}
 	}
 	return rv, nil
