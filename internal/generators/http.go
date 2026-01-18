@@ -2,29 +2,17 @@ package generators
 
 import (
 	"io"
-	"net/http"
-	"time"
 
+	"rafaelmartins.com/p/website/internal/http"
 	"rafaelmartins.com/p/website/internal/runner"
 )
 
-type HttpError struct {
-	StatusCode int
-	Status     string
-}
-
-func (e *HttpError) Error() string {
-	return "http: " + e.Status
-}
-
 type HTTP struct {
 	Url       string
-	Header    http.Header
+	Header    map[string]string
 	Immutable bool
 
-	ts           time.Time
-	etag         string
-	lastmodified string
+	ctx http.RequestContext
 }
 
 func (*HTTP) GetID() string {
@@ -32,27 +20,7 @@ func (*HTTP) GetID() string {
 }
 
 func (h *HTTP) GetReader() (io.ReadCloser, error) {
-	r, err := http.NewRequest("GET", h.Url, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	if h.Header != nil {
-		r.Header = h.Header.Clone()
-	}
-
-	resp, err := http.DefaultClient.Do(r)
-	if err != nil {
-		return nil, err
-	}
-	if resp.StatusCode >= 400 {
-		resp.Body.Close()
-		return nil, &HttpError{
-			StatusCode: resp.StatusCode,
-			Status:     resp.Status,
-		}
-	}
-	return resp.Body, nil
+	return http.RequestWithContext(&h.ctx, "GET", h.Url, h.Header, nil)
 }
 
 func (*HTTP) GetPaths() ([]string, error) {
