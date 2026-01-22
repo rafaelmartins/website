@@ -24,17 +24,17 @@ type ProjectPage struct {
 	idx    int
 	name   string
 	title  string
+	body   string
 	menu   string
 	src    string
 	isRoot bool
 
-	meta *frontmatter.FrontMatter
-	data []byte
-
 	proj *Project
 	file *github.RepositoryFile
+	meta *frontmatter.FrontMatter
 
 	otitle string
+	odesc  string
 	images []string
 }
 
@@ -81,23 +81,64 @@ func (pp *ProjectPage) read() error {
 		return err
 	}
 
-	pp.meta, pp.data, err = frontmatter.Parse(src)
+	meta, data, err := frontmatter.Parse(src)
 	if err != nil {
 		return err
 	}
 
-	pp.title = pp.meta.Title
-	if pp.title == "" {
-		t, err := markdown.GetTitle(pp.data)
-		if err != nil {
-			return err
-		}
-		pp.title = t
+	pc := parser.NewContext()
+	pc.Set(pcProjectKey, pp.proj)
+	pc.Set(pcBaseUrlKey, "https://github.com/"+pp.proj.Owner+"/"+pp.proj.Repo+"/blob/"+pp.proj.proj.Head)
+	pc.Set(pcCurrentPageKey, pp.name)
+
+	body, err := markdown.Render(gmMarkdown, data, pc)
+	if err != nil {
+		return err
+	}
+	if err := pc.Get(pcErrorKey); err != nil {
+		return err.(error)
+	}
+	pp.meta = meta
+	pp.body = body
+
+	pp.images = nil
+	if img := pc.Get(pcImagesKey); img != nil {
+		pp.images = img.([]string)
 	}
 
-	pp.menu = pp.title
+	title := pp.meta.Title
+	if title == "" {
+		if t := pc.Get(pcTitleKey); t != nil {
+			title = t.(string)
+		}
+	}
+	if title == "" {
+		title = pp.proj.Repo
+	}
+	pp.title = title
+
+	pp.menu = title
 	if pp.meta.Menu != "" {
 		pp.menu = pp.meta.Menu
+	}
+
+	pp.otitle = title
+	if pp.proj.OpenGraphTitle != "" {
+		pp.otitle = pp.proj.OpenGraphTitle
+	}
+
+	pp.odesc = pp.proj.proj.Description
+	if pp.proj.OpenGraphDescription != "" {
+		pp.odesc = pp.proj.OpenGraphDescription
+	}
+
+	if pp.meta != nil {
+		if pp.meta.OpenGraph.Title != "" {
+			pp.otitle = pp.meta.OpenGraph.Title
+		}
+		if pp.meta.OpenGraph.Description != "" {
+			pp.odesc = pp.meta.OpenGraph.Description
+		}
 	}
 	return nil
 }
@@ -153,6 +194,12 @@ func (pp *ProjectPage) GetReader() (io.ReadCloser, error) {
 		Date:        time.Now().UTC(),
 	}
 
+	if pp.proj.LocalDirectory != nil {
+		if err := pp.read(); err != nil {
+			return nil, err
+		}
+	}
+
 	if pp.proj.proj.LicenseSpdx != "" {
 		tmpl.License.SPDX = pp.proj.proj.LicenseSpdx
 		tmpl.License.URL = "https://spdx.org/licenses/" + pp.proj.proj.LicenseSpdx + ".html"
@@ -194,57 +241,6 @@ func (pp *ProjectPage) GetReader() (io.ReadCloser, error) {
 		})
 	}
 
-	pc := parser.NewContext()
-	pc.Set(pcProjectKey, pp.proj)
-	pc.Set(pcBaseUrlKey, "https://github.com/"+pp.proj.Owner+"/"+pp.proj.Repo+"/blob/"+pp.proj.proj.Head)
-	pc.Set(pcCurrentPageKey, pp.name)
-
-	if pp.proj.LocalDirectory != nil {
-		if err := pp.read(); err != nil {
-			return nil, err
-		}
-	}
-
-	body, err := markdown.Render(gmMarkdown, pp.data, pc)
-	if err != nil {
-		return nil, err
-	}
-	if err := pc.Get(pcErrorKey); err != nil {
-		return nil, err.(error)
-	}
-
-	pp.images = nil
-	if img := pc.Get(pcImagesKey); img != nil {
-		pp.images = img.([]string)
-	}
-
-	title := pp.proj.Repo
-	if t := pc.Get(pcTitleKey); t != nil {
-		title = t.(string)
-	}
-	if pp.title != "" {
-		title = pp.title
-	}
-
-	pp.otitle = title
-	if pp.proj.OpenGraphTitle != "" {
-		pp.otitle = pp.proj.OpenGraphTitle
-	}
-
-	odesc := pp.proj.proj.Description
-	if pp.proj.OpenGraphDescription != "" {
-		odesc = pp.proj.OpenGraphDescription
-	}
-
-	if pp.meta != nil {
-		if pp.meta.OpenGraph.Title != "" {
-			pp.otitle = pp.meta.OpenGraph.Title
-		}
-		if pp.meta.OpenGraph.Description != "" {
-			odesc = pp.meta.OpenGraph.Description
-		}
-	}
-
 	purl := path.Join(pp.proj.url, pp.name)
 	if purl != "/" {
 		purl += "/"
@@ -265,17 +261,17 @@ func (pp *ProjectPage) GetReader() (io.ReadCloser, error) {
 
 	buf := &bytes.Buffer{}
 	if err := templates.Execute(buf, pp.getTemplate(), nil, lctx, &templates.ContentContext{
-		Title:       title,
+		Title:       pp.title,
 		Description: pp.proj.proj.Description,
 		URL:         purl,
 		OpenGraph: templates.OpenGraphEntry{
 			Title:       pp.otitle,
-			Description: odesc,
+			Description: pp.odesc,
 			Image:       ogimage.URL(purl),
 		},
 		Entry: &templates.ContentEntry{
-			Title:   title,
-			Body:    body,
+			Title:   pp.title,
+			Body:    pp.body,
 			Project: tmpl,
 		},
 	}); err != nil {
@@ -315,19 +311,8 @@ func (pp *ProjectPage) GetImmutable() bool {
 }
 
 func (pp *ProjectPage) GetByProducts(ch chan *runner.GeneratorByProduct) {
-	slices.Sort(pp.images)
-
-	for _, img := range slices.Compact(pp.images) {
-		rd, err := github.GetRepositoryFile(pp.proj.Owner, pp.proj.Repo, img, pp.proj.proj.Head)
-		if err != nil {
-			ch <- &runner.GeneratorByProduct{Err: err}
-			break
-		}
-
-		ch <- &runner.GeneratorByProduct{
-			Filename: filepath.FromSlash(img),
-			Reader:   rd,
-		}
+	if ch == nil {
+		return
 	}
 
 	image := pp.proj.OpenGraphImage

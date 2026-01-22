@@ -2,6 +2,7 @@ package project
 
 import (
 	"path/filepath"
+	"slices"
 
 	"rafaelmartins.com/p/website/internal/runner"
 )
@@ -28,11 +29,21 @@ func (p *Project) GetTasks() ([]*runner.Task, error) {
 	}
 
 	rv := []*runner.Task{}
+	images := []string{}
 	for _, page := range p.pages {
 		rv = append(rv, runner.NewTask(p, page))
+		images = append(images, page.images...)
 	}
 	if len(p.CDocsHeaders) > 0 {
 		rv = append(rv, runner.NewTask(p, &cDocs{proj: p}))
+	}
+
+	slices.Sort(images)
+	for _, img := range slices.Compact(images) {
+		rv = append(rv, runner.NewTask(p, &imageTask{
+			proj: p,
+			path: img,
+		}))
 	}
 	return rv, nil
 }
