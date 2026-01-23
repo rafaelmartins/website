@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 
 	"rafaelmartins.com/p/website/internal/cdocs"
+	"rafaelmartins.com/p/website/internal/github"
 	"rafaelmartins.com/p/website/internal/ogimage"
 	"rafaelmartins.com/p/website/internal/runner"
 	"rafaelmartins.com/p/website/internal/templates"
@@ -48,25 +49,23 @@ func (c *cDocs) GetReader() (io.ReadCloser, error) {
 
 	headers := []*cdocs.TemplateCtxHeader{}
 	for _, h := range c.proj.CDocsHeaders {
-		headerPath := path.Join(headerPath, h)
-		hdr := []byte{}
-		found := false
-		for _, header := range c.proj.proj.Headers {
-			if header.Name == headerPath {
-				var err error
-				hdr, err = header.Read()
-				if err != nil {
-					return nil, err
-				}
-				found = true
+		var header *github.RepositoryFile
+		for _, hh := range c.proj.proj.Headers {
+			if hh.Name == path.Join(headerPath, h) {
+				header = hh
 				break
 			}
 		}
-		if !found {
+		if header == nil {
 			return nil, fmt.Errorf("cdocs: header not found: %s", h)
 		}
 
-		ast, err := cdocs.Parse(h, io.NopCloser(bytes.NewBuffer(hdr)))
+		data, err := header.Read()
+		if err != nil {
+			return nil, err
+		}
+
+		ast, err := cdocs.Parse(h, io.NopCloser(bytes.NewBuffer(data)))
 		if err != nil {
 			return nil, err
 		}
