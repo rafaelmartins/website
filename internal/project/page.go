@@ -252,8 +252,13 @@ func (pp *ProjectPage) GetReader() (io.ReadCloser, error) {
 
 	tmpl.Menus = nil
 	for _, p := range pp.proj.pages {
+		// FIXME: max 9 sub pages???
+		if p.idx%10 != 0 {
+			continue
+		}
+
 		tmpl.Menus = append(tmpl.Menus, &templates.ProjectContentMenu{
-			Active: p.name == pp.name,
+			Active: p.idx/10 == pp.idx/10,
 			URL:    p.resolveUrl(pp.name),
 			Title:  p.menu,
 		})
