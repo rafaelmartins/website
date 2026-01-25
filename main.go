@@ -320,11 +320,6 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 	}
 
 	for _, pj := range c.Projects {
-		sidebar := true
-		if pj.WithSidebar != nil && !*pj.WithSidebar {
-			sidebar = false
-		}
-
 		for _, repo := range pj.Repositories {
 			localDir := (*string)(nil)
 			if v, ok := map[string]string(*fLocalDir)[repo.Owner+"/"+repo.Repo]; ok {
@@ -336,11 +331,6 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 			immutable := true
 			if repo.Immutable != nil && !*repo.Immutable {
 				immutable = false
-			}
-
-			dsidebar := true
-			if repo.CDocs.WithSidebar != nil && !*repo.CDocs.WithSidebar {
-				dsidebar = false
 			}
 
 			rv = append(rv,
@@ -357,7 +347,6 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 						BaseDestination:        pj.BaseDestination,
 						Template:               pj.Template,
 						Immutable:              immutable,
-						WithSidebar:            sidebar,
 						OpenGraphTitle:         repo.OpenGraph.Title,
 						OpenGraphDescription:   repo.OpenGraph.Description,
 						OpenGraphImage:         repo.OpenGraph.Image,
@@ -369,7 +358,6 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 						CDocsHeaders:                repo.CDocs.Headers,
 						CDocsBaseDirectory:          repo.CDocs.BaseDirectory,
 						CDocsTemplate:               repo.CDocs.Template,
-						CDocsWithSidebar:            dsidebar,
 						CDocsOpenGraphTitle:         repo.CDocs.OpenGraph.Title,
 						CDocsOpenGraphDescription:   repo.CDocs.OpenGraph.Description,
 						CDocsOpenGraphImage:         repo.CDocs.OpenGraph.Image,

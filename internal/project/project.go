@@ -23,7 +23,6 @@ type Project struct {
 	BaseDestination        string
 	Template               string
 	Immutable              bool
-	WithSidebar            bool
 	OpenGraphTitle         string
 	OpenGraphDescription   string
 	OpenGraphImage         string
@@ -35,7 +34,6 @@ type Project struct {
 	CDocsHeaders                []string
 	CDocsBaseDirectory          *string
 	CDocsTemplate               string
-	CDocsWithSidebar            bool
 	CDocsOpenGraphTitle         string
 	CDocsOpenGraphDescription   string
 	CDocsOpenGraphImage         string

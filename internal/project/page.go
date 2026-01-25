@@ -247,7 +247,7 @@ func (pp *ProjectPage) GetReader() (io.ReadCloser, error) {
 	}
 
 	lctx := &templates.LayoutContext{
-		WithSidebar: pp.proj.WithSidebar,
+		WithSidebar: pp.isRoot,
 	}
 
 	tmpl.Menus = nil

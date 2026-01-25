@@ -90,7 +90,7 @@ func (c *cDocs) GetReader() (io.ReadCloser, error) {
 	}
 
 	lctx := &templates.LayoutContext{
-		WithSidebar: c.proj.CDocsWithSidebar,
+		WithSidebar: true,
 	}
 
 	buf := &bytes.Buffer{}

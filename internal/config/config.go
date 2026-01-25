@@ -64,29 +64,13 @@ type Config struct {
 
 	Projects []*struct {
 		Repositories []*struct {
-			Owner    string `yaml:"owner"`
-			Repo     string `yaml:"repo"`
-			SubPages []struct {
-				SubPage     string `yaml:"subpage"`
-				Template    string `yaml:"template"`
-				WithSidebar *bool  `yaml:"with-sidebar"`
-				OpenGraph   struct {
-					Title       string `yaml:"title"`
-					Description string `yaml:"description"`
-					Image       string `yaml:"image"`
-					ImageGen    struct {
-						Color *uint32  `yaml:"color"`
-						DPI   *float64 `yaml:"dpi"`
-						Size  *float64 `yaml:"size"`
-					} `yaml:"image-gen"`
-				} `yaml:"opengraph"`
-			} `yaml:"subpages"`
+			Owner string `yaml:"owner"`
+			Repo  string `yaml:"repo"`
 			CDocs struct {
 				Destination   string   `yaml:"destination"`
 				Headers       []string `yaml:"headers"`
 				BaseDirectory *string  `yaml:"base-directory"`
 				Template      string   `yaml:"template"`
-				WithSidebar   *bool    `yaml:"with-sidebar"`
 				OpenGraph     struct {
 					Title       string `yaml:"title"`
 					Description string `yaml:"description"`
@@ -121,7 +105,6 @@ type Config struct {
 		} `yaml:"repositories"`
 		BaseDestination string `yaml:"base-destination"`
 		Template        string `yaml:"template"`
-		WithSidebar     *bool  `yaml:"with-sidebar"`
 	} `yaml:"projects"`
 
 	Pages []*struct {
