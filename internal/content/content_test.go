@@ -12,156 +12,94 @@ func testdataPath(name string) string {
 
 func TestIsSupported(t *testing.T) {
 	tests := []struct {
+		name     string
 		file     string
 		expected bool
 	}{
-		{testdataPath("sample.md"), true},
-		{testdataPath("sample.html"), true},
-		{testdataPath("sample.textbundle"), true},
-		{testdataPath("sample.textpack"), true},
-		{"file.txt", false},
-		{"file.unknown", false},
+		{"markdown file", testdataPath("sample.md"), true},
+		{"html file", testdataPath("sample.html"), true},
+		{"textbundle file", testdataPath("sample.textbundle"), true},
+		{"textpack file", testdataPath("sample.textpack"), true},
+		{"unsupported txt file", "file.txt", false},
+		{"unsupported unknown file", "file.unknown", false},
 	}
 
 	for _, tt := range tests {
-		result := IsSupported(tt.file)
-		if result != tt.expected {
-			t.Errorf("IsSupported(%s) = %v, want %v", tt.file, result, tt.expected)
-		}
+		t.Run(tt.name, func(t *testing.T) {
+			result := IsSupported(tt.file)
+			if result != tt.expected {
+				t.Errorf("IsSupported(%s) = %v, want %v", tt.file, result, tt.expected)
+			}
+		})
 	}
 }
 
-func TestRenderMarkdown(t *testing.T) {
-	f := testdataPath("sample.md")
-	html, meta, err := Render(f, "")
-	if err != nil {
-		t.Fatalf("render failed: %v", err)
+func TestRender(t *testing.T) {
+	tests := []struct {
+		name         string
+		file         string
+		wantTitle    string
+		wantDesc     string
+		containsText string
+	}{
+		{"markdown", testdataPath("sample.md"), "Test Markdown", "A test markdown file", "Main Heading"},
+		{"html", testdataPath("sample.html"), "Test HTML", "A test HTML file", "<h1>"},
+		{"textbundle", testdataPath("sample.textbundle"), "Main Heading", "A test textbundle file", "This is a test textbundle file"},
+		{"textpack", testdataPath("sample.textpack"), "Main Heading", "A test textpack file", "This is a test textpack file"},
 	}
 
-	if meta == nil {
-		t.Fatal("render returned nil metadata")
-	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			html, meta, err := Render(tt.file, "")
+			if err != nil {
+				t.Fatalf("render failed: %v", err)
+			}
 
-	if meta.Title != "Test Markdown" {
-		t.Errorf("title=%q, want %q", meta.Title, "Test Markdown")
-	}
+			if meta == nil {
+				t.Fatal("render returned nil metadata")
+			}
 
-	if meta.Description != "A test markdown file" {
-		t.Errorf("description=%q, want %q", meta.Description, "A test markdown file")
-	}
+			if meta.Title != tt.wantTitle {
+				t.Errorf("title=%q, want %q", meta.Title, tt.wantTitle)
+			}
 
-	if html == "" {
-		t.Error("rendered HTML is empty")
-	}
+			if meta.Description != tt.wantDesc {
+				t.Errorf("description=%q, want %q", meta.Description, tt.wantDesc)
+			}
 
-	if !bytes.Contains([]byte(html), []byte("Main Heading")) && !bytes.Contains([]byte(html), []byte("<h")) {
-		t.Error("rendered HTML missing expected content")
-	}
-}
+			if html == "" {
+				t.Error("rendered HTML is empty")
+			}
 
-func TestRenderHTML(t *testing.T) {
-	f := testdataPath("sample.html")
-	html, meta, err := Render(f, "")
-	if err != nil {
-		t.Fatalf("render failed: %v", err)
-	}
-
-	if meta == nil {
-		t.Fatal("render returned nil metadata")
-	}
-
-	if meta.Title != "Test HTML" {
-		t.Errorf("title=%q, want %q", meta.Title, "Test HTML")
-	}
-
-	if meta.Description != "A test HTML file" {
-		t.Errorf("description=%q, want %q", meta.Description, "A test HTML file")
-	}
-
-	if !bytes.Contains([]byte(html), []byte("<h1>")) {
-		t.Error("rendered HTML missing expected <h1> tag")
+			if !bytes.Contains([]byte(html), []byte(tt.containsText)) {
+				t.Errorf("rendered HTML missing expected content: %q", tt.containsText)
+			}
+		})
 	}
 }
 
-func TestRenderTextBundle(t *testing.T) {
-	f := testdataPath("sample.textbundle")
-	html, meta, err := Render(f, "")
-	if err != nil {
-		t.Fatalf("render failed: %v", err)
+func TestRenderWithBaseURL(t *testing.T) {
+	tests := []struct {
+		name            string
+		file            string
+		baseurl         string
+		containsRewrite string
+	}{
+		{"textbundle with baseurl", testdataPath("sample.textbundle"), "/blog/test", "/blog/test/assets/image.png"},
+		{"textpack with baseurl", testdataPath("sample.textpack"), "/files/test", "/files/test/assets/image.png"},
 	}
 
-	if meta == nil {
-		t.Fatal("render returned nil metadata")
-	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			html, _, err := Render(tt.file, tt.baseurl)
+			if err != nil {
+				t.Fatalf("render failed: %v", err)
+			}
 
-	if meta.Title != "Main Heading" {
-		t.Errorf("title=%q, want %q", meta.Title, "Main Heading")
-	}
-
-	if meta.Description != "A test textbundle file" {
-		t.Errorf("description=%q, want %q", meta.Description, "A test textbundle file")
-	}
-
-	if html == "" {
-		t.Error("rendered HTML is empty")
-	}
-
-	if !bytes.Contains([]byte(html), []byte("This is a test textbundle file")) {
-		t.Error("rendered HTML missing expected content")
-	}
-}
-
-func TestRenderTextBundleWithBaseURL(t *testing.T) {
-	f := testdataPath("sample.textbundle")
-	baseurl := "/blog/test"
-	html, _, err := Render(f, baseurl)
-	if err != nil {
-		t.Fatalf("render failed: %v", err)
-	}
-
-	if !bytes.Contains([]byte(html), []byte("/blog/test/assets/image.png")) {
-		t.Error("rendered HTML missing rewritten asset path")
-	}
-}
-
-func TestRenderTextPack(t *testing.T) {
-	f := testdataPath("sample.textpack")
-	html, meta, err := Render(f, "")
-	if err != nil {
-		t.Fatalf("render failed: %v", err)
-	}
-
-	if meta == nil {
-		t.Fatal("render returned nil metadata")
-	}
-
-	if meta.Title != "Main Heading" {
-		t.Errorf("title=%q, want %q", meta.Title, "Main Heading")
-	}
-
-	if meta.Description != "A test textpack file" {
-		t.Errorf("description=%q, want %q", meta.Description, "A test textpack file")
-	}
-
-	if html == "" {
-		t.Error("rendered HTML is empty")
-	}
-
-	if !bytes.Contains([]byte(html), []byte("This is a test textpack file")) {
-		t.Error("rendered HTML missing expected content")
-	}
-}
-
-func TestRenderTextPackWithBaseURL(t *testing.T) {
-	f := testdataPath("sample.textpack")
-	baseurl := "/files/test"
-	html, _, err := Render(f, baseurl)
-	if err != nil {
-		t.Fatalf("render failed: %v", err)
-	}
-
-	if !bytes.Contains([]byte(html), []byte("/files/test/assets/image.png")) {
-		t.Error("rendered HTML missing rewritten asset path")
+			if !bytes.Contains([]byte(html), []byte(tt.containsRewrite)) {
+				t.Error("rendered HTML missing rewritten asset path")
+			}
+		})
 	}
 }
 

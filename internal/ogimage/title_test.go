@@ -21,33 +21,36 @@ func TestTitleSplit(t *testing.T) {
 	defer face.Close()
 
 	args := []struct {
+		name   string
 		title  string
 		lines  []string
 		height int
 		err    error
 	}{
-		{"", []string{}, 0, nil},
-		{"bola", []string{"bola"}, 95, nil},
+		{"empty", "", []string{}, 0, nil},
+		{"bola", "bola", []string{"bola"}, 95, nil},
 
-		{"bola guda", []string{"bola guda"}, 95, nil},
-		{"bola gudaaaaaaaaa aa", []string{"bola", "gudaaaaaaaaa aa"}, 202, nil},
-		{"bola gudaaaaaaaaaaa", []string{"bola", "gudaaaaaaaaaaa"}, 202, nil},
-		{"bola gudaaaaaaaaa aaaaaaa aaaaaa 1234", []string{"bola", "gudaaaaaaaaa", "aaaaaaa aaaaaa", "1234"}, 416, nil},
-		{"bola gudaaaaaaaaa aaaaaaaaaaaaaa aaaaaaaaaaaaaa", []string{"bola", "gudaaaaaaaaa", "aaaaaaaaaaaaaa", "aaaaaaaaaaaaaa"}, 416, nil},
-		{"bola gudaaaaaaaaa aaaaaaaaaaaaaaaaaa 1234", []string{}, 0, errTitleTooLongWidth},
-		{"bola gudaaaaaaaaa aaaaaaaaaaaaaa aaaaaaaaaaaaaa aaaaaaaaaaaaaa aaaaaaaaaaaaaa", []string{}, 0, errTitleTooLongHeight},
+		{"bola guda", "bola guda", []string{"bola guda"}, 95, nil},
+		{"bola gudaaaaaaaaa aa", "bola gudaaaaaaaaa aa", []string{"bola", "gudaaaaaaaaa aa"}, 202, nil},
+		{"bola gudaaaaaaaaaaa", "bola gudaaaaaaaaaaa", []string{"bola", "gudaaaaaaaaaaa"}, 202, nil},
+		{"long multi-line", "bola gudaaaaaaaaa aaaaaaa aaaaaa 1234", []string{"bola", "gudaaaaaaaaa", "aaaaaaa aaaaaa", "1234"}, 416, nil},
+		{"multi-line equal", "bola gudaaaaaaaaa aaaaaaaaaaaaaa aaaaaaaaaaaaaa", []string{"bola", "gudaaaaaaaaa", "aaaaaaaaaaaaaa", "aaaaaaaaaaaaaa"}, 416, nil},
+		{"too long width", "bola gudaaaaaaaaa aaaaaaaaaaaaaaaaaa 1234", []string{}, 0, errTitleTooLongWidth},
+		{"too long height", "bola gudaaaaaaaaa aaaaaaaaaaaaaa aaaaaaaaaaaaaa aaaaaaaaaaaaaa aaaaaaaaaaaaaa", []string{}, 0, errTitleTooLongHeight},
 	}
 
-	for i, tt := range args {
-		lines, height, err := titleSplit(tt.title, face, image.Rect(50, 20, 910, 510))
-		if err != tt.err {
-			t.Errorf("%d: bad error: got %q, want %q", i, err, tt.err)
-		}
-		if slices.Compare(lines, tt.lines) != 0 {
-			t.Errorf("%d: bad lines: got %q, want %q", i, lines, tt.lines)
-		}
-		if height != tt.height {
-			t.Errorf("%d: bad height: got %d, want %d", i, height, tt.height)
-		}
+	for _, tt := range args {
+		t.Run(tt.name, func(t *testing.T) {
+			lines, height, err := titleSplit(tt.title, face, image.Rect(50, 20, 910, 510))
+			if err != tt.err {
+				t.Errorf("bad error: got %q, want %q", err, tt.err)
+			}
+			if slices.Compare(lines, tt.lines) != 0 {
+				t.Errorf("bad lines: got %q, want %q", lines, tt.lines)
+			}
+			if height != tt.height {
+				t.Errorf("bad height: got %d, want %d", height, tt.height)
+			}
+		})
 	}
 }
