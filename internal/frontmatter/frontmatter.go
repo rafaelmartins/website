@@ -2,7 +2,6 @@ package frontmatter
 
 import (
 	"bytes"
-	"errors"
 	"time"
 
 	"go.yaml.in/yaml/v3"
@@ -84,11 +83,11 @@ func Parse(src []byte) (*FrontMatter, []byte, error) {
 		}
 	}
 
+	metadata := &FrontMatter{}
 	if level == 0 {
-		return nil, nil, errors.New("content: frontmatter: file is empty")
+		return metadata, rest, nil
 	}
 
-	metadata := &FrontMatter{}
 	if err := yaml.Unmarshal(fm, metadata); err != nil {
 		return nil, nil, err
 	}
