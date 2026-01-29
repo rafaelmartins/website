@@ -3,6 +3,7 @@ package markdown
 import (
 	"bytes"
 
+	figure "github.com/mangoumbrella/goldmark-figure"
 	"github.com/yuin/goldmark"
 	emoji "github.com/yuin/goldmark-emoji"
 	highlighting "github.com/yuin/goldmark-highlighting/v2"
@@ -25,6 +26,7 @@ func New(style string, ext ...goldmark.Extender) goldmark.Markdown {
 					extension.DefinitionList,
 					extension.Footnote,
 					emoji.Emoji,
+					figure.Figure.WithSkipNoCaption(),
 					highlighting.NewHighlighting(opt...),
 				},
 				ext...,
