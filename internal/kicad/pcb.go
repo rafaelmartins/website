@@ -97,10 +97,6 @@ func (k *KicadProject) PcbRender(ch chan *runner.GeneratorByProduct, cli *KicadC
 			args = append(args,
 				"--preset", config.preset,
 			)
-		} else {
-			args = append(args,
-				"--use-board-stackup-colors",
-			)
 		}
 
 		if config.Pan != nil {

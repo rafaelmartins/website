@@ -38,13 +38,8 @@ func montage(imgs []image.Image) (image.Image, error) {
 	b1 := imgs[0].Bounds()
 	b2 := imgs[1].Bounds()
 
-	direction := ""
-	if b1.Dy() == b2.Dy() {
-		direction = "x"
-	} else if b1.Dx() == b2.Dx() {
-		direction = "y"
-	} else {
-		return nil, errors.New("kicad: montage: no common dimension for two first sides")
+	if b1.Dx() != b2.Dx() || b1.Dy() != b2.Dy() {
+		return nil, errors.New("kicad: montage: image dimensions must match")
 	}
 
 	type srcType struct {
@@ -55,7 +50,7 @@ func montage(imgs []image.Image) (image.Image, error) {
 	srcs := []*srcType{}
 	dstRect := image.Rect(0, 0, 0, 0)
 	for _, img := range imgs {
-		if direction == "x" {
+		if b1.Dy() >= b1.Dx() {
 			srcs = append(srcs, &srcType{
 				img: img,
 				orig: image.Point{
