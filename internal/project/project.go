@@ -11,9 +11,15 @@ import (
 	"rafaelmartins.com/p/website/internal/github"
 )
 
+type ProjectLicense struct {
+	SpdxId string
+	Title  string
+}
+
 type Project struct {
-	Owner string
-	Repo  string
+	Owner    string
+	Repo     string
+	Licenses []*ProjectLicense
 
 	GoImport string
 	GoRepo   string
@@ -47,6 +53,7 @@ type Project struct {
 	url              string
 	cdocsDestination string
 	cdocsUrl         string
+	license          string
 }
 
 func (p *Project) init() error {
@@ -79,6 +86,13 @@ func (p *Project) init() error {
 		if p.cdocsUrl != "/" {
 			p.cdocsUrl += "/"
 		}
+	}
+
+	p.license = ""
+	if len(p.Licenses) > 0 {
+		p.license = p.Licenses[0].SpdxId
+	} else if p.proj.LicenseSpdx != "" {
+		p.license = p.proj.LicenseSpdx
 	}
 	return p.reload()
 }

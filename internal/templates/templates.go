@@ -64,24 +64,25 @@ type ProjectContentMenu struct {
 	Title  string
 }
 
+type ProjectContentLicense struct {
+	SpdxId string
+	Title  string
+}
+
 type ProjectContentEntry struct {
-	Owner        string
-	Repo         string
-	URL          string
-	Description  string
-	Menus        []*ProjectContentMenu
-	GoImport     string
-	GoRepo       string
-	CDocsEnabled bool
-	CDocsURL     string
-	Stars        int
-	Watching     int
-	Forks        int
-	License      struct {
-		SPDX string
-		URL  string
-		Data string
-	}
+	Owner         string
+	Repo          string
+	URL           string
+	Description   string
+	Menus         []*ProjectContentMenu
+	Licenses      []*ProjectContentLicense
+	GoImport      string
+	GoRepo        string
+	CDocsEnabled  bool
+	CDocsURL      string
+	Stars         int
+	Watching      int
+	Forks         int
 	LatestRelease *ProjectContentLatestRelease
 	Date          time.Time
 }
@@ -118,6 +119,7 @@ type ContentContext struct {
 	Description string
 	URL         string
 	Slug        string
+	License     string
 	OpenGraph   OpenGraphEntry
 	Entry       *ContentEntry
 	Entries     []*ContentEntry

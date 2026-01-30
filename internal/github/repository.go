@@ -11,7 +11,7 @@ import (
 )
 
 var getRepository = `
-query GetRepository($owner: String!, $repo: String!, $licenseref: String, $copyingref: String, $readmeref: String, $docsref: String, $headersref: String) {
+query GetRepository($owner: String!, $repo: String!, $readmeref: String, $docsref: String, $headersref: String) {
 	repository(owner: $owner, name: $repo) {
 		description
 		homepageUrl
@@ -33,20 +33,6 @@ query GetRepository($owner: String!, $repo: String!, $licenseref: String, $copyi
 		}
 		licenseInfo {
 			spdxId
-		}
-		license: object(expression: $licenseref) {
-			... on Blob {
-				text
-				isBinary
-				isTruncated
-			}
-		}
-		copying: object(expression: $copyingref) {
-			... on Blob {
-				text
-				isBinary
-				isTruncated
-			}
 		}
 		latestRelease {
 			name
@@ -157,7 +143,6 @@ type Repository struct {
 	Stars         int
 	Watchers      int
 	LicenseSpdx   string
-	LicenseData   *RepositoryFile
 	LatestRelease *RepositoryLatestRelease
 	Releases      []string
 	Readme        *RepositoryFile
@@ -243,8 +228,6 @@ func GetRepository(owner string, repo string, headersDir *string, localDir *stri
 			LicenseInfo *struct {
 				SpdxId string `json:"spdxId"`
 			} `json:"licenseInfo"`
-			License       *repositoryBlob `json:"license"`
-			Copying       *repositoryBlob `json:"copying"`
 			LatestRelease *struct {
 				Name          string `json:"name"`
 				TagName       string `json:"tagName"`
@@ -296,8 +279,6 @@ func GetRepository(owner string, repo string, headersDir *string, localDir *stri
 		"repo":  repo,
 	}
 	if localDir == nil {
-		variables["licenseref"] = "HEAD:LICENSE"
-		variables["copyingref"] = "HEAD:COPYING"
 		variables["readmeref"] = "HEAD:README.md"
 		variables["docsref"] = "HEAD:docs"
 		if headersDir != nil {
@@ -376,16 +357,6 @@ func GetRepository(owner string, repo string, headersDir *string, localDir *stri
 		return rv, nil
 	}
 
-	if rv.LicenseSpdx == "" {
-		if o.Repository.License != nil {
-			rv.LicenseData = newRepositoryFile(owner, repo, "LICENSE", o.Repository.Head.Oid, o.Repository.License, localDir)
-		} else if o.Repository.Copying != nil {
-			rv.LicenseData = newRepositoryFile(owner, repo, "COPYING", o.Repository.Head.Oid, o.Repository.Copying, localDir)
-		} else {
-			return nil, fmt.Errorf("github: repository: %s/%s: failed to find license", owner, repo)
-		}
-	}
-
 	if o.Repository.Readme != nil {
 		rv.Readme = newRepositoryFile(owner, repo, "README.md", o.Repository.Head.Oid, o.Repository.Readme, nil)
 	}
@@ -427,17 +398,6 @@ func GetRepository(owner string, repo string, headersDir *string, localDir *stri
 func (r *Repository) ReloadLocalDir() error {
 	if r.localDir == nil {
 		return nil
-	}
-
-	r.LicenseData = nil
-	if r.LicenseSpdx == "" {
-		if _, err := os.Stat(filepath.Join(*r.localDir, "LICENSE")); err == nil {
-			r.LicenseData = newRepositoryFile(r.owner, r.repo, "LICENSE", "", nil, r.localDir)
-		} else if _, err := os.Stat(filepath.Join(*r.localDir, "COPYING")); err == nil {
-			r.LicenseData = newRepositoryFile(r.owner, r.repo, "COPYING", "", nil, r.localDir)
-		} else {
-			return fmt.Errorf("github: repository: %s/%s: failed to find license", r.owner, r.repo)
-		}
 	}
 
 	r.Readme = nil

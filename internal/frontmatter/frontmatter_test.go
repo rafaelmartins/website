@@ -11,6 +11,7 @@ title: Test Article
 description: A test article
 date: 2025-01-28
 menu: blog
+license: MIT
 author:
   name: John Doe
   email: john@example.com
@@ -45,6 +46,10 @@ This is the content.
 
 	if metadata.Menu != "blog" {
 		t.Errorf("menu=%q, want %q", metadata.Menu, "blog")
+	}
+
+	if metadata.License != "MIT" {
+		t.Errorf("license=%q, want %q", metadata.License, "MIT")
 	}
 
 	if metadata.Author.Name != "John Doe" {

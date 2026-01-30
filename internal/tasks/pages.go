@@ -13,6 +13,7 @@ type pageTaskImpl struct {
 	baseDestination   string
 	slug              string
 	source            string
+	license           string
 	extraDependencies []string
 	prettyURL         bool
 	template          string
@@ -45,8 +46,9 @@ func (t *pageTaskImpl) GetGenerator() (runner.Generator, error) {
 	}
 
 	return &generators.Content{
-		URL:  url,
-		Slug: t.slug,
+		URL:     url,
+		Slug:    t.slug,
+		License: t.license,
 		Sources: []*generators.ContentSource{
 			{
 				File: t.source,
@@ -69,8 +71,9 @@ func (t *pageTaskImpl) GetGenerator() (runner.Generator, error) {
 }
 
 type PageSource struct {
-	Slug string
-	File string
+	Slug    string
+	File    string
+	License string
 
 	OpenGraphTitle         string
 	OpenGraphDescription   string
@@ -118,6 +121,7 @@ func (p *Pages) GetTasks() ([]*runner.Task, error) {
 					baseDestination:   p.BaseDestination,
 					slug:              v.Slug,
 					source:            v.File,
+					license:           v.License,
 					extraDependencies: deps,
 					prettyURL:         p.PrettyURL,
 					template:          tmpl,

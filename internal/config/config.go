@@ -8,9 +8,10 @@ import (
 )
 
 type Config struct {
-	Title  string `yaml:"title"`
-	Footer string `yaml:"footer"`
-	URL    string `yaml:"url"`
+	Title   string `yaml:"title"`
+	Footer  string `yaml:"footer"`
+	URL     string `yaml:"url"`
+	License string `yaml:"license"`
 
 	Author struct {
 		Name  string `yaml:"name"`
@@ -64,8 +65,12 @@ type Config struct {
 
 	Projects []*struct {
 		Repositories []*struct {
-			Owner string `yaml:"owner"`
-			Repo  string `yaml:"repo"`
+			Owner    string `yaml:"owner"`
+			Repo     string `yaml:"repo"`
+			Licenses []struct {
+				SpdxId string `yaml:"spdx-id"`
+				Title  string `yaml:"title"`
+			} `yaml:"licenses"`
 			CDocs struct {
 				Destination   string   `yaml:"destination"`
 				Headers       []string `yaml:"headers"`
@@ -111,6 +116,7 @@ type Config struct {
 		Sources []*struct {
 			Slug      string `yaml:"slug"`
 			File      string `yaml:"file"`
+			License   string `yaml:"license"`
 			OpenGraph struct {
 				Title       string `yaml:"title"`
 				Description string `yaml:"description"`

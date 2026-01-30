@@ -200,15 +200,13 @@ func (pp *ProjectPage) GetReader() (io.ReadCloser, error) {
 		}
 	}
 
-	if pp.proj.proj.LicenseSpdx != "" {
-		tmpl.License.SPDX = pp.proj.proj.LicenseSpdx
-		tmpl.License.URL = "https://spdx.org/licenses/" + pp.proj.proj.LicenseSpdx + ".html"
-	} else if pp.proj.proj.LicenseData != nil {
-		lic, err := pp.proj.proj.LicenseData.Read()
-		if err != nil {
-			return nil, err
+	if len(pp.proj.Licenses) > 0 {
+		for _, lic := range pp.proj.Licenses {
+			tmpl.Licenses = append(tmpl.Licenses, &templates.ProjectContentLicense{
+				SpdxId: lic.SpdxId,
+				Title:  lic.Title,
+			})
 		}
-		tmpl.License.Data = string(lic)
 	}
 
 	if pp.isRoot && pp.proj.proj.LatestRelease != nil && pp.proj.proj.LatestRelease.Description != "" {
@@ -269,6 +267,7 @@ func (pp *ProjectPage) GetReader() (io.ReadCloser, error) {
 		Title:       pp.title,
 		Description: pp.proj.proj.Description,
 		URL:         purl,
+		License:     pp.proj.license,
 		OpenGraph: templates.OpenGraphEntry{
 			Title:       pp.otitle,
 			Description: pp.odesc,

@@ -169,8 +169,9 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 			}
 
 			src = append(src, &tasks.PageSource{
-				Slug: s.Slug,
-				File: s.File,
+				Slug:    s.Slug,
+				File:    s.File,
+				License: s.License,
 
 				OpenGraphTitle:         s.OpenGraph.Title,
 				OpenGraphDescription:   s.OpenGraph.Description,
@@ -333,11 +334,20 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 				immutable = false
 			}
 
+			licenses := []*project.ProjectLicense{}
+			for _, lic := range repo.Licenses {
+				licenses = append(licenses, &project.ProjectLicense{
+					SpdxId: lic.SpdxId,
+					Title:  lic.Title,
+				})
+			}
+
 			rv = append(rv,
 				runner.NewTaskGroup(
 					&project.Project{
-						Owner: repo.Owner,
-						Repo:  repo.Repo,
+						Owner:    repo.Owner,
+						Repo:     repo.Repo,
+						Licenses: licenses,
 
 						GoImport: repo.Go.Import,
 						GoRepo:   repo.Go.Repo,

@@ -26,6 +26,7 @@ type Content struct {
 	Description       string
 	URL               string
 	Slug              string
+	License           string
 	Sources           []*ContentSource
 	IsPost            bool
 	ExtraDependencies []string
@@ -61,6 +62,7 @@ func (h *Content) GetReader() (io.ReadCloser, error) {
 		Description: h.Description,
 		URL:         h.URL,
 		Slug:        h.Slug,
+		License:     h.License,
 		OpenGraph: templates.OpenGraphEntry{
 			Title:       h.OpenGraphTitle,
 			Description: h.OpenGraphDescription,
@@ -127,6 +129,9 @@ func (h *Content) GetReader() (io.ReadCloser, error) {
 				ctx.Title = entry.Title
 			}
 			ctx.Entry = entry
+			if metadata.License != "" {
+				ctx.License = metadata.License
+			}
 			h.metadata = metadata
 			break
 		}

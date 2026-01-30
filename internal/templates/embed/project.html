@@ -37,6 +37,7 @@
     <strong>{{ required .Content.Entry.Project.Owner }}/{{ required .Content.Entry.Project.Repo }}</strong>
   </a>
 </div>
+{{- if or .Content.Entry.Project.URL (not .Content.Entry.Project.Licenses) }}
 <table class="table is-fullwidth">
   <thead>
     <tr>
@@ -52,21 +53,36 @@
       </td>
     </tr>
     {{- end }}
+    {{- if not .Content.Entry.Project.Licenses }}
     <tr>
-      {{- if .Content.Entry.Project.License.SPDX }}
-      <th>Main License:</th>
-      <td>
-        <a href="https://spdx.org/licenses/{{ requiredAttr .Content.Entry.Project.License.SPDX }}.html">{{ .Content.Entry.Project.License.SPDX }}</a>
-      </td>
-      {{- else if .Content.Entry.Project.License.URL }}
       <th>License:</th>
       <td>
-        <a href="{{ requiredAttr .Content.Entry.Project.License.URL }}">Link</a>
+        <a href="https://spdx.org/licenses/{{ requiredAttr .Content.License }}.html">{{ .Content.License }}</a>
       </td>
-      {{- end }}
     </tr>
+    {{- end }}
   </tbody>
 </table>
+{{- end }}
+{{- if .Content.Entry.Project.Licenses }}
+<table class="table is-fullwidth">
+  <thead>
+    <tr>
+      <th colspan="2" class="has-text-centered">Open Source Licenses</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{- range .Content.Entry.Project.Licenses }}
+    <tr>
+      <th>{{ required .Title }}</th>
+      <td>
+        <a href="https://spdx.org/licenses/{{ requiredAttr .SpdxId }}.html">{{ .SpdxId }}</a>
+      </td>
+    </tr>
+    {{- end }}
+  </tbody>
+</table>
+{{- end }}
 {{- if or .Content.Entry.Project.GoImport .Content.Entry.Project.CDocsURL }}
 <table class="table is-fullwidth">
   <thead>
