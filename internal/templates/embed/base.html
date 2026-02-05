@@ -30,6 +30,7 @@
     <link href="/assets/@fontsource-variable/atkinson-hyperlegible-mono/wght.css" rel="stylesheet" type="text/css">
     <link href="/assets/@fontsource-variable/atkinson-hyperlegible-mono/wght-italic.css" rel="stylesheet" type="text/css">
     <link href="/assets/@fortawesome/fontawesome-free/css/all.css" rel="stylesheet" type="text/css">
+    <link href="/assets/main.css" rel="stylesheet" type="text/css">
     {{- if .Config.Posts.PostsPerPageAtom }}
     <link href="{{ if .Config.Posts.BaseDestination }}/{{ requiredAttr .Config.Posts.BaseDestination }}{{
       end }}/atom.xml" rel="alternate" type="application/atom+xml" title="{{
@@ -42,23 +43,6 @@
       if .Title }}{{ requiredAttr .Title }} - {{ end }}{{ requiredAttr $.Config.Title }}">
     {{- end }}
     {{- end }}
-    <style type="text/css">
-      :root {
-        --bulma-body-family: "Atkinson Hyperlegible Next Variable", sans-serif;
-        --bulma-code-family: "Atkinson Hyperlegible Mono Variable", monospace;
-      }
-      .title, .subtitle {
-        --bulma-title-size: var(--bulma-size-4) !important;
-      }
-      .navbar {
-        --bulma-navbar-burger-color: var(--bulma-navbar-item-color);
-      }
-      html {
-        -moz-osx-font-smoothing: auto !important;
-        -webkit-font-smoothing: auto !important;
-        text-rendering: auto !important;
-      }
-    </style>
 {{ template "extra_head" . }}
   </head>
   <body>

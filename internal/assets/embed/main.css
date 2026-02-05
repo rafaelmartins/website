@@ -1,0 +1,18 @@
+:root {
+  --bulma-body-family: "Atkinson Hyperlegible Next Variable", sans-serif;
+  --bulma-code-family: "Atkinson Hyperlegible Mono Variable", monospace;
+}
+
+.title, .subtitle {
+  --bulma-title-size: var(--bulma-size-4) !important;
+}
+
+.navbar {
+  --bulma-navbar-burger-color: var(--bulma-navbar-item-color);
+}
+
+html {
+  -moz-osx-font-smoothing: auto !important;
+  -webkit-font-smoothing: auto !important;
+  text-rendering: auto !important;
+}

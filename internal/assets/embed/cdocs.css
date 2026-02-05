@@ -1,0 +1,7 @@
+.card-content th {
+  white-space: nowrap;
+}
+
+.card-content pre {
+  background-color: var(--bulma-background) !important;
+}

@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 
+	"rafaelmartins.com/p/website/internal/assets"
 	"rafaelmartins.com/p/website/internal/cdocs"
 	"rafaelmartins.com/p/website/internal/config"
 	"rafaelmartins.com/p/website/internal/kicad"
@@ -69,6 +70,14 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 	}
 
 	rv := []*runner.TaskGroup{
+		// assets embedded
+		runner.NewTaskGroup(
+			&tasks.Embed{
+				FS:              assets.Assets,
+				BaseDestination: assetsDir,
+			},
+		),
+
 		// assets required by embedded templates
 		runner.NewTaskGroup(
 			&tasks.NpmPackage{

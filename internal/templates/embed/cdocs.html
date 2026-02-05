@@ -1,14 +1,7 @@
 {{ define "title" }}{{ required .Content.Title }} - {{ required .Config.Title }}{{ end }}
 
 {{ define "extra_head" -}}
-<style type="text/css">
-  .card-content th {
-    white-space: nowrap;
-  }
-  .card-content pre {
-    background-color: var(--bulma-background) !important;
-  }
-</style>
+<link href="/assets/cdocs.css" rel="stylesheet" type="text/css">
 {{- end }}
 
 {{ define "cdocs_includes" -}}
