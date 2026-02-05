@@ -21,7 +21,8 @@ var (
 	//go:embed embed/*
 	content embed.FS
 
-	ccfg *config.Config
+	ccfg       *config.Config
+	cassetsDir string
 )
 
 type LayoutContext struct {
@@ -142,6 +143,10 @@ func SetConfig(cfg *config.Config) {
 	ccfg = cfg
 }
 
+func SetAssetsDir(assetsDir string) {
+	cassetsDir = assetsDir
+}
+
 func GetPaths(name string) ([]string, error) {
 	// we always load the base.html template, even if it is overwritten completely later
 	// then we must always include the executable timestamp, as this template is embedded.
@@ -163,6 +168,10 @@ func GetPaths(name string) ([]string, error) {
 	}
 
 	return rv, nil
+}
+
+func assetsUrl() string {
+	return "/" + cassetsDir
 }
 
 func required(v reflect.Value) (reflect.Value, error) {
@@ -193,6 +202,7 @@ func Execute(wr io.Writer, name string, fm template.FuncMap, lctx *LayoutContext
 	if fm == nil {
 		fm = template.FuncMap{}
 	}
+	fm["assetsUrl"] = assetsUrl
 	fm["required"] = required
 	fm["requiredAttr"] = requiredAttr
 

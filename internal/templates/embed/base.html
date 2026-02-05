@@ -24,13 +24,13 @@
     <meta name="twitter:image" content="{{ requiredAttr .Config.URL }}{{ requiredAttr .Content.OpenGraph.Image }}">
     {{- end }}
     <title>{{ template "title" . }}</title>
-    <link href="/assets/bulma/css/versions/bulma-no-dark-mode.css" rel="stylesheet" type="text/css">
-    <link href="/assets/@fontsource-variable/atkinson-hyperlegible-next/wght.css" rel="stylesheet" type="text/css">
-    <link href="/assets/@fontsource-variable/atkinson-hyperlegible-next/wght-italic.css" rel="stylesheet" type="text/css">
-    <link href="/assets/@fontsource-variable/atkinson-hyperlegible-mono/wght.css" rel="stylesheet" type="text/css">
-    <link href="/assets/@fontsource-variable/atkinson-hyperlegible-mono/wght-italic.css" rel="stylesheet" type="text/css">
-    <link href="/assets/@fortawesome/fontawesome-free/css/all.css" rel="stylesheet" type="text/css">
-    <link href="/assets/main.css" rel="stylesheet" type="text/css">
+    <link href="{{ assetsUrl }}/bulma/css/versions/bulma-no-dark-mode.css" rel="stylesheet" type="text/css">
+    <link href="{{ assetsUrl }}/@fontsource-variable/atkinson-hyperlegible-next/wght.css" rel="stylesheet" type="text/css">
+    <link href="{{ assetsUrl }}/@fontsource-variable/atkinson-hyperlegible-next/wght-italic.css" rel="stylesheet" type="text/css">
+    <link href="{{ assetsUrl }}/@fontsource-variable/atkinson-hyperlegible-mono/wght.css" rel="stylesheet" type="text/css">
+    <link href="{{ assetsUrl }}/@fontsource-variable/atkinson-hyperlegible-mono/wght-italic.css" rel="stylesheet" type="text/css">
+    <link href="{{ assetsUrl }}/@fortawesome/fontawesome-free/css/all.css" rel="stylesheet" type="text/css">
+    <link href="{{ assetsUrl }}/main.css" rel="stylesheet" type="text/css">
     {{- if .Config.Posts.PostsPerPageAtom }}
     <link href="{{ if .Config.Posts.BaseDestination }}/{{ requiredAttr .Config.Posts.BaseDestination }}{{
       end }}/atom.xml" rel="alternate" type="application/atom+xml" title="{{
@@ -127,7 +127,7 @@
 {{ template "footer" . }}
       </div>
     </footer>
-    <script src="/assets/anchor-js/anchor.js"></script>
+    <script src="{{ assetsUrl }}/anchor-js/anchor.js"></script>
     <script type="text/javascript">
       anchors.add('.anchor h2, .anchor h3, .anchor h4, .anchor h5, .anchor h6');
       document.addEventListener('DOMContentLoaded', () => {

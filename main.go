@@ -68,6 +68,7 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 	if assetsDir == "" {
 		assetsDir = "assets"
 	}
+	templates.SetAssetsDir(assetsDir)
 
 	rv := []*runner.TaskGroup{
 		// assets embedded
