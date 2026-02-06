@@ -16,3 +16,58 @@ html {
   -webkit-font-smoothing: auto !important;
   text-rendering: auto !important;
 }
+
+.admonition {
+  padding: 0.5rem 1rem;
+  margin: 1rem 0;
+}
+
+.admonition .admonition-title {
+  font-weight: var(--bulma-weight-semibold);
+  display: flex;
+  align-items: center;
+}
+
+.admonition .admonition-title i {
+  margin-right: 0.5rem;
+}
+
+.admonition.admonition-note {
+  border-left: .25em solid var(--bulma-info);
+}
+
+.admonition.admonition-tip {
+  border-left: .25em solid var(--bulma-success);
+}
+
+.admonition.admonition-important {
+  border-left: .25em solid var(--bulma-link);
+}
+
+.admonition.admonition-warning {
+  border-left: .25em solid var(--bulma-warning);
+}
+
+.admonition.admonition-caution {
+  border-left: .25em solid var(--bulma-danger);
+}
+
+.admonition.admonition-note .admonition-title {
+  color: var(--bulma-info);
+}
+
+.admonition.admonition-tip .admonition-title {
+  color: var(--bulma-success);
+}
+
+.admonition.admonition-important .admonition-title {
+  color: var(--bulma-link);
+}
+
+.admonition.admonition-warning .admonition-title {
+  color: var(--bulma-warning);
+}
+
+.admonition.admonition-caution .admonition-title {
+  color: var(--bulma-danger);
+}
