@@ -113,12 +113,17 @@ func (h *Content) GetReader() (io.ReadCloser, error) {
 
 		if h.IsPost {
 			entry.Post = &templates.PostContentEntry{
-				Date: metadata.Date.Time,
+				Published: metadata.Published.Time,
+				Updated:   metadata.Updated.Time,
 			}
 			entry.Post.Author.Name = metadata.Author.Name
 			entry.Post.Author.Email = metadata.Author.Email
 			if atomUpdated.IsZero() {
-				atomUpdated = entry.Post.Date
+				if entry.Post.Updated.IsZero() {
+					atomUpdated = entry.Post.Published
+				} else {
+					atomUpdated = entry.Post.Updated
+				}
 			}
 		}
 

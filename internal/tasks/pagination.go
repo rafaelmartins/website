@@ -16,8 +16,8 @@ import (
 )
 
 type paginationPost struct {
-	Source *generators.ContentSource
-	Date   time.Time
+	Source    *generators.ContentSource
+	Published time.Time
 }
 
 type paginationTaskImpl struct {
@@ -127,16 +127,16 @@ func (p *Pagination) GetTasks() ([]*runner.Task, error) {
 				return nil, err
 			}
 
-			post.Date = m.Date.Time
+			post.Published = m.Published.Time
 			posts = append(posts, post)
 		}
 	}
 
 	slices.SortStableFunc(posts, func(a *paginationPost, b *paginationPost) int {
 		if p.SortReverse {
-			return b.Date.Compare(a.Date)
+			return b.Published.Compare(a.Published)
 		}
-		return a.Date.Compare(b.Date)
+		return a.Published.Compare(b.Published)
 	})
 
 	ppp := p.PostsPerPage

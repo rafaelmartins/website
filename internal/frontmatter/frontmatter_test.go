@@ -9,7 +9,8 @@ func TestParseFrontMatterWithValidYAML(t *testing.T) {
 	src := []byte(`---
 title: Test Article
 description: A test article
-date: 2025-01-28
+published: 2025-01-28
+updated: 2025-01-29
 menu: blog
 license: MIT
 author:
@@ -72,6 +73,14 @@ This is the content.
 		t.Errorf("extra.custom_field=%q, want %q", metadata.Extra["custom_field"], "custom_value")
 	}
 
+	if metadata.Published.Time != time.Date(2025, 1, 28, 0, 0, 0, 0, time.UTC) {
+		t.Errorf("published=%v, want %v", metadata.Published.Time, time.Date(2025, 1, 28, 0, 0, 0, 0, time.UTC))
+	}
+
+	if metadata.Updated.Time != time.Date(2025, 1, 29, 0, 0, 0, 0, time.UTC) {
+		t.Errorf("updated=%v, want %v", metadata.Updated.Time, time.Date(2025, 1, 29, 0, 0, 0, 0, time.UTC))
+	}
+
 	if string(rest) != "# Content\n\nThis is the content.\n" {
 		t.Errorf("rest content mismatch: got %q", string(rest))
 	}
@@ -79,35 +88,41 @@ This is the content.
 
 func TestParseFrontMatterWithDateFormats(t *testing.T) {
 	tests := []struct {
-		name     string
-		src      []byte
-		wantDate time.Time
-		wantErr  bool
+		name          string
+		src           []byte
+		wantPublished time.Time
+		wantUpdated   time.Time
+		wantErr       bool
 	}{
 		{
 			name: "full datetime format",
 			src: []byte(`---
-date: 2025-01-28 15:30:45
+published: 2025-01-28 15:30:45
+updated: 2025-01-29 16:45:30
 ---
 content
 `),
-			wantDate: time.Date(2025, 1, 28, 15, 30, 45, 0, time.UTC),
-			wantErr:  false,
+			wantPublished: time.Date(2025, 1, 28, 15, 30, 45, 0, time.UTC),
+			wantUpdated:   time.Date(2025, 1, 29, 16, 45, 30, 0, time.UTC),
+			wantErr:       false,
 		},
 		{
 			name: "date only format",
 			src: []byte(`---
-date: 2025-01-28
+published: 2025-01-28
+updated: 2025-01-29
 ---
 content
 `),
-			wantDate: time.Date(2025, 1, 28, 0, 0, 0, 0, time.UTC),
-			wantErr:  false,
+			wantPublished: time.Date(2025, 1, 28, 0, 0, 0, 0, time.UTC),
+			wantUpdated:   time.Date(2025, 1, 29, 0, 0, 0, 0, time.UTC),
+			wantErr:       false,
 		},
 		{
 			name: "invalid date format",
 			src: []byte(`---
-date: invalid-date
+published: invalid-date
+updated: 2025-01-29
 ---
 content
 `),
@@ -121,8 +136,11 @@ content
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Parse error=%v, wantErr=%v", err, tt.wantErr)
 			}
-			if !tt.wantErr && metadata.Date.Time != tt.wantDate {
-				t.Errorf("date=%v, want %v", metadata.Date.Time, tt.wantDate)
+			if !tt.wantErr && metadata.Published.Time != tt.wantPublished {
+				t.Errorf("published=%v, want %v", metadata.Published.Time, tt.wantPublished)
+			}
+			if !tt.wantErr && metadata.Updated.Time != tt.wantUpdated {
+				t.Errorf("updated=%v, want %v", metadata.Updated.Time, tt.wantUpdated)
 			}
 		})
 	}
@@ -372,15 +390,15 @@ func TestFrontMatterDateUnmarshalYAML(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			src := []byte("---\ndate: " + tt.yaml + "\n---\ncontent\n")
+			src := []byte("---\npublished: " + tt.yaml + "\n---\ncontent\n")
 			metadata, _, err := Parse(src)
 
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Parse error=%v, wantErr=%v", err, tt.wantErr)
 			}
 
-			if !tt.wantErr && metadata.Date.Time != tt.want {
-				t.Errorf("date=%v, want %v", metadata.Date.Time, tt.want)
+			if !tt.wantErr && metadata.Published.Time != tt.want {
+				t.Errorf("published=%v, want %v", metadata.Published.Time, tt.want)
 			}
 		})
 	}

@@ -34,7 +34,8 @@ func (d *FrontMatterDate) UnmarshalYAML(node *yaml.Node) error {
 type FrontMatter struct {
 	Title       string          `yaml:"title"`
 	Description string          `yaml:"description"`
-	Date        FrontMatterDate `yaml:"date"`
+	Published   FrontMatterDate `yaml:"published"`
+	Updated     FrontMatterDate `yaml:"updated"`
 	Menu        string          `yaml:"menu"`
 	License     string          `yaml:"license"`
 	Author      struct {

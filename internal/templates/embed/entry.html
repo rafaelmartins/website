@@ -6,8 +6,13 @@
 {{ .Content.Entry.Body }}
   {{- if .Content.Entry.Post }}
   <div class="has-text-grey-light mt-6">
-    <time>Posted by {{ if .Content.Entry.Post.Author.Name }}{{ .Content.Entry.Post.Author.Name }}{{
-      else }}{{ .Config.Author.Name }}{{ end }} on {{ .Content.Entry.Post.Date.Format "January 02, 2006" }}</time>
+    Published by {{ if .Content.Entry.Post.Author.Name }}{{ .Content.Entry.Post.Author.Name }}{{
+      else }}{{ .Config.Author.Name }}{{ end }} on <time datetime="{{
+      .Content.Entry.Post.Published.Format "2006-01-02T15:04:05Z" }}">{{
+      .Content.Entry.Post.Published.Format "January 02, 2006" }}</time>{{
+      if not .Content.Entry.Post.Updated.IsZero }} and modified on <time datetime="{{
+      .Content.Entry.Post.Updated.Format "2006-01-02T15:04:05Z" }}">{{
+      .Content.Entry.Post.Updated.Format "January 02, 2006" }}</time>{{ end }}.
   </div>
   {{- end }}
 </article>

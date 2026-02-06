@@ -14,8 +14,12 @@
   <entry>
     <title type="text">{{ required .Title }}</title>
     <id>{{ required $.Config.URL }}{{ required .URL }}</id>
-    <updated>{{ .Post.Date.Format "2006-01-02T15:04:05Z" }}</updated>
-    <published>{{ .Post.Date.Format "2006-01-02T15:04:05Z" }}</published>
+    {{- if .Post.Updated.IsZero }}
+    <updated>{{ .Post.Published.Format "2006-01-02T15:04:05Z" }}</updated>
+    {{- else }}
+    <updated>{{ .Post.Updated.Format "2006-01-02T15:04:05Z" }}</updated>
+    {{- end }}
+    <published>{{ .Post.Published.Format "2006-01-02T15:04:05Z" }}</published>
     <link href="{{ requiredAttr $.Config.URL }}{{ requiredAttr .URL }}" />
     <author>
       <name>{{ if .Post.Author.Name }}{{ .Post.Author.Name }}{{ else }}{{ $.Config.Author.Name }}{{ end }}</name>

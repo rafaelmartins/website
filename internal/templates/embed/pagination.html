@@ -28,7 +28,7 @@
     </dt>
     {{- if .Post }}
     <dd class="mb-4 is-size-5">
-      <time>{{ .Post.Date.Format "January 02, 2006" }}</time>
+      <time datetime="{{ .Post.Published.Format "2006-01-02T15:04:05Z" }}">{{ .Post.Published.Format "January 02, 2006" }}</time>
     </dd>
     {{- end }}
     {{- else }}

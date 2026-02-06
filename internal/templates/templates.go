@@ -38,7 +38,8 @@ type PostContentEntry struct {
 		Name  string
 		Email string
 	}
-	Date time.Time
+	Published time.Time
+	Updated   time.Time
 }
 
 type ProjectContentLatestReleaseFile struct {
