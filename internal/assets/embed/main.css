@@ -71,3 +71,16 @@ html {
 .admonition.admonition-caution .admonition-title {
   color: var(--bulma-danger);
 }
+
+.spoiler, .spoiler > * {
+  transition: color 0.5s, opacity 0.5s;
+}
+
+.spoiler:not(:hover) {
+  color: transparent;
+  background-color: var(--bulma-text);
+}
+
+.spoiler:not(:hover) > * {
+  opacity: 0;
+}

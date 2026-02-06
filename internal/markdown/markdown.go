@@ -23,6 +23,7 @@ func New(style string, ext ...goldmark.Extender) goldmark.Markdown {
 			append(
 				[]goldmark.Extender{
 					&admonitions{},
+					&spoilers{},
 					extension.GFM,
 					extension.DefinitionList,
 					extension.Footnote,
