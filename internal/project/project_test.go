@@ -116,7 +116,7 @@ func TestHandleImageUrl(t *testing.T) {
 }
 
 func TestHandleLinkUrl(t *testing.T) {
-	pages := []*ProjectPage{
+	pageResolvers := []*projectPageResolver{
 		{src: "docs/index.md", name: "."},
 		{src: "docs/asd.md", name: "asd"},
 		{src: "docs/guide.md", name: "guide"},
@@ -128,84 +128,84 @@ func TestHandleLinkUrl(t *testing.T) {
 		link        string
 		subdir      string
 		currentPage string
-		pages       []*ProjectPage
+		pages       []*projectPageResolver
 		expGH       bool
 		expRV       string
 	}{
-		{"@@ simple", "@@page", "docs", ".", pages, false, "page"},
-		{"@@ with path", "@@some/path", "docs", ".", pages, false, "some/path"},
-		{"@@ with sub", "@@page", "sub", ".", pages, false, "page"},
-		{"@@ absolute", "@@/absolute/path", "", ".", pages, false, "/absolute/path"},
-		{"@@ empty after prefix", "@@", "docs", ".", pages, false, ""},
+		{"@@ simple", "@@page", "docs", ".", pageResolvers, false, "page"},
+		{"@@ with path", "@@some/path", "docs", ".", pageResolvers, false, "some/path"},
+		{"@@ with sub", "@@page", "sub", ".", pageResolvers, false, "page"},
+		{"@@ absolute", "@@/absolute/path", "", ".", pageResolvers, false, "/absolute/path"},
+		{"@@ empty after prefix", "@@", "docs", ".", pageResolvers, false, ""},
 
-		{"https url", "https://example.com/foo", "sub", ".", pages, false, ""},
-		{"http url", "http://example.com/foo", "", "", pages, false, ""},
-		{"protocol-relative url", "//example.com/a/b", "", "", pages, false, ""},
-		{"ftp url", "ftp://example.com/file", "docs", ".", pages, false, ""},
+		{"https url", "https://example.com/foo", "sub", ".", pageResolvers, false, ""},
+		{"http url", "http://example.com/foo", "", "", pageResolvers, false, ""},
+		{"protocol-relative url", "//example.com/a/b", "", "", pageResolvers, false, ""},
+		{"ftp url", "ftp://example.com/file", "docs", ".", pageResolvers, false, ""},
 
-		{"/assets/image.png", "/assets/image.png", "sub", ".", pages, true, "assets/image.png"},
-		{"/assets/image.png no subdir", "/assets/image.png", "", ".", pages, true, "assets/image.png"},
-		{"/assets/image.png ignored subdir", "/assets/image.png", "ignored", ".", pages, true, "assets/image.png"},
+		{"/assets/image.png", "/assets/image.png", "sub", ".", pageResolvers, true, "assets/image.png"},
+		{"/assets/image.png no subdir", "/assets/image.png", "", ".", pageResolvers, true, "assets/image.png"},
+		{"/assets/image.png ignored subdir", "/assets/image.png", "ignored", ".", pageResolvers, true, "assets/image.png"},
 
-		{"/docs/index.md", "/docs/index.md", "", ".", pages, false, "./"},
-		{"/docs/guide.md", "/docs/guide.md", "", ".", pages, false, "guide/"},
-		{"/docs/asd.md from asd", "/docs/asd.md", "", "asd", pages, false, "./"},
-		{"/docs/asd.md from guide", "/docs/asd.md", "", "guide", pages, false, "../asd/"},
-		{"/docs/page.md", "/docs/page.md", "", ".", pages, false, "page/"},
-		{"/docs/nested/deep.md", "/docs/nested/deep.md", "", ".", pages, true, "docs/nested/deep.md"},
-		{"/docs/nested/deep.md from asd", "/docs/nested/deep.md", "", "asd", pages, true, "docs/nested/deep.md"},
+		{"/docs/index.md", "/docs/index.md", "", ".", pageResolvers, false, "./"},
+		{"/docs/guide.md", "/docs/guide.md", "", ".", pageResolvers, false, "guide/"},
+		{"/docs/asd.md from asd", "/docs/asd.md", "", "asd", pageResolvers, false, "./"},
+		{"/docs/asd.md from guide", "/docs/asd.md", "", "guide", pageResolvers, false, "../asd/"},
+		{"/docs/page.md", "/docs/page.md", "", ".", pageResolvers, false, "page/"},
+		{"/docs/nested/deep.md", "/docs/nested/deep.md", "", ".", pageResolvers, true, "docs/nested/deep.md"},
+		{"/docs/nested/deep.md from asd", "/docs/nested/deep.md", "", "asd", pageResolvers, true, "docs/nested/deep.md"},
 
-		{"guide.md", "guide.md", "docs", ".", pages, false, "guide/"},
-		{"asd.md", "asd.md", "docs", ".", pages, false, "asd/"},
-		{"asd.md from guide", "asd.md", "docs", "guide", pages, false, "../asd/"},
-		{"page.md", "page.md", "docs", ".", pages, false, "page/"},
-		{"index.md", "index.md", "docs", ".", pages, false, "./"},
-		{"index.md from guide", "index.md", "docs", "guide", pages, false, "../"},
-		{"index.md from asd", "index.md", "docs", "asd", pages, false, "../"},
-		{"nested/deep.md", "nested/deep.md", "docs", ".", pages, true, "docs/nested/deep.md"},
-		{"nested/deep.md from guide", "nested/deep.md", "docs", "guide", pages, true, "docs/nested/deep.md"},
+		{"guide.md", "guide.md", "docs", ".", pageResolvers, false, "guide/"},
+		{"asd.md", "asd.md", "docs", ".", pageResolvers, false, "asd/"},
+		{"asd.md from guide", "asd.md", "docs", "guide", pageResolvers, false, "../asd/"},
+		{"page.md", "page.md", "docs", ".", pageResolvers, false, "page/"},
+		{"index.md", "index.md", "docs", ".", pageResolvers, false, "./"},
+		{"index.md from guide", "index.md", "docs", "guide", pageResolvers, false, "../"},
+		{"index.md from asd", "index.md", "docs", "asd", pageResolvers, false, "../"},
+		{"nested/deep.md", "nested/deep.md", "docs", ".", pageResolvers, true, "docs/nested/deep.md"},
+		{"nested/deep.md from guide", "nested/deep.md", "docs", "guide", pageResolvers, true, "docs/nested/deep.md"},
 
-		{"assets/pic.png", "assets/pic.png", "docs", ".", pages, true, "docs/assets/pic.png"},
-		{"images/logo.svg", "images/logo.svg", "", ".", pages, true, "images/logo.svg"},
-		{"file.txt", "file.txt", "subdir", ".", pages, true, "subdir/file.txt"},
-		{"../file.txt", "../file.txt", "docs/nested", ".", pages, true, "docs/file.txt"},
+		{"assets/pic.png", "assets/pic.png", "docs", ".", pageResolvers, true, "docs/assets/pic.png"},
+		{"images/logo.svg", "images/logo.svg", "", ".", pageResolvers, true, "images/logo.svg"},
+		{"file.txt", "file.txt", "subdir", ".", pageResolvers, true, "subdir/file.txt"},
+		{"../file.txt", "../file.txt", "docs/nested", ".", pageResolvers, true, "docs/file.txt"},
 
-		{"/assets/style.css", "/assets/style.css", "", ".", pages, true, "assets/style.css"},
-		{"/images/pic.png", "/images/pic.png", "ignored", ".", pages, true, "images/pic.png"},
+		{"/assets/style.css", "/assets/style.css", "", ".", pageResolvers, true, "assets/style.css"},
+		{"/images/pic.png", "/images/pic.png", "ignored", ".", pageResolvers, true, "images/pic.png"},
 
-		{"/docs/guide.md?v=1", "/docs/guide.md?v=1", "", ".", pages, false, "guide/"},
-		{"/docs/guide.md#section", "/docs/guide.md#section", "", ".", pages, false, "guide/"},
-		{"/docs/guide.md?v=1#section", "/docs/guide.md?v=1#section", "", ".", pages, false, "guide/"},
-		{"asd.md?query=value", "asd.md?query=value", "docs", ".", pages, false, "asd/"},
-		{"asd.md#anchor from guide", "asd.md#anchor", "docs", "guide", pages, false, "../asd/"},
-		{"assets/file.png?v=2", "assets/file.png?v=2", "docs", ".", pages, true, "docs/assets/file.png"},
+		{"/docs/guide.md?v=1", "/docs/guide.md?v=1", "", ".", pageResolvers, false, "guide/"},
+		{"/docs/guide.md#section", "/docs/guide.md#section", "", ".", pageResolvers, false, "guide/"},
+		{"/docs/guide.md?v=1#section", "/docs/guide.md?v=1#section", "", ".", pageResolvers, false, "guide/"},
+		{"asd.md?query=value", "asd.md?query=value", "docs", ".", pageResolvers, false, "asd/"},
+		{"asd.md#anchor from guide", "asd.md#anchor", "docs", "guide", pageResolvers, false, "../asd/"},
+		{"assets/file.png?v=2", "assets/file.png?v=2", "docs", ".", pageResolvers, true, "docs/assets/file.png"},
 
-		{"empty", "", "", ".", pages, false, ""},
-		{"empty with docs", "", "docs", ".", pages, false, ""},
-		{".", ".", "", ".", pages, true, "."},
-		{".with docs", ".", "docs", ".", pages, true, "docs"},
-		{"./ with docs", "./", "docs", ".", pages, true, "docs"},
+		{"empty", "", "", ".", pageResolvers, false, ""},
+		{"empty with docs", "", "docs", ".", pageResolvers, false, ""},
+		{".", ".", "", ".", pageResolvers, true, "."},
+		{".with docs", ".", "docs", ".", pageResolvers, true, "docs"},
+		{"./ with docs", "./", "docs", ".", pageResolvers, true, "docs"},
 
-		{"./guide.md", "./guide.md", "docs", ".", pages, false, "guide/"},
-		{"./asd.md from guide", "./asd.md", "docs", "guide", pages, false, "../asd/"},
-		{"docs/./index.md", "docs/./index.md", "", ".", pages, false, "./"},
-		{"docs//guide.md", "docs//guide.md", "", ".", pages, false, "guide/"},
+		{"./guide.md", "./guide.md", "docs", ".", pageResolvers, false, "guide/"},
+		{"./asd.md from guide", "./asd.md", "docs", "guide", pageResolvers, false, "../asd/"},
+		{"docs/./index.md", "docs/./index.md", "", ".", pageResolvers, false, "./"},
+		{"docs//guide.md", "docs//guide.md", "", ".", pageResolvers, false, "guide/"},
 
-		{"guide.md from page", "guide.md", "docs", "page", pages, false, "../guide/"},
-		{"page.md from guide", "page.md", "docs", "guide", pages, false, "../page/"},
-		{"index.md from nested/deep", "index.md", "docs", "nested/deep", pages, false, "../"},
-		{"nested/deep.md from asd", "nested/deep.md", "docs", "asd", pages, true, "docs/nested/deep.md"},
-		{"nested/deep.md from nested/deep", "nested/deep.md", "docs", "nested/deep", pages, true, "docs/nested/deep.md"},
+		{"guide.md from page", "guide.md", "docs", "page", pageResolvers, false, "../guide/"},
+		{"page.md from guide", "page.md", "docs", "guide", pageResolvers, false, "../page/"},
+		{"index.md from nested/deep", "index.md", "docs", "nested/deep", pageResolvers, false, "../"},
+		{"nested/deep.md from asd", "nested/deep.md", "docs", "asd", pageResolvers, true, "docs/nested/deep.md"},
+		{"nested/deep.md from nested/deep", "nested/deep.md", "docs", "nested/deep", pageResolvers, true, "docs/nested/deep.md"},
 
 		{"any/link.md with nil pages", "any/link.md", "docs", ".", nil, true, "docs/any/link.md"},
 		{"/absolute/link.md with nil pages", "/absolute/link.md", "", ".", nil, true, "absolute/link.md"},
 
-		{"any/link.md with empty pages", "any/link.md", "docs", ".", []*ProjectPage{}, true, "docs/any/link.md"},
+		{"any/link.md with empty pages", "any/link.md", "docs", ".", []*projectPageResolver{}, true, "docs/any/link.md"},
 	}
 
 	for _, tt := range args {
 		t.Run(tt.name, func(t *testing.T) {
-			proj := &Project{subdir: tt.subdir, pages: tt.pages}
+			proj := &Project{subdir: tt.subdir, pageResolvers: tt.pages}
 			gh, rv, err := proj.handleLinkUrl(tt.link, tt.currentPage)
 			if err != nil {
 				t.Fatalf("unexpected error: %v", err)

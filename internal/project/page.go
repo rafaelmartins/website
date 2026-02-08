@@ -2,6 +2,7 @@ package project
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"path"
@@ -20,6 +21,66 @@ import (
 	"rafaelmartins.com/p/website/internal/templates"
 )
 
+func splitFileName(fileName string, isReadme bool, isRoot bool) (int, string, error) {
+	if isReadme {
+		return 0, "", nil
+	}
+
+	s := strings.SplitN(path.Base(fileName), "_", 2)
+	if len(s) != 2 {
+		return 0, "", fmt.Errorf("project: page: bad file name: %s", fileName)
+	}
+
+	i, err := strconv.ParseInt(s[0], 10, 32)
+	if err != nil {
+		return 0, "", err
+	}
+	idx := int(i)
+
+	if idx == 0 && !isRoot {
+		return 0, "", fmt.Errorf("project: page: root page must be index 0: %s", fileName)
+	}
+
+	name := ""
+	if !isRoot {
+		name = strings.TrimSuffix(s[1], path.Ext(s[1]))
+	}
+	return idx, name, nil
+}
+
+type projectPageResolver struct {
+	src  string
+	name string
+}
+
+func newPageResolver(file *github.RepositoryFile, isReadme bool, isRoot bool) (*projectPageResolver, error) {
+	if file == nil {
+		return nil, errors.New("project: page resolver: file is nil")
+	}
+
+	_, name, err := splitFileName(file.Name, isReadme, isRoot)
+	if err != nil {
+		return nil, err
+	}
+	return &projectPageResolver{
+		src:  file.Name,
+		name: name,
+	}, nil
+}
+
+func (ppr *projectPageResolver) resolveUrl(current string) string {
+	current = path.Clean(current)
+	if path.Clean(ppr.name) == current {
+		return "./"
+	}
+
+	prefix := ""
+	if current != "." {
+		prefix = ".."
+	}
+	return path.Join(prefix, ppr.name) + "/"
+}
+
 type ProjectPage struct {
 	idx    int
 	name   string
@@ -29,9 +90,10 @@ type ProjectPage struct {
 	src    string
 	isRoot bool
 
-	proj *Project
-	file *github.RepositoryFile
-	meta *frontmatter.FrontMatter
+	proj     *Project
+	file     *github.RepositoryFile
+	meta     *frontmatter.FrontMatter
+	resolver *projectPageResolver
 
 	otitle string
 	odesc  string
@@ -39,24 +101,18 @@ type ProjectPage struct {
 }
 
 func newPage(proj *Project, file *github.RepositoryFile, isReadme bool, isRoot bool) (*ProjectPage, error) {
-	idx := 0
-	name := ""
+	if file == nil {
+		return nil, errors.New("project: page: file is nil")
+	}
 
-	if !isReadme {
-		s := strings.SplitN(path.Base(file.Name), "_", 2)
-		if len(s) != 2 {
-			return nil, fmt.Errorf("project: page: bad file name: %s", file.Name)
-		}
+	idx, name, err := splitFileName(file.Name, isReadme, isRoot)
+	if err != nil {
+		return nil, err
+	}
 
-		i, err := strconv.ParseInt(s[0], 10, 32)
-		if err != nil {
-			return nil, err
-		}
-		idx = int(i)
-
-		if !isRoot {
-			name = strings.TrimSuffix(s[1], path.Ext(s[1]))
-		}
+	resolver, err := newPageResolver(file, isReadme, isRoot)
+	if err != nil {
+		return nil, err
 	}
 
 	rv := &ProjectPage{
@@ -65,8 +121,9 @@ func newPage(proj *Project, file *github.RepositoryFile, isReadme bool, isRoot b
 		src:    file.Name,
 		isRoot: isRoot,
 
-		proj: proj,
-		file: file,
+		proj:     proj,
+		file:     file,
+		resolver: resolver,
 	}
 
 	if err := rv.read(); err != nil {
@@ -141,19 +198,6 @@ func (pp *ProjectPage) read() error {
 		}
 	}
 	return nil
-}
-
-func (pp *ProjectPage) resolveUrl(current string) string {
-	current = path.Clean(current)
-	if path.Clean(pp.name) == current {
-		return "./"
-	}
-
-	prefix := ""
-	if current != "." {
-		prefix = ".."
-	}
-	return path.Join(prefix, pp.name) + "/"
 }
 
 func (pp *ProjectPage) GetDestination() string {
@@ -258,7 +302,7 @@ func (pp *ProjectPage) GetReader() (io.ReadCloser, error) {
 
 		tmpl.Menus = append(tmpl.Menus, &templates.ProjectContentMenu{
 			Active: p.idx/10 == pp.idx/10,
-			URL:    p.resolveUrl(pp.name),
+			URL:    p.resolver.resolveUrl(pp.name),
 			Title:  p.menu,
 		})
 	}

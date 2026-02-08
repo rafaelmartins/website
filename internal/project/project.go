@@ -50,6 +50,7 @@ type Project struct {
 	proj             *github.Repository
 	subdir           string
 	pages            []*ProjectPage
+	pageResolvers    []*projectPageResolver
 	url              string
 	cdocsDestination string
 	cdocsUrl         string
@@ -112,6 +113,16 @@ func (p *Project) reload() error {
 		subdir = ""
 	}
 	p.subdir = subdir
+
+	// must be filled before initializing pages!
+	p.pageResolvers = nil
+	for idx, doc := range docs {
+		res, err := newPageResolver(doc, doc == p.proj.Readme, idx == 0)
+		if err != nil {
+			return err
+		}
+		p.pageResolvers = append(p.pageResolvers, res)
+	}
 
 	p.pages = nil
 	for idx, doc := range docs {
@@ -188,7 +199,7 @@ func (p *Project) handleLinkUrl(link string, currentPage string) (bool, string, 
 	}
 	v = path.Clean(v)
 
-	for _, pg := range p.pages {
+	for _, pg := range p.pageResolvers {
 		if pg.src == v {
 			return false, pg.resolveUrl(currentPage), nil
 		}
