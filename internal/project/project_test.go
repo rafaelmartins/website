@@ -15,8 +15,8 @@ func TestHandleImageUrl(t *testing.T) {
 		rv2         string
 		hasErr      bool
 	}{
-		{"empty all", "", "", "", "", ".", false},
-		{"empty img with subdir", "", "subdir", "", "subdir", "subdir", false},
+		{"empty all", "", "", "", "", "", false},
+		{"empty img with subdir", "", "subdir", "", "", "", false},
 
 		{"simple image.png", "image.png", "", "", "image.png", "image.png", false},
 		{"./image.png", "./image.png", "", "", "image.png", "image.png", false},
@@ -45,6 +45,13 @@ func TestHandleImageUrl(t *testing.T) {
 		{"/image.png with sub", "/image.png", "sub", "", "image.png", "image.png", false},
 		{"/folder/image.png with sub", "/folder/image.png", "sub", "", "folder/image.png", "folder/image.png", false},
 		{"/folder/image.png with sub/nested", "/folder/image.png", "sub/nested", "", "folder/image.png", "folder/image.png", false},
+
+		{"@@ simple", "@@image.png", "", "", "", "image.png", false},
+		{"@@ with path", "@@folder/image.png", "", "", "", "folder/image.png", false},
+		{"@@ with sub", "@@image.png", "sub", "", "", "image.png", false},
+		{"@@ with sub and currentPage", "@@image.png", "sub", "p", "", "image.png", false},
+		{"@@ absolute", "@@/image.png", "", "", "", "/image.png", false},
+		{"@@ empty after prefix", "@@", "", "", "", "", false},
 
 		{"http url", "http://example.com/image.png", "", "", "", "", false},
 		{"https url", "https://example.com/image.png", "", "", "", "", false},
@@ -125,6 +132,12 @@ func TestHandleLinkUrl(t *testing.T) {
 		expGH       bool
 		expRV       string
 	}{
+		{"@@ simple", "@@page", "docs", ".", pages, false, "page"},
+		{"@@ with path", "@@some/path", "docs", ".", pages, false, "some/path"},
+		{"@@ with sub", "@@page", "sub", ".", pages, false, "page"},
+		{"@@ absolute", "@@/absolute/path", "", ".", pages, false, "/absolute/path"},
+		{"@@ empty after prefix", "@@", "docs", ".", pages, false, ""},
+
 		{"https url", "https://example.com/foo", "sub", ".", pages, false, ""},
 		{"http url", "http://example.com/foo", "", "", pages, false, ""},
 		{"protocol-relative url", "//example.com/a/b", "", "", pages, false, ""},
@@ -167,8 +180,8 @@ func TestHandleLinkUrl(t *testing.T) {
 		{"asd.md#anchor from guide", "asd.md#anchor", "docs", "guide", pages, false, "../asd/"},
 		{"assets/file.png?v=2", "assets/file.png?v=2", "docs", ".", pages, true, "docs/assets/file.png"},
 
-		{"empty", "", "", ".", pages, true, "."},
-		{"empty with docs", "", "docs", ".", pages, true, "docs"},
+		{"empty", "", "", ".", pages, false, ""},
+		{"empty with docs", "", "docs", ".", pages, false, ""},
 		{".", ".", "", ".", pages, true, "."},
 		{".with docs", ".", "docs", ".", pages, true, "docs"},
 		{"./ with docs", "./", "docs", ".", pages, true, "docs"},

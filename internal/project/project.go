@@ -132,6 +132,10 @@ func (p *Project) reload() error {
 }
 
 func (p *Project) handleImageUrl(img string, currentPage string) (string, string, error) {
+	if img == "" {
+		return "", "", nil
+	}
+
 	u, err := url.Parse(img)
 	if err != nil {
 		return "", "", err
@@ -139,6 +143,10 @@ func (p *Project) handleImageUrl(img string, currentPage string) (string, string
 
 	if u.IsAbs() || u.Host != "" {
 		return "", "", nil
+	}
+
+	if after, ok := strings.CutPrefix(img, "@@"); ok {
+		return "", after, nil
 	}
 
 	v := strings.TrimPrefix(u.Path, "/")
@@ -157,6 +165,10 @@ func (p *Project) handleImageUrl(img string, currentPage string) (string, string
 }
 
 func (p *Project) handleLinkUrl(link string, currentPage string) (bool, string, error) {
+	if link == "" {
+		return false, "", nil
+	}
+
 	u, err := url.Parse(link)
 	if err != nil {
 		return false, "", err
@@ -164,6 +176,10 @@ func (p *Project) handleLinkUrl(link string, currentPage string) (bool, string, 
 
 	if u.IsAbs() || u.Host != "" {
 		return false, "", nil
+	}
+
+	if after, ok := strings.CutPrefix(link, "@@"); ok {
+		return false, after, nil
 	}
 
 	v := path.Join(p.subdir, u.Path)
