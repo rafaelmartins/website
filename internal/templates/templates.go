@@ -87,6 +87,7 @@ type ProjectContentEntry struct {
 	Forks         int
 	LatestRelease *ProjectContentLatestRelease
 	Date          time.Time
+	IsRoot        bool
 }
 
 type OpenGraphEntry struct {

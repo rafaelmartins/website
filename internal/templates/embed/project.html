@@ -1,4 +1,6 @@
-{{ define "title" }}{{ required .Content.Title }} - {{ required .Config.Title }}{{ end }}
+{{ define "title" }}{{ if .Content.Entry.Project.IsRoot }}{{ required .Content.Entry.Project.Repo }}{{
+  else }}{{ required .Content.Entry.Project.Repo }}: {{ required .Content.Title }}{{
+  end }} - {{ required .Config.Title }}{{ end }}
 
 {{ define "extra_head" -}}
 {{- if .Content.Entry.Project.GoImport }}
@@ -7,17 +9,20 @@
 {{- end }}
 
 {{ define "main" -}}
-{{- if gt (len .Content.Entry.Project.Menus) 1 }}
-<div class="tabs">
-  <ul class="m-0">
-    {{- range .Content.Entry.Project.Menus }}
-    <li{{ if .Active }} class="is-active"{{ end }}><a href="{{ .URL }}">{{ .Title }}</a></li>
-    {{- end }}
-  </ul>
-</div>
-{{- end }}
 <article class="anchor">
+  <h1 class="title">{{ required .Content.Entry.Project.Repo }}</h1>
+  {{- if gt (len .Content.Entry.Project.Menus) 1 }}
+  <div class="tabs">
+    <ul class="m-0">
+      {{- range .Content.Entry.Project.Menus }}
+      <li{{ if .Active }} class="is-active"{{ end }}><a href="{{ .URL }}">{{ .Title }}</a></li>
+      {{- end }}
+    </ul>
+  </div>
+  {{- if .Content.Entry.Title }}
   <h1 class="title">{{ required .Content.Entry.Title }}</h1>
+  {{- end }}
+  {{- end }}
 {{ .Content.Entry.Body }}
 </article>
 {{- if .Content.Entry.Project.LatestRelease }}

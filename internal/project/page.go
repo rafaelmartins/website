@@ -112,9 +112,6 @@ func (pp *ProjectPage) read() error {
 			title = t.(string)
 		}
 	}
-	if title == "" {
-		title = pp.proj.Repo
-	}
 	pp.title = title
 
 	pp.menu = title
@@ -123,6 +120,9 @@ func (pp *ProjectPage) read() error {
 	}
 
 	pp.otitle = title
+	if pp.otitle == "" {
+		pp.otitle = pp.proj.Repo
+	}
 	if pp.proj.OpenGraphTitle != "" {
 		pp.otitle = pp.proj.OpenGraphTitle
 	}
@@ -192,6 +192,7 @@ func (pp *ProjectPage) GetReader() (io.ReadCloser, error) {
 		Watching:    pp.proj.proj.Watchers,
 		Forks:       pp.proj.proj.Forks,
 		Date:        time.Now().UTC(),
+		IsRoot:      pp.isRoot,
 	}
 
 	if pp.proj.LocalDirectory != nil {
