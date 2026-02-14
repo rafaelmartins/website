@@ -131,7 +131,7 @@
     <script type="text/javascript">
       anchors.add('.anchor h2, .anchor h3, .anchor h4, .anchor h5, .anchor h6');
       document.addEventListener('DOMContentLoaded', () => {
-        Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0).forEach(element => {
+        document.querySelectorAll('.navbar-burger').forEach(element => {
           element.addEventListener('click', () => {
             element.classList.toggle('is-active');
             document.getElementById(element.dataset.target).classList.toggle('is-active');
