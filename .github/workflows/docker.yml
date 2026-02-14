@@ -83,16 +83,16 @@ jobs:
       - run: |
           [[ -d "${{ matrix.destination }}/assets" ]]
 
-  cleanup-images:
-    runs-on: ubuntu-latest
-    needs: test-action
+  # cleanup-images:
+  #   runs-on: ubuntu-latest
+  #   needs: test-action
 
-    steps:
-      - id: image
-        run: echo "name=$(echo "${IMAGE_NAME}" | cut -d/ -f2)" >> $GITHUB_OUTPUT
+  #   steps:
+  #     - id: image
+  #       run: echo "name=$(echo "${IMAGE_NAME}" | cut -d/ -f2)" >> $GITHUB_OUTPUT
 
-      - uses: actions/delete-package-versions@v5
-        with:
-          package-name: ${{ steps.image.outputs.name }}
-          package-type: 'container'
-          delete-only-untagged-versions: 'true'
+  #     - uses: actions/delete-package-versions@v5
+  #       with:
+  #         package-name: ${{ steps.image.outputs.name }}
+  #         package-type: 'container'
+  #         delete-only-untagged-versions: 'true'
