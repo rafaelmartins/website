@@ -49,19 +49,20 @@ jobs:
           push: true
           tags: ${{ steps.tags.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          provenance: false
 
   # TODO: test
 
-  # cleanup-images:
-  #   runs-on: ubuntu-latest
-  #   needs: build-and-push-image
+  cleanup-images:
+    runs-on: ubuntu-latest
+    needs: build-and-push-image
 
-  #   steps:
-  #     - id: image
-  #       run: echo "name=$(echo "${IMAGE_NAME}" | cut -d/ -f2)" >> $GITHUB_OUTPUT
+    steps:
+      - id: image
+        run: echo "name=$(echo "${IMAGE_NAME}" | cut -d/ -f2)" >> $GITHUB_OUTPUT
 
-  #     - uses: actions/delete-package-versions@v5
-  #       with:
-  #         package-name: ${{ steps.image.outputs.name }}
-  #         package-type: 'container'
-  #         delete-only-untagged-versions: 'true'
+      - uses: actions/delete-package-versions@v5
+        with:
+          package-name: ${{ steps.image.outputs.name }}
+          package-type: 'container'
+          delete-only-untagged-versions: 'true'
