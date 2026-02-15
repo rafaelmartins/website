@@ -30,6 +30,7 @@
     <link href="{{ assetsUrl }}/@fontsource-variable/atkinson-hyperlegible-mono/wght.css" rel="stylesheet" type="text/css">
     <link href="{{ assetsUrl }}/@fontsource-variable/atkinson-hyperlegible-mono/wght-italic.css" rel="stylesheet" type="text/css">
     <link href="{{ assetsUrl }}/@fortawesome/fontawesome-free/css/all.css" rel="stylesheet" type="text/css">
+    <link href="{{ assetsUrl }}/glightbox/dist/css/glightbox.css" rel="stylesheet" type="text/css">
     <link href="{{ assetsUrl }}/main.css" rel="stylesheet" type="text/css">
     {{- if .Config.Posts.PostsPerPageAtom }}
     <link href="{{ if .Config.Posts.BaseDestination }}/{{ requiredAttr .Config.Posts.BaseDestination }}{{
@@ -128,8 +129,13 @@
       </div>
     </footer>
     <script src="{{ assetsUrl }}/anchor-js/anchor.js"></script>
+    <script src="{{ assetsUrl }}/glightbox/dist/js/glightbox.js"></script>
     <script type="text/javascript">
       anchors.add('.anchor h2, .anchor h3, .anchor h4, .anchor h5, .anchor h6');
+      const lightbox = GLightbox({
+        touchNavigation: true,
+        selector: '.content figure:not(.image) > img',
+      });
       document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.navbar-burger').forEach(element => {
           element.addEventListener('click', () => {

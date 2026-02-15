@@ -102,6 +102,17 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 		),
 		runner.NewTaskGroup(
 			&tasks.NpmPackage{
+				Name:    "glightbox",
+				Version: "3.3.1",
+				Files: []string{
+					"dist/css/glightbox.css",
+					"dist/js/glightbox.js",
+				},
+				BaseDestination: assetsDir,
+			},
+		),
+		runner.NewTaskGroup(
+			&tasks.NpmPackage{
 				Name:    "@fortawesome/fontawesome-free",
 				Version: "7.1.0",
 				Files: []string{
