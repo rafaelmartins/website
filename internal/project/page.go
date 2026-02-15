@@ -177,6 +177,9 @@ func (pp *ProjectPage) read() error {
 	}
 
 	pp.otitle = title
+	if pp.otitle != "" && !pp.isRoot {
+		pp.otitle = pp.proj.Repo + ": " + pp.otitle
+	}
 	if pp.otitle == "" {
 		pp.otitle = pp.proj.Repo
 	}
