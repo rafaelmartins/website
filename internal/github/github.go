@@ -9,11 +9,34 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"os/exec"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
 )
+
+var token = func() string {
+	if rv, ok := os.LookupEnv("GITHUB_TOKEN"); ok {
+		return rv
+	}
+
+	gh, err := exec.LookPath("gh")
+	if err != nil {
+		return ""
+	}
+
+	out, err := exec.Command(gh, "auth", "token").Output()
+	if err != nil {
+		if err, ok := err.(*exec.ExitError); ok {
+			log.Printf("warning: failed to request gh auth token: %s", err.Stderr)
+		} else {
+			log.Printf("warning: failed to request gh auth token: %s", err)
+		}
+		return ""
+	}
+	return strings.TrimSpace(string(out))
+}()
 
 var (
 	rlMutex   sync.Mutex
@@ -58,7 +81,7 @@ func RequestWithContext(ctx *RequestContext, method string, path string, headers
 		return nil, err
 	}
 
-	if token, ok := os.LookupEnv("GITHUB_TOKEN"); ok {
+	if token != "" {
 		req.Header.Set("authorization", "Bearer "+token)
 	}
 
