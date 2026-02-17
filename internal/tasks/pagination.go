@@ -37,7 +37,7 @@ type paginationTaskImpl struct {
 	openGraphImage         string
 	openGraphImageURL      string
 	openGraphImageGenerate bool
-	openGraphImageGenColor *uint32
+	openGraphImageGenColor *string
 	openGraphImageGenDPI   *float64
 	openGraphImageGenSize  *float64
 }
@@ -88,7 +88,7 @@ type Pagination struct {
 	OpenGraphTitle         string
 	OpenGraphDescription   string
 	OpenGraphImage         string
-	OpenGraphImageGenColor *uint32
+	OpenGraphImageGenColor *string
 	OpenGraphImageGenDPI   *float64
 	OpenGraphImageGenSize  *float64
 }

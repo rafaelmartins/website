@@ -47,7 +47,7 @@ type FrontMatter struct {
 		Description string `yaml:"description"`
 		Image       string `yaml:"image"`
 		ImageGen    struct {
-			Color *uint32  `yaml:"color"`
+			Color *string  `yaml:"color"`
 			DPI   *float64 `yaml:"dpi"`
 			Size  *float64 `yaml:"size"`
 		} `yaml:"image-gen"`

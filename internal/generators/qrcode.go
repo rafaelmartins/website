@@ -3,12 +3,12 @@ package generators
 import (
 	"bytes"
 	"errors"
-	"image/color"
 	"image/png"
 	"io"
 	"os"
 
 	"github.com/skip2/go-qrcode"
+	"rafaelmartins.com/p/website/internal/hexcolor"
 	"rafaelmartins.com/p/website/internal/runner"
 )
 
@@ -16,8 +16,8 @@ type QRCode struct {
 	File            string
 	Content         string
 	Size            int
-	ForegroundColor *uint32
-	BackgroundColor *uint32
+	ForegroundColor *string
+	BackgroundColor *string
 	WithoutBorders  bool
 }
 
@@ -51,21 +51,19 @@ func (s *QRCode) GetReader() (io.ReadCloser, error) {
 	}
 
 	if s.ForegroundColor != nil {
-		qr.ForegroundColor = color.RGBA{
-			R: byte(*s.ForegroundColor >> 24),
-			G: byte(*s.ForegroundColor >> 16),
-			B: byte(*s.ForegroundColor >> 8),
-			A: byte(*s.ForegroundColor),
+		cc, err := hexcolor.ToRGBA(*s.ForegroundColor)
+		if err != nil {
+			return nil, err
 		}
+		qr.ForegroundColor = cc
 	}
 
 	if s.BackgroundColor != nil {
-		qr.BackgroundColor = color.RGBA{
-			R: byte(*s.BackgroundColor >> 24),
-			G: byte(*s.BackgroundColor >> 16),
-			B: byte(*s.BackgroundColor >> 8),
-			A: byte(*s.BackgroundColor),
+		cc, err := hexcolor.ToRGBA(*s.BackgroundColor)
+		if err != nil {
+			return nil, err
 		}
+		qr.BackgroundColor = cc
 	}
 
 	qr.DisableBorder = s.WithoutBorders

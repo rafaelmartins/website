@@ -32,7 +32,7 @@ type Project struct {
 	OpenGraphTitle         string
 	OpenGraphDescription   string
 	OpenGraphImage         string
-	OpenGraphImageGenColor *uint32
+	OpenGraphImageGenColor *string
 	OpenGraphImageGenDPI   *float64
 	OpenGraphImageGenSize  *float64
 
@@ -43,7 +43,7 @@ type Project struct {
 	CDocsOpenGraphTitle         string
 	CDocsOpenGraphDescription   string
 	CDocsOpenGraphImage         string
-	CDocsOpenGraphImageGenColor *uint32
+	CDocsOpenGraphImageGenColor *string
 	CDocsOpenGraphImageGenDPI   *float64
 	CDocsOpenGraphImageGenSize  *float64
 

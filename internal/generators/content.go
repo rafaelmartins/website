@@ -40,7 +40,7 @@ type Content struct {
 	OpenGraphImage         string
 	OpenGraphImageURL      string
 	OpenGraphImageGenerate bool
-	OpenGraphImageGenColor *uint32
+	OpenGraphImageGenColor *string
 	OpenGraphImageGenDPI   *float64
 	OpenGraphImageGenSize  *float64
 

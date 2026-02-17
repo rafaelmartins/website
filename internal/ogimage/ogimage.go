@@ -16,6 +16,7 @@ import (
 	"golang.org/x/image/draw"
 	"golang.org/x/image/font"
 	"golang.org/x/image/math/fixed"
+	"rafaelmartins.com/p/website/internal/hexcolor"
 	"rafaelmartins.com/p/website/internal/ogfont"
 	"rafaelmartins.com/p/website/internal/runner"
 )
@@ -33,7 +34,7 @@ var (
 	available bool
 )
 
-func SetGlobals(template string, minX *int, minY *int, maxX *int, maxY *int, defaultColor *uint32, defaultDPI *float64, defaultSize *float64) error {
+func SetGlobals(template string, minX *int, minY *int, maxX *int, maxY *int, defaultColor *string, defaultDPI *float64, defaultSize *float64) error {
 	available = template != ""
 	if !available {
 		return nil
@@ -95,12 +96,11 @@ func SetGlobals(template string, minX *int, minY *int, maxX *int, maxY *int, def
 
 	dcolor := color.Color(color.Black)
 	if defaultColor != nil {
-		dcolor = color.RGBA{
-			R: byte(*defaultColor >> 24),
-			G: byte(*defaultColor >> 16),
-			B: byte(*defaultColor >> 8),
-			A: byte(*defaultColor),
+		cc, err := hexcolor.ToRGBA(*defaultColor)
+		if err != nil {
+			return err
 		}
+		dcolor = cc
 	}
 
 	img = iimg
@@ -173,7 +173,7 @@ func Generate(text string, c color.Color, dpi *float64, size *float64) (io.ReadC
 	return io.NopCloser(buf), nil
 }
 
-func GenerateByProduct(ch chan *runner.GeneratorByProduct, title string, generate bool, image string, c *uint32, dpi *float64, size *float64) {
+func GenerateByProduct(ch chan *runner.GeneratorByProduct, title string, generate bool, image string, c *string, dpi *float64, size *float64) {
 	if ch == nil || !generate || !available {
 		return
 	}
@@ -193,12 +193,12 @@ func GenerateByProduct(ch chan *runner.GeneratorByProduct, title string, generat
 
 	dcolor := dColor
 	if c != nil {
-		dcolor = color.RGBA{
-			R: byte(*c >> 24),
-			G: byte(*c >> 16),
-			B: byte(*c >> 8),
-			A: byte(*c),
+		cc, err := hexcolor.ToRGBA(*c)
+		if err != nil {
+			ch <- &runner.GeneratorByProduct{Err: err}
+			return
 		}
+		dcolor = cc
 	}
 
 	rd, err := Generate(html.UnescapeString(title), dcolor, dpi, size)

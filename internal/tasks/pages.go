@@ -24,7 +24,7 @@ type pageTaskImpl struct {
 	openGraphDescription   string
 	openGraphImage         string
 	openGraphImageGenerate bool
-	openGraphImageGenColor *uint32
+	openGraphImageGenColor *string
 	openGraphImageGenDPI   *float64
 	openGraphImageGenSize  *float64
 }
@@ -79,7 +79,7 @@ type PageSource struct {
 	OpenGraphDescription   string
 	OpenGraphImage         string
 	OpenGraphImageGenerate bool
-	OpenGraphImageGenColor *uint32
+	OpenGraphImageGenColor *string
 	OpenGraphImageGenDPI   *float64
 	OpenGraphImageGenSize  *float64
 }

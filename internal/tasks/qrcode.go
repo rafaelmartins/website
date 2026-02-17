@@ -13,8 +13,8 @@ type qrcodeTask struct {
 	sourceContent       string
 	destinationFilename string
 	size                int
-	foregroundColor     *uint32
-	backgroundColor     *uint32
+	foregroundColor     *string
+	backgroundColor     *string
 	withoutBorders      bool
 }
 
@@ -38,8 +38,8 @@ type QRCode struct {
 	SourceContent   string
 	DestinationFile string
 	Size            int
-	ForegroundColor *uint32
-	BackgroundColor *uint32
+	ForegroundColor *string
+	BackgroundColor *string
 	WithoutBorders  bool
 }
 

@@ -28,7 +28,7 @@ type Config struct {
 			MaxX *int `yaml:"max-x"`
 			MaxY *int `yaml:"max-y"`
 		} `yaml:"mask"`
-		DefaultColor *uint32  `yaml:"default-color"`
+		DefaultColor *string  `yaml:"default-color"`
 		DefaultDPI   *float64 `yaml:"default-dpi"`
 		DefaultSize  *float64 `yaml:"default-size"`
 	} `yaml:"opengraph-image-gen"`
@@ -81,7 +81,7 @@ type Config struct {
 					Description string `yaml:"description"`
 					Image       string `yaml:"image"`
 					ImageGen    struct {
-						Color *uint32  `yaml:"color"`
+						Color *string  `yaml:"color"`
 						DPI   *float64 `yaml:"dpi"`
 						Size  *float64 `yaml:"size"`
 					} `yaml:"image-gen"`
@@ -101,7 +101,7 @@ type Config struct {
 				Description string `yaml:"description"`
 				Image       string `yaml:"image"`
 				ImageGen    struct {
-					Color *uint32  `yaml:"color"`
+					Color *string  `yaml:"color"`
 					DPI   *float64 `yaml:"dpi"`
 					Size  *float64 `yaml:"size"`
 				} `yaml:"image-gen"`
@@ -123,7 +123,7 @@ type Config struct {
 				Image       string `yaml:"image"`
 				ImageGen    struct {
 					Generate *bool    `yaml:"generate"`
-					Color    *uint32  `yaml:"color"`
+					Color    *string  `yaml:"color"`
 					DPI      *float64 `yaml:"dpi"`
 					Size     *float64 `yaml:"size"`
 				} `yaml:"image-gen"`
@@ -153,7 +153,7 @@ type Config struct {
 			Description string `yaml:"description"`
 			Image       string `yaml:"image"`
 			ImageGen    struct {
-				Color *uint32  `yaml:"color"`
+				Color *string  `yaml:"color"`
 				DPI   *float64 `yaml:"dpi"`
 				Size  *float64 `yaml:"size"`
 			} `yaml:"image-gen"`
@@ -177,7 +177,7 @@ type Config struct {
 				Description string `yaml:"description"`
 				Image       string `yaml:"image"`
 				ImageGen    struct {
-					Color *uint32  `yaml:"color"`
+					Color *string  `yaml:"color"`
 					DPI   *float64 `yaml:"dpi"`
 					Size  *float64 `yaml:"size"`
 				} `yaml:"image-gen"`
@@ -190,8 +190,8 @@ type Config struct {
 		SourceContent   string  `yaml:"source-content"`
 		DestinationFile string  `yaml:"destination-file"`
 		Size            int     `yaml:"size"`
-		ForegroundColor *uint32 `yaml:"foreground-color"`
-		BackgroundColor *uint32 `yaml:"background-color"`
+		ForegroundColor *string `yaml:"foreground-color"`
+		BackgroundColor *string `yaml:"background-color"`
 		WithoutBorders  bool    `yaml:"without-borders"`
 	} `yaml:"qrcode"`
 
