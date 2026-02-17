@@ -1,8 +1,6 @@
 module rafaelmartins.com/p/website
 
-go 1.24.0
-
-toolchain go1.24.2
+go 1.26
 
 require (
 	github.com/alecthomas/chroma/v2 v2.23.1
@@ -16,12 +14,12 @@ require (
 	github.com/yuin/goldmark-emoji v1.0.6
 	github.com/yuin/goldmark-highlighting/v2 v2.0.0-20230729083705-37449abec8cc
 	go.yaml.in/yaml/v3 v3.0.4
-	golang.org/x/image v0.35.0
+	golang.org/x/image v0.36.0
 	golang.org/x/sync v0.19.0
 )
 
 require (
 	github.com/dlclark/regexp2 v1.11.5 // indirect
 	github.com/tdewolff/parse/v2 v2.8.5 // indirect
-	golang.org/x/text v0.33.0 // indirect
+	golang.org/x/text v0.34.0 // indirect
 )

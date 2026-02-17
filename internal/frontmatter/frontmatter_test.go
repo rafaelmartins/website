@@ -331,7 +331,7 @@ content
 		t.Error("tags not found in extra")
 	}
 
-	tagsList, ok := tags.([]interface{})
+	tagsList, ok := tags.([]any)
 	if !ok || len(tagsList) != 2 {
 		t.Errorf("tags=%v, expected array of 2 elements", tags)
 	}
