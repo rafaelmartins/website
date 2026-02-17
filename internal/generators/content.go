@@ -118,12 +118,11 @@ func (h *Content) GetReader() (io.ReadCloser, error) {
 			}
 			entry.Post.Author.Name = metadata.Author.Name
 			entry.Post.Author.Email = metadata.Author.Email
-			if atomUpdated.IsZero() {
-				if entry.Post.Updated.IsZero() {
-					atomUpdated = entry.Post.Published
-				} else {
-					atomUpdated = entry.Post.Updated
-				}
+			if atomUpdated.Before(entry.Post.Published) {
+				atomUpdated = entry.Post.Published
+			}
+			if atomUpdated.Before(entry.Post.Updated) {
+				atomUpdated = entry.Post.Updated
 			}
 		}
 
