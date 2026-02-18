@@ -86,7 +86,6 @@ type ProjectContentEntry struct {
 	Watching      int
 	Forks         int
 	LatestRelease *ProjectContentLatestRelease
-	Date          time.Time
 	IsRoot        bool
 }
 

@@ -136,6 +136,6 @@
 </div>
 <div class="has-text-centered is-size-7">
   <strong class="has-text-grey-light">Updated:</strong>
-  <time class="has-text-grey-light">{{ .Content.Entry.CDocs.Date.Format "2006-01-02 15:04:05" }} UTC</time>
+  <time class="has-text-grey-light" datetime="{{ .Time }}">{{ .Time.Format "2006-01-02 15:04:05" }} UTC</time>
 </div>
 {{- end }}

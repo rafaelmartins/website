@@ -10,7 +10,6 @@ import (
 	"slices"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/yuin/goldmark/parser"
 	"rafaelmartins.com/p/website/internal/frontmatter"
@@ -238,7 +237,6 @@ func (pp *ProjectPage) GetReader() (io.ReadCloser, error) {
 		Stars:       pp.proj.proj.Stars,
 		Watching:    pp.proj.proj.Watchers,
 		Forks:       pp.proj.proj.Forks,
-		Date:        time.Now().UTC(),
 		IsRoot:      pp.isRoot,
 	}
 
