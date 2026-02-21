@@ -10,6 +10,9 @@ import (
 	"path/filepath"
 	"strconv"
 
+	"rafaelmartins.com/p/website/internal/hardware/hconfig"
+	"rafaelmartins.com/p/website/internal/hardware/tools"
+	"rafaelmartins.com/p/website/internal/hardware/utils"
 	"rafaelmartins.com/p/website/internal/runner"
 )
 
@@ -36,7 +39,7 @@ type PcbRenderFile struct {
 	File  string `json:"file"`
 }
 
-func (k *KicadProject) PcbRenderFiles(config *PcbRenderConfig) map[string][]*PcbRenderFile {
+func (k *KicadProject) PcbRenderFiles(config *hconfig.PcbRenderConfig) map[string][]*PcbRenderFile {
 	if k.pcb == "" || config == nil || !config.Enable {
 		return map[string][]*PcbRenderFile{}
 	}
@@ -61,7 +64,7 @@ func (k *KicadProject) PcbRenderFiles(config *PcbRenderConfig) map[string][]*Pcb
 	return rv
 }
 
-func (k *KicadProject) PcbRender(ch chan *runner.GeneratorByProduct, cli *KicadCli, config *PcbRenderConfig) {
+func (k *KicadProject) PcbRender(ch chan *runner.GeneratorByProduct, cli *tools.KicadCli, config *hconfig.PcbRenderConfig) {
 	if k.pcb == "" || ch == nil || cli == nil || config == nil || !config.Enable {
 		return
 	}
@@ -91,11 +94,11 @@ func (k *KicadProject) PcbRender(ch chan *runner.GeneratorByProduct, cli *KicadC
 			"--side", side,
 		}
 
-		if config.preset != "" {
+		if k.pcbPreset != "" {
 			// this does not works at all as of kicad 9.0.5
 			// see https://gitlab.com/kicad/code/kicad/-/issues/21950
 			args = append(args,
-				"--preset", config.preset,
+				"--preset", k.pcbPreset,
 			)
 		}
 
@@ -137,7 +140,7 @@ func (k *KicadProject) PcbRender(ch chan *runner.GeneratorByProduct, cli *KicadC
 
 		for _, scale := range config.Scales {
 			buf := &bytes.Buffer{}
-			if err := resize(buf, src, scale); err != nil {
+			if err := utils.Resize(buf, src, scale); err != nil {
 				ch <- &runner.GeneratorByProduct{Err: err}
 			} else {
 				ch <- &runner.GeneratorByProduct{
@@ -148,7 +151,7 @@ func (k *KicadProject) PcbRender(ch chan *runner.GeneratorByProduct, cli *KicadC
 		}
 	}
 
-	m, err := montage(montageSrc)
+	m, err := utils.Montage(montageSrc)
 	if err != nil {
 		ch <- &runner.GeneratorByProduct{Err: err}
 		return
@@ -156,7 +159,7 @@ func (k *KicadProject) PcbRender(ch chan *runner.GeneratorByProduct, cli *KicadC
 
 	for _, scale := range config.Scales {
 		buf := &bytes.Buffer{}
-		if err := resize(buf, m, scale); err != nil {
+		if err := utils.Resize(buf, m, scale); err != nil {
 			ch <- &runner.GeneratorByProduct{Err: err}
 		} else {
 			ch <- &runner.GeneratorByProduct{
@@ -167,7 +170,7 @@ func (k *KicadProject) PcbRender(ch chan *runner.GeneratorByProduct, cli *KicadC
 	}
 }
 
-func (k *KicadProject) PcbIbomFilename(config *PcbIbomConfig) string {
+func (k *KicadProject) PcbIbomFilename(config *hconfig.PcbIbomConfig) string {
 	if k.pcb == "" || config == nil || !config.Enable {
 		return ""
 	}
@@ -179,7 +182,7 @@ func (k *KicadProject) PcbIbomFilename(config *PcbIbomConfig) string {
 	return fn + "_ibom.html"
 }
 
-func (k *KicadProject) PcbIbom(ch chan *runner.GeneratorByProduct, ibom *InteractiveHtmlBom, config *PcbIbomConfig) {
+func (k *KicadProject) PcbIbom(ch chan *runner.GeneratorByProduct, ibom *tools.InteractiveHtmlBom, config *hconfig.PcbIbomConfig) {
 	if k.pcb == "" || ch == nil || ibom == nil || config == nil || !config.Enable {
 		return
 	}
@@ -220,7 +223,7 @@ func (k *KicadProject) PcbIbom(ch chan *runner.GeneratorByProduct, ibom *Interac
 	}
 }
 
-func (k *KicadProject) PcbGerberFilename(config *PcbGerberConfig) string {
+func (k *KicadProject) PcbGerberFilename(config *hconfig.PcbGerberConfig) string {
 	if k.pcb == "" || config == nil || !config.Enable {
 		return ""
 	}
@@ -232,7 +235,7 @@ func (k *KicadProject) PcbGerberFilename(config *PcbGerberConfig) string {
 	return fn + "_gerber.zip"
 }
 
-func (k *KicadProject) PcbGerber(ch chan *runner.GeneratorByProduct, config *PcbGerberConfig) {
+func (k *KicadProject) PcbGerber(ch chan *runner.GeneratorByProduct, config *hconfig.PcbGerberConfig) {
 	if k.pcb == "" || ch == nil || config == nil || !config.Enable {
 		return
 	}

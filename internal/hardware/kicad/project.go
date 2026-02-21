@@ -15,6 +15,8 @@ type KicadProject struct {
 	pro      string
 	sch      string
 	pcb      string
+
+	pcbPreset string
 }
 
 var reRevision = regexp.MustCompile(`rev "([0-9.-]+)"`)
@@ -74,6 +76,14 @@ func NewKicadProject(pro string) (*KicadProject, error) {
 		rv.pcb = pcb
 	}
 	return rv, nil
+}
+
+func (k *KicadProject) GetName() string {
+	return k.name
+}
+
+func (k *KicadProject) SetPreset(preset string) {
+	k.pcbPreset = preset
 }
 
 func (k *KicadProject) GetPaths() ([]string, error) {

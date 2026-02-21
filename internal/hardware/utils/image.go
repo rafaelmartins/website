@@ -1,4 +1,4 @@
-package kicad
+package utils
 
 import (
 	"errors"
@@ -9,7 +9,7 @@ import (
 	"golang.org/x/image/draw"
 )
 
-func resize(w io.Writer, src image.Image, scale int) error {
+func Resize(w io.Writer, src image.Image, scale int) error {
 	dwidth := 0
 	dheight := 0
 	srect := src.Bounds()
@@ -27,7 +27,7 @@ func resize(w io.Writer, src image.Image, scale int) error {
 	return png.Encode(w, dst)
 }
 
-func montage(imgs []image.Image) (image.Image, error) {
+func Montage(imgs []image.Image) (image.Image, error) {
 	if len(imgs) == 0 {
 		return nil, errors.New("kicad: montage: no images found")
 	}

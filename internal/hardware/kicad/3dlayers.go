@@ -9,9 +9,11 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+
+	"rafaelmartins.com/p/website/internal/hardware/tools"
 )
 
-func Patch3dLayers(cli *KicadCli, presetFile string, includeDnp bool) (string, error) {
+func Patch3dLayers(cli *tools.KicadCli, presetFile string, includeDnp bool) (string, error) {
 	if runtime.GOOS != "linux" || os.Getenv("CI") != "true" {
 		return "", nil
 	}

@@ -18,7 +18,7 @@ if [ x"${GITHUB_ACTIONS}" = xtrue ]; then
     exec /bin/website \
         ${INPUT_CONFIGURATION+-c "${INPUT_CONFIGURATION}"} \
         ${INPUT_DESTINATION+-d "${INPUT_DESTINATION}"} \
-        -k
+        -w
 fi
 
-exec /bin/website -k "${@}"
+exec /bin/website -w "${@}"

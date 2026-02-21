@@ -1,5 +1,5 @@
-name: 'Run rafaelmartins.com/p/website to generate Kicad assets'
-description: 'Run rafaelmartins.com/p/website to generate Kicad assets'
+name: 'Run rafaelmartins.com/p/website to generate hardware assets'
+description: 'Run rafaelmartins.com/p/website to generate hardware assets'
 
 inputs:
   source:
@@ -19,4 +19,4 @@ inputs:
 
 runs:
   using: docker
-  image: docker://ghcr.io/rafaelmartins/website:kicad-latest
+  image: docker://ghcr.io/rafaelmartins/website:hardware-latest

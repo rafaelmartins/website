@@ -1,4 +1,4 @@
-package kicad
+package tools
 
 import (
 	"bytes"
