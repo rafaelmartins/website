@@ -403,14 +403,15 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 				rv = append(rv,
 					runner.NewTaskGroup(
 						&tasks.Kicad{
-							Owner:    repo.Owner,
-							Repo:     repo.Repo,
-							UrlOrTag: kicadProject,
+							Owner:             repo.Owner,
+							Repo:              repo.Repo,
+							UrlOrTag:          kicadProject,
+							PcbRenderMinScale: repo.Kicad.PcbRender.MinScale,
+							PcbRenderMaxScale: repo.Kicad.PcbRender.MaxScale,
 
-							BaseDestination:     pj.BaseDestination,
-							Destination:         repo.Kicad.Destination,
-							IncludeNameRevision: repo.Kicad.IncludeNameRevision,
-							Immutable:           immutable,
+							BaseDestination: pj.BaseDestination,
+							Destination:     repo.Kicad.Destination,
+							Immutable:       immutable,
 						},
 					),
 				)

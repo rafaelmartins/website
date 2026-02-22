@@ -88,9 +88,12 @@ type Config struct {
 				} `yaml:"opengraph"`
 			} `yaml:"c-docs"`
 			Kicad struct {
-				Destination         string   `yaml:"destination"`
-				Projects            []string `yaml:"projects"`
-				IncludeNameRevision bool     `yaml:"include-name-revision"`
+				Destination string   `yaml:"destination"`
+				Projects    []string `yaml:"projects"`
+				PcbRender   struct {
+					MinScale int `yaml:"min-scale"`
+					MaxScale int `yaml:"max-scale"`
+				} `yaml:"pcb-render"`
 			} `yaml:"kicad"`
 			Go struct {
 				Import string `yaml:"import"`

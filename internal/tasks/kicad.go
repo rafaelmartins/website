@@ -14,10 +14,9 @@ import (
 )
 
 type kicadTaskImpl struct {
-	repo                string
-	destination         string
-	includeNameRevision bool
-	immutable           bool
+	repo        string
+	destination string
+	immutable   bool
 
 	name     string
 	revision string
@@ -26,9 +25,6 @@ type kicadTaskImpl struct {
 }
 
 func (k *kicadTaskImpl) GetDestination() string {
-	if k.includeNameRevision {
-		return filepath.Join(k.repo, k.destination, k.name, k.revision, k.path)
-	}
 	return filepath.Join(k.repo, k.destination, k.path)
 }
 
@@ -44,10 +40,12 @@ type Kicad struct {
 	Repo     string
 	UrlOrTag string
 
-	BaseDestination     string
-	Destination         string
-	IncludeNameRevision bool
-	Immutable           bool
+	PcbRenderMinScale int
+	PcbRenderMaxScale int
+
+	BaseDestination string
+	Destination     string
+	Immutable       bool
 
 	ctx   http.RequestContext
 	tasks []*runner.Task
@@ -112,14 +110,13 @@ func (k *Kicad) GetTasks() ([]*runner.Task, error) {
 				return nil, err
 			}
 			rv = append(rv, runner.NewTask(k, &kicadTaskImpl{
-				repo:                k.Repo,
-				destination:         destination,
-				includeNameRevision: k.IncludeNameRevision,
-				immutable:           k.Immutable,
-				name:                name,
-				revision:            revision,
-				url:                 sch,
-				path:                d,
+				repo:        k.Repo,
+				destination: destination,
+				immutable:   k.Immutable,
+				name:        name,
+				revision:    revision,
+				url:         sch,
+				path:        d,
 			}))
 		}
 
@@ -129,14 +126,13 @@ func (k *Kicad) GetTasks() ([]*runner.Task, error) {
 				return nil, err
 			}
 			rv = append(rv, runner.NewTask(k, &kicadTaskImpl{
-				repo:                k.Repo,
-				destination:         destination,
-				includeNameRevision: k.IncludeNameRevision,
-				immutable:           k.Immutable,
-				name:                name,
-				revision:            revision,
-				url:                 ibom,
-				path:                d,
+				repo:        k.Repo,
+				destination: destination,
+				immutable:   k.Immutable,
+				name:        name,
+				revision:    revision,
+				url:         ibom,
+				path:        d,
 			}))
 		}
 
@@ -146,14 +142,13 @@ func (k *Kicad) GetTasks() ([]*runner.Task, error) {
 				return nil, err
 			}
 			rv = append(rv, runner.NewTask(k, &kicadTaskImpl{
-				repo:                k.Repo,
-				destination:         destination,
-				includeNameRevision: k.IncludeNameRevision,
-				immutable:           k.Immutable,
-				name:                name,
-				revision:            revision,
-				url:                 gerber,
-				path:                d,
+				repo:        k.Repo,
+				destination: destination,
+				immutable:   k.Immutable,
+				name:        name,
+				revision:    revision,
+				url:         gerber,
+				path:        d,
 			}))
 		}
 
@@ -162,19 +157,33 @@ func (k *Kicad) GetTasks() ([]*runner.Task, error) {
 				if l, ok := v.([]any); ok {
 					for _, m := range l {
 						if mm, ok := m.(map[string]any); ok {
-							img, err := url.JoinPath(baseUrl, mm["file"].(string))
+							scale, ok := mm["scale"].(float64)
+							if !ok {
+								continue
+							}
+							if k.PcbRenderMinScale > 0 && int(scale) < k.PcbRenderMinScale {
+								continue
+							}
+							if k.PcbRenderMaxScale > 0 && int(scale) > k.PcbRenderMaxScale {
+								continue
+							}
+
+							file, ok := mm["file"].(string)
+							if !ok {
+								continue
+							}
+							img, err := url.JoinPath(baseUrl, file)
 							if err != nil {
 								return nil, err
 							}
 							rv = append(rv, runner.NewTask(k, &kicadTaskImpl{
-								repo:                k.Repo,
-								destination:         destination,
-								includeNameRevision: k.IncludeNameRevision,
-								immutable:           k.Immutable,
-								name:                name,
-								revision:            revision,
-								url:                 img,
-								path:                mm["file"].(string),
+								repo:        k.Repo,
+								destination: destination,
+								immutable:   k.Immutable,
+								name:        name,
+								revision:    revision,
+								url:         img,
+								path:        mm["file"].(string),
 							}))
 						}
 					}
