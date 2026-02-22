@@ -87,11 +87,11 @@ type Config struct {
 					} `yaml:"image-gen"`
 				} `yaml:"opengraph"`
 			} `yaml:"c-docs"`
-			Hardware struct {
+			Kicad struct {
 				Destination         string   `yaml:"destination"`
 				Projects            []string `yaml:"projects"`
 				IncludeNameRevision bool     `yaml:"include-name-revision"`
-			} `yaml:"hardware"`
+			} `yaml:"kicad"`
 			Go struct {
 				Import string `yaml:"import"`
 				Repo   string `yaml:"repo"`

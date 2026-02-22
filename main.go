@@ -400,17 +400,17 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 				),
 			)
 
-			for _, hardwareProject := range repo.Hardware.Projects {
+			for _, kicadProject := range repo.Kicad.Projects {
 				rv = append(rv,
 					runner.NewTaskGroup(
 						&tasks.Kicad{
 							Owner:    repo.Owner,
 							Repo:     repo.Repo,
-							UrlOrTag: hardwareProject,
+							UrlOrTag: kicadProject,
 
 							BaseDestination:     pj.BaseDestination,
-							Destination:         repo.Hardware.Destination,
-							IncludeNameRevision: repo.Hardware.IncludeNameRevision,
+							Destination:         repo.Kicad.Destination,
+							IncludeNameRevision: repo.Kicad.IncludeNameRevision,
 							Immutable:           immutable,
 						},
 					),
