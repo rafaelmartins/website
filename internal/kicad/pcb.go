@@ -37,7 +37,7 @@ type PcbRenderFile struct {
 }
 
 func (k *KicadProject) PcbRenderFiles(config *PcbRenderConfig) map[string][]*PcbRenderFile {
-	if k.pcb == "" || config == nil || !config.Enable {
+	if k.pcb == "" || config == nil || len(config.Scales) == 0 {
 		return map[string][]*PcbRenderFile{}
 	}
 
@@ -62,7 +62,7 @@ func (k *KicadProject) PcbRenderFiles(config *PcbRenderConfig) map[string][]*Pcb
 }
 
 func (k *KicadProject) PcbRender(ch chan *runner.GeneratorByProduct, cli *KicadCli, config *PcbRenderConfig) {
-	if k.pcb == "" || ch == nil || cli == nil || config == nil || !config.Enable {
+	if k.pcb == "" || ch == nil || cli == nil || config == nil || len(config.Scales) == 0 {
 		return
 	}
 
@@ -221,7 +221,7 @@ func (k *KicadProject) PcbIbom(ch chan *runner.GeneratorByProduct, ibom *Interac
 }
 
 func (k *KicadProject) PcbGerberFilename(config *PcbGerberConfig) string {
-	if k.pcb == "" || config == nil || !config.Enable {
+	if k.pcb == "" || config == nil || config.CopyPattern == "" {
 		return ""
 	}
 
@@ -233,7 +233,7 @@ func (k *KicadProject) PcbGerberFilename(config *PcbGerberConfig) string {
 }
 
 func (k *KicadProject) PcbGerber(ch chan *runner.GeneratorByProduct, config *PcbGerberConfig) {
-	if k.pcb == "" || ch == nil || config == nil || !config.Enable {
+	if k.pcb == "" || ch == nil || config == nil || config.CopyPattern == "" {
 		return
 	}
 	if config.CopyPattern == "" {

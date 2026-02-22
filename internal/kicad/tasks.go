@@ -10,6 +10,11 @@ import (
 )
 
 func GetTasksGroups(c *Config) ([]*runner.TaskGroup, error) {
+	p, err := NewKicadProject(c.ProjectFile)
+	if err != nil {
+		return nil, err
+	}
+
 	cli, err := NewKicadCli()
 	if err != nil {
 		return nil, err
@@ -20,41 +25,28 @@ func GetTasksGroups(c *Config) ([]*runner.TaskGroup, error) {
 		return nil, err
 	}
 
-	rv := []*runner.TaskGroup{}
-	for _, proj := range c.Projects {
-		p, err := NewKicadProject(proj.File)
-		if err != nil {
-			return nil, err
-		}
-
-		rv = append(rv, runner.NewTaskGroup(&Task{
+	return []*runner.TaskGroup{
+		runner.NewTaskGroup(&Task{
 			Project:            p,
-			Config:             &proj,
+			Config:             c,
 			KicadCli:           cli,
 			InteractiveHtmlBom: ibom,
-			IsSingle:           len(c.Projects) == 1,
-		}))
-	}
-	return rv, nil
+		}),
+	}, nil
+
 }
 
 type Task struct {
 	Project            *KicadProject
-	Config             *ProjectConfig
+	Config             *Config
 	KicadCli           *KicadCli
 	InteractiveHtmlBom *InteractiveHtmlBom
-	IsSingle           bool
 }
 
 func (t *Task) GetBaseDestination() string {
-	if t.Config != nil && t.Config.BaseDestination != "" {
+	if t.Config != nil {
 		return t.Config.BaseDestination
 	}
-
-	if t.Project != nil && !t.IsSingle {
-		return t.Project.name
-	}
-
 	return ""
 }
 

@@ -19,7 +19,6 @@ func (x XYZ) String() string {
 }
 
 type PcbRenderConfig struct {
-	Enable     bool     `yaml:"enable"`
 	Width      int      `yaml:"width"`
 	Height     int      `yaml:"height"`
 	Zoom       *float64 `yaml:"zoom"`
@@ -38,7 +37,6 @@ type PcbIbomConfig struct {
 }
 
 type PcbGerberConfig struct {
-	Enable      bool   `yaml:"enable"`
 	CopyPattern string `yaml:"copy-pattern"`
 }
 
@@ -46,17 +44,13 @@ type SchExportPdfConfig struct {
 	Enable bool `yaml:"enable"`
 }
 
-type ProjectConfig struct {
+type Config struct {
 	BaseDestination string              `yaml:"base-destination"`
-	File            string              `yaml:"file"`
+	ProjectFile     string              `yaml:"project-file"`
 	PcbRender       *PcbRenderConfig    `yaml:"pcb-render"`
 	PcbIbom         *PcbIbomConfig      `yaml:"pcb-ibom"`
 	PcbGerber       *PcbGerberConfig    `yaml:"pcb-gerber"`
 	SchExportPdf    *SchExportPdfConfig `yaml:"sch-export-pdf"`
-}
-
-type Config struct {
-	Projects []ProjectConfig `yaml:"projects"`
 
 	file string
 	ts   time.Time
