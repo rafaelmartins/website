@@ -1,5 +1,9 @@
 name: Docker (kicad-base)
 on:
+  push:
+    paths:
+      - .github/workflows/docker-kicad-base.yml
+      - kicad/base/Dockerfile
   workflow_dispatch:
 
 permissions:
