@@ -1,4 +1,4 @@
-package hconfig
+package kicad
 
 import (
 	"fmt"

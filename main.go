@@ -10,8 +10,7 @@ import (
 	"rafaelmartins.com/p/website/internal/assets"
 	"rafaelmartins.com/p/website/internal/cdocs"
 	"rafaelmartins.com/p/website/internal/config"
-	"rafaelmartins.com/p/website/internal/hardware"
-	"rafaelmartins.com/p/website/internal/hardware/hconfig"
+	"rafaelmartins.com/p/website/internal/kicad"
 	"rafaelmartins.com/p/website/internal/meta"
 	"rafaelmartins.com/p/website/internal/ogimage"
 	"rafaelmartins.com/p/website/internal/project"
@@ -54,11 +53,11 @@ var (
 	fLocalDir   = stringSlice("l", "use local git repository for given project (format \"owner/repo=dir\")")
 	fRunServer  = flag.Bool("r", false, "run development server")
 	fForce      = flag.Bool("f", false, "force re-running all tasks")
-	fHardware   = flag.Bool("w", false, "hardware assets mode")
+	fKicad      = flag.Bool("k", false, "kicad assets mode")
 	fVersion    = flag.Bool("v", false, "show version and exit")
 
 	cfg        *config.Config      = nil
-	hcfg       *hconfig.Config     = nil
+	kcfg       *kicad.Config       = nil
 	taskGroups []*runner.TaskGroup = nil
 
 	force = false
@@ -457,21 +456,21 @@ func build() error {
 	return err
 }
 
-func buildHardware() error {
-	if force || hcfg == nil || !hcfg.IsUpToDate() {
+func buildKicad() error {
+	if force || kcfg == nil || !kcfg.IsUpToDate() {
 		var err error
-		hcfg, err = hconfig.NewConfig(*fConfigFile)
+		kcfg, err = kicad.NewConfig(*fConfigFile)
 		if err != nil {
 			return err
 		}
 
-		tg, err := hardware.GetTasksGroups(hcfg)
+		tg, err := kicad.GetTasksGroups(kcfg)
 		if err != nil {
 			return err
 		}
 		taskGroups = tg
 	}
-	err := runner.Run(taskGroups, *fBuildDir, hcfg, force)
+	err := runner.Run(taskGroups, *fBuildDir, kcfg, force)
 	if force {
 		// force only first time
 		force = false
@@ -516,8 +515,8 @@ func main() {
 	force = *fForce
 
 	buildFunc := build
-	if *fHardware {
-		buildFunc = buildHardware
+	if *fKicad {
+		buildFunc = buildKicad
 	}
 
 	if *fRunServer {

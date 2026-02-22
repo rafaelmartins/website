@@ -4,12 +4,10 @@ import (
 	"os"
 	"path/filepath"
 
-	"rafaelmartins.com/p/website/internal/hardware/hconfig"
-	"rafaelmartins.com/p/website/internal/hardware/tools"
 	"rafaelmartins.com/p/website/internal/runner"
 )
 
-func (k *KicadProject) SchExportPdfFilename(config *hconfig.SchExportPdfConfig) string {
+func (k *KicadProject) SchExportPdfFilename(config *SchExportPdfConfig) string {
 	if k.sch == "" || config == nil || !config.Enable {
 		return ""
 	}
@@ -21,7 +19,7 @@ func (k *KicadProject) SchExportPdfFilename(config *hconfig.SchExportPdfConfig) 
 	return fn + "_sch.pdf"
 }
 
-func (k *KicadProject) SchExportPdf(ch chan *runner.GeneratorByProduct, cli *tools.KicadCli, config *hconfig.SchExportPdfConfig) {
+func (k *KicadProject) SchExportPdf(ch chan *runner.GeneratorByProduct, cli *KicadCli, config *SchExportPdfConfig) {
 	if k.sch == "" || ch == nil || cli == nil || config == nil || !config.Enable {
 		return
 	}

@@ -1,31 +1,28 @@
-package hardware
+package kicad
 
 import (
 	"bytes"
 	"encoding/json"
 	"io"
 
-	"rafaelmartins.com/p/website/internal/hardware/hconfig"
-	"rafaelmartins.com/p/website/internal/hardware/kicad"
-	"rafaelmartins.com/p/website/internal/hardware/tools"
 	"rafaelmartins.com/p/website/internal/meta"
 	"rafaelmartins.com/p/website/internal/runner"
 )
 
-func GetTasksGroups(c *hconfig.Config) ([]*runner.TaskGroup, error) {
-	cli, err := tools.NewKicadCli()
+func GetTasksGroups(c *Config) ([]*runner.TaskGroup, error) {
+	cli, err := NewKicadCli()
 	if err != nil {
 		return nil, err
 	}
 
-	ibom, err := tools.NewInteractiveHtmlBom()
+	ibom, err := NewInteractiveHtmlBom()
 	if err != nil {
 		return nil, err
 	}
 
 	rv := []*runner.TaskGroup{}
 	for _, proj := range c.Projects {
-		p, err := kicad.NewKicadProject(proj.File)
+		p, err := NewKicadProject(proj.File)
 		if err != nil {
 			return nil, err
 		}
@@ -42,10 +39,10 @@ func GetTasksGroups(c *hconfig.Config) ([]*runner.TaskGroup, error) {
 }
 
 type Task struct {
-	Project            *kicad.KicadProject
-	Config             *hconfig.ProjectConfig
-	KicadCli           *tools.KicadCli
-	InteractiveHtmlBom *tools.InteractiveHtmlBom
+	Project            *KicadProject
+	Config             *ProjectConfig
+	KicadCli           *KicadCli
+	InteractiveHtmlBom *InteractiveHtmlBom
 	IsSingle           bool
 }
 
@@ -55,7 +52,7 @@ func (t *Task) GetBaseDestination() string {
 	}
 
 	if t.Project != nil && !t.IsSingle {
-		return t.Project.GetName()
+		return t.Project.name
 	}
 
 	return ""
@@ -84,14 +81,14 @@ func (t *Task) GetReader() (io.ReadCloser, error) {
 	}
 
 	data := struct {
-		Version      int                               `json:"version"`
-		Name         string                            `json:"name"`
-		Revision     string                            `json:"revision"`
-		PcbRender    map[string][]*kicad.PcbRenderFile `json:"pcb-render"`
-		PcbIbom      string                            `json:"pcb-ibom"`
-		PcbGerber    string                            `json:"pcb-gerber"`
-		SchExportPdf string                            `json:"sch-export-pdf"`
-		Tools        map[string]string                 `json:"tools"`
+		Version      int                         `json:"version"`
+		Name         string                      `json:"name"`
+		Revision     string                      `json:"revision"`
+		PcbRender    map[string][]*PcbRenderFile `json:"pcb-render"`
+		PcbIbom      string                      `json:"pcb-ibom"`
+		PcbGerber    string                      `json:"pcb-gerber"`
+		SchExportPdf string                      `json:"sch-export-pdf"`
+		Tools        map[string]string           `json:"tools"`
 	}{
 		Version:      1,
 		Name:         t.Project.Name(),
@@ -107,11 +104,11 @@ func (t *Task) GetReader() (io.ReadCloser, error) {
 		},
 	}
 
-	preset, err := kicad.Patch3dLayers(t.KicadCli, t.Config.PcbRender.PresetFile, t.Config.PcbRender.IncludeDNP)
+	preset, err := Patch3dLayers(t.KicadCli, t.Config.PcbRender.PresetFile, t.Config.PcbRender.IncludeDNP)
 	if err != nil {
 		return nil, err
 	}
-	t.Project.SetPreset(preset)
+	t.Config.PcbRender.preset = preset
 
 	buf := &bytes.Buffer{}
 	if err := json.NewEncoder(buf).Encode(data); err != nil {

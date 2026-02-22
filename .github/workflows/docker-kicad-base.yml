@@ -1,6 +1,5 @@
-name: Docker (hardware)
+name: Docker (kicad-base)
 on:
-  push:
   workflow_dispatch:
 
 permissions:
@@ -9,7 +8,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: docker-hardware
+  group: docker-kicad-base
   cancel-in-progress: true
 
 env:
@@ -32,9 +31,9 @@ jobs:
       - id: tags
         run: |
           if [[ "${{ github.ref_name }}" == "main" ]]; then
-            tags="${REGISTRY}/${IMAGE_NAME}:hardware-latest"
+            tags="${REGISTRY}/${IMAGE_NAME}:kicad-base-latest"
           else
-            tags="${REGISTRY}/${IMAGE_NAME}:hardware-${{ github.ref_name }}"
+            tags="${REGISTRY}/${IMAGE_NAME}:kicad-base-${{ github.ref_name }}"
           fi
           echo "tags=${tags}" >> $GITHUB_OUTPUT
 
@@ -46,7 +45,7 @@ jobs:
       - uses: docker/build-push-action@v6
         with:
           context: .
-          file: ./hardware/Dockerfile
+          file: ./kicad/base/Dockerfile
           push: true
           tags: ${{ steps.tags.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
