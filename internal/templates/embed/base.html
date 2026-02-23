@@ -134,6 +134,12 @@
     <script>
       document.addEventListener('DOMContentLoaded', () => {
         anchors.add('.anchor h2, .anchor h3, .anchor h4, .anchor h5, .anchor h6');
+        document.querySelectorAll('.content figure:not(.image) > img').forEach(img => {
+          const figcaption = img.closest('figure')?.querySelector('figcaption');
+          if (figcaption) {
+            img.dataset.title = figcaption.textContent.trim();
+          }
+        });
         GLightbox({
           touchNavigation: true,
           selector: '.content figure:not(.image) > img',
