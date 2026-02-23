@@ -1,6 +1,6 @@
 {{ define "base" -}}
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -24,14 +24,15 @@
     <meta name="twitter:image" content="{{ requiredAttr .Config.URL }}{{ requiredAttr .Content.OpenGraph.Image }}">
     {{- end }}
     <title>{{ template "title" . }}</title>
-    <link href="{{ assetsUrl }}/bulma/css/versions/bulma-no-dark-mode.css" rel="stylesheet" type="text/css">
-    <link href="{{ assetsUrl }}/@fontsource-variable/atkinson-hyperlegible-next/wght.css" rel="stylesheet" type="text/css">
-    <link href="{{ assetsUrl }}/@fontsource-variable/atkinson-hyperlegible-next/wght-italic.css" rel="stylesheet" type="text/css">
-    <link href="{{ assetsUrl }}/@fontsource-variable/atkinson-hyperlegible-mono/wght.css" rel="stylesheet" type="text/css">
-    <link href="{{ assetsUrl }}/@fontsource-variable/atkinson-hyperlegible-mono/wght-italic.css" rel="stylesheet" type="text/css">
-    <link href="{{ assetsUrl }}/@fortawesome/fontawesome-free/css/all.css" rel="stylesheet" type="text/css">
-    <link href="{{ assetsUrl }}/glightbox/dist/css/glightbox.css" rel="stylesheet" type="text/css">
-    <link href="{{ assetsUrl }}/main.css" rel="stylesheet" type="text/css">
+    <link rel="canonical" href="{{ requiredAttr .Config.URL }}{{ requiredAttr .Content.URL }}">
+    <link href="{{ assetsUrl }}/bulma/css/versions/bulma-no-dark-mode.css" rel="stylesheet">
+    <link href="{{ assetsUrl }}/@fontsource-variable/atkinson-hyperlegible-next/wght.css" rel="stylesheet">
+    <link href="{{ assetsUrl }}/@fontsource-variable/atkinson-hyperlegible-next/wght-italic.css" rel="stylesheet">
+    <link href="{{ assetsUrl }}/@fontsource-variable/atkinson-hyperlegible-mono/wght.css" rel="stylesheet">
+    <link href="{{ assetsUrl }}/@fontsource-variable/atkinson-hyperlegible-mono/wght-italic.css" rel="stylesheet">
+    <link href="{{ assetsUrl }}/@fortawesome/fontawesome-free/css/all.css" rel="stylesheet">
+    <link href="{{ assetsUrl }}/glightbox/dist/css/glightbox.css" rel="stylesheet">
+    <link href="{{ assetsUrl }}/main.css" rel="stylesheet">
     {{- if .Config.Posts.PostsPerPageAtom }}
     <link href="{{ if .Config.Posts.BaseDestination }}/{{ requiredAttr .Config.Posts.BaseDestination }}{{
       end }}/atom.xml" rel="alternate" type="application/atom+xml" title="{{
@@ -47,7 +48,7 @@
 {{ template "extra_head" . }}
   </head>
   <body>
-    <nav class="navbar is-light" role="navigation" aria-label="Main Navigation">
+    <nav class="navbar is-light" aria-label="Main Navigation">
       <div class="container is-max-desktop">
         <div class="navbar-brand">
           <a class="navbar-item" href="/">
@@ -130,13 +131,13 @@
     </footer>
     <script src="{{ assetsUrl }}/anchor-js/anchor.js"></script>
     <script src="{{ assetsUrl }}/glightbox/dist/js/glightbox.js"></script>
-    <script type="text/javascript">
-      anchors.add('.anchor h2, .anchor h3, .anchor h4, .anchor h5, .anchor h6');
-      const lightbox = GLightbox({
-        touchNavigation: true,
-        selector: '.content figure:not(.image) > img',
-      });
+    <script>
       document.addEventListener('DOMContentLoaded', () => {
+        anchors.add('.anchor h2, .anchor h3, .anchor h4, .anchor h5, .anchor h6');
+        GLightbox({
+          touchNavigation: true,
+          selector: '.content figure:not(.image) > img',
+        });
         document.querySelectorAll('.navbar-burger').forEach(element => {
           element.addEventListener('click', () => {
             element.classList.toggle('is-active');
