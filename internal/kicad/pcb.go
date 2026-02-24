@@ -90,6 +90,9 @@ func (k *KicadProject) PcbRender(ch chan *runner.GeneratorByProduct, cli *KicadC
 			"--zoom", fmt.Sprint(zoom),
 			"--side", side,
 		}
+		if config.Perspective {
+			args = append(args, "--perspective")
+		}
 
 		if config.preset != "" {
 			// this does not works at all as of kicad 9.0.5
