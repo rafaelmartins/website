@@ -21,6 +21,8 @@ type Project struct {
 	Repo     string
 	Licenses []*ProjectLicense
 
+	Files []string
+
 	GoImport string
 	GoRepo   string
 

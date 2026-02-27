@@ -71,6 +71,7 @@ type Config struct {
 				SpdxId string `yaml:"spdx-id"`
 				Title  string `yaml:"title"`
 			} `yaml:"licenses"`
+			Files []string `yaml:"files"`
 			CDocs struct {
 				Destination   string   `yaml:"destination"`
 				Headers       []string `yaml:"headers"`

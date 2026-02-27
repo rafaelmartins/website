@@ -29,18 +29,20 @@ func (p *Project) GetTasks() ([]*runner.Task, error) {
 	}
 
 	rv := []*runner.Task{}
-	images := []string{}
+	files := []string{}
 	for _, page := range p.pages {
 		rv = append(rv, runner.NewTask(p, page))
-		images = append(images, page.images...)
+		files = append(files, page.images...)
 	}
+	files = append(files, p.Files...)
+
 	if len(p.CDocsHeaders) > 0 {
 		rv = append(rv, runner.NewTask(p, &cDocs{proj: p}))
 	}
 
-	slices.Sort(images)
-	for _, img := range slices.Compact(images) {
-		rv = append(rv, runner.NewTask(p, &imageTask{
+	slices.Sort(files)
+	for _, img := range slices.Compact(files) {
+		rv = append(rv, runner.NewTask(p, &fileTask{
 			proj: p,
 			path: img,
 		}))

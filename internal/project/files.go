@@ -7,16 +7,16 @@ import (
 	"rafaelmartins.com/p/website/internal/runner"
 )
 
-type imageTask struct {
+type fileTask struct {
 	proj *Project
 	path string
 }
 
-func (i *imageTask) GetDestination() string {
+func (i *fileTask) GetDestination() string {
 	return filepath.Join(i.proj.Repo, filepath.FromSlash(string(i.path)))
 }
 
-func (i *imageTask) GetGenerator() (runner.Generator, error) {
+func (i *fileTask) GetGenerator() (runner.Generator, error) {
 	if i.proj.LocalDirectory != nil {
 		return generators.File(filepath.Join(*i.proj.LocalDirectory, i.path)), nil
 	}

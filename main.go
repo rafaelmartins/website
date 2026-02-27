@@ -370,6 +370,8 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 						Repo:     repo.Repo,
 						Licenses: licenses,
 
+						Files: repo.Files,
+
 						GoImport: repo.Go.Import,
 						GoRepo:   repo.Go.Repo,
 
