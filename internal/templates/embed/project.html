@@ -3,6 +3,7 @@
   end }} - {{ required .Config.Title }}{{ end }}
 
 {{ define "extra_head" -}}
+<link href="{{ assetsUrl }}/project.css" rel="stylesheet">
 {{- if and .Content.Entry.Project.GoImport .Content.Entry.Project.IsRoot }}
 <meta name="go-import" content="{{ requiredAttr .Content.Entry.Project.GoImport }} git https://github.com/{{ requiredAttr .Content.Entry.Project.Owner }}/{{ if .Content.Entry.Project.GoRepo }}{{ requiredAttr .Content.Entry.Project.GoRepo }}{{ else }}{{ requiredAttr .Content.Entry.Project.Repo }}{{ end }}.git">
 {{- end }}
