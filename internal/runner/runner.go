@@ -293,8 +293,9 @@ func Run(groups []*TaskGroup, basedir string, cfg Config, force bool) error {
 
 	if outdated.Load() > 0 {
 		log.Printf("--------------------------------------------------------------------------------")
-		github.DumpRatelimit()
-		log.Printf("--------------------------------------------------------------------------------")
+		if github.DumpRatelimit() {
+			log.Printf("--------------------------------------------------------------------------------")
+		}
 	}
 	return nil
 }

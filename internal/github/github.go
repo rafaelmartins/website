@@ -183,16 +183,22 @@ func Request(method string, path string, headers map[string]string, body io.Read
 	return RequestWithContext(nil, method, path, headers, body)
 }
 
-func DumpRatelimit() {
+func DumpRatelimit() bool {
 	rlMutex.Lock()
 	defer rlMutex.Unlock()
 
+	rv := false
 	s := "ratelimit:"
 	if rlGraphql != nil {
+		rv = true
 		s += fmt.Sprintf(" graphql=%d;", *rlGraphql)
 	}
 	if rlRest != nil {
+		rv = true
 		s += fmt.Sprintf(" rest=%d;", *rlRest)
 	}
-	log.Print(s)
+	if rv {
+		log.Print(s)
+	}
+	return rv
 }
