@@ -457,5 +457,9 @@ func GetRepositoryFile(owner string, repo string, ppath string, ref string) (io.
 	headers := map[string]string{
 		"accept": "application/vnd.github.raw+json",
 	}
-	return Request("GET", path.Join("repos", owner, repo, "contents", ppath), headers, nil)
+	qs := ""
+	if ref != "" {
+		qs = "?ref=" + ref
+	}
+	return Request("GET", path.Join("repos", owner, repo, "contents", ppath+qs), headers, nil)
 }
