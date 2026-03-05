@@ -434,10 +434,6 @@ func build() error {
 
 		if err := ogimage.SetGlobals(
 			cfg.OpenGraphImageGen.Template,
-			cfg.OpenGraphImageGen.Mask.MinX,
-			cfg.OpenGraphImageGen.Mask.MinY,
-			cfg.OpenGraphImageGen.Mask.MaxX,
-			cfg.OpenGraphImageGen.Mask.MaxY,
 			cfg.OpenGraphImageGen.DefaultColor,
 			cfg.OpenGraphImageGen.DefaultDPI,
 			cfg.OpenGraphImageGen.DefaultSize,

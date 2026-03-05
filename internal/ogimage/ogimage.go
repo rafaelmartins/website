@@ -3,7 +3,6 @@ package ogimage
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	"html"
 	"image"
 	"image/color"
@@ -19,6 +18,7 @@ import (
 	"rafaelmartins.com/p/website/internal/hexcolor"
 	"rafaelmartins.com/p/website/internal/ogfont"
 	"rafaelmartins.com/p/website/internal/runner"
+	"rafaelmartins.com/p/website/internal/xcf"
 )
 
 var (
@@ -34,7 +34,7 @@ var (
 	available bool
 )
 
-func SetGlobals(template string, minX *int, minY *int, maxX *int, maxY *int, defaultColor *string, defaultDPI *float64, defaultSize *float64) error {
+func SetGlobals(template string, defaultColor *string, defaultDPI *float64, defaultSize *float64) error {
 	available = template != ""
 	if !available {
 		return nil
@@ -54,35 +54,11 @@ func SetGlobals(template string, minX *int, minY *int, maxX *int, maxY *int, def
 	}
 	defer fp.Close()
 
-	iimg, _, err := image.Decode(fp)
+	iimg, mmask, err := xcf.Decode(fp)
 	if err != nil {
 		return err
 	}
 	tmpl = template
-
-	mmin := iimg.Bounds().Min
-	if minX != nil {
-		mmin.X = *minX
-	}
-	if minY != nil {
-		mmin.Y = *minY
-	}
-
-	mmax := iimg.Bounds().Max
-	if maxX != nil {
-		mmax.X = *maxX
-	}
-	if maxY != nil {
-		mmax.Y = *maxY
-	}
-
-	mmask := image.Rectangle{
-		Min: mmin,
-		Max: mmax,
-	}
-	if mmask.Min.X > mmask.Max.X || mmask.Min.Y > mmask.Max.Y {
-		return fmt.Errorf("ogimage: bad mask rectangle: %v", mask)
-	}
 
 	ddpi := float64(72)
 	if defaultDPI != nil {

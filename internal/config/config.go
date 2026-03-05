@@ -21,13 +21,7 @@ type Config struct {
 	TemplatePartials []string `yaml:"template-partials"`
 
 	OpenGraphImageGen struct {
-		Template string `yaml:"template"`
-		Mask     struct {
-			MinX *int `yaml:"min-x"`
-			MinY *int `yaml:"min-y"`
-			MaxX *int `yaml:"max-x"`
-			MaxY *int `yaml:"max-y"`
-		} `yaml:"mask"`
+		Template     string   `yaml:"template"`
 		DefaultColor *string  `yaml:"default-color"`
 		DefaultDPI   *float64 `yaml:"default-dpi"`
 		DefaultSize  *float64 `yaml:"default-size"`
