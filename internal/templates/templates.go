@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"os"
 	"reflect"
 	"strings"
@@ -19,7 +20,9 @@ import (
 
 var (
 	//go:embed embed/*
-	content embed.FS
+	embedded embed.FS
+
+	content fs.FS = embed.FS{}
 
 	ccfg       *config.Config
 	cassetsDir string
@@ -142,6 +145,13 @@ type context struct {
 
 func SetConfig(cfg *config.Config) {
 	ccfg = cfg
+	if ccfg.BaseTemplate == "" {
+		var err error
+		content, err = fs.Sub(embedded, "embed")
+		if err != nil {
+			panic(err)
+		}
+	}
 }
 
 func SetAssetsDir(assetsDir string) {
@@ -149,16 +159,20 @@ func SetAssetsDir(assetsDir string) {
 }
 
 func GetPaths(name string) ([]string, error) {
-	// we always load the base.html template, even if it is overwritten completely later
-	// then we must always include the executable timestamp, as this template is embedded.
-	rv, err := utils.Executables()
-	if err != nil {
-		return nil, err
+	rv := []string{}
+	if ccfg != nil && ccfg.BaseTemplate != "" {
+		rv = append(rv, ccfg.BaseTemplate)
+	} else {
+		v, err := utils.Executables()
+		if err != nil {
+			return nil, err
+		}
+		rv = append(rv, v...)
 	}
 
 	if _, err := os.Stat(name); err == nil {
 		rv = append(rv, name)
-	} else if _, err := content.Open("embed/" + name); err == nil {
+	} else if _, err := content.Open(name); err == nil {
 		// do nothing, executable timestamp already included
 	} else {
 		return nil, fmt.Errorf("templates: failed to find template: %s", name)
@@ -207,9 +221,21 @@ func Execute(wr io.Writer, name string, fm template.FuncMap, lctx *LayoutContext
 	fm["required"] = required
 	fm["requiredAttr"] = requiredAttr
 
-	tmpl, err := template.New("base").Funcs(fm).ParseFS(content, "embed/base.html")
-	if err != nil {
-		return err
+	var tmpl *template.Template
+	if ccfg != nil && ccfg.BaseTemplate != "" {
+		if _, err := os.Stat(ccfg.BaseTemplate); err == nil {
+			tmpl, err = template.New("base").Funcs(fm).ParseFiles(ccfg.BaseTemplate)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	if tmpl == nil {
+		var err error
+		tmpl, err = template.New("base").Funcs(fm).ParseFS(content, "base.html")
+		if err != nil {
+			return err
+		}
 	}
 
 	if _, err := os.Stat(name); err == nil {
@@ -217,8 +243,8 @@ func Execute(wr io.Writer, name string, fm template.FuncMap, lctx *LayoutContext
 		if err != nil {
 			return err
 		}
-	} else if _, err := content.Open("embed/" + name); err == nil {
-		tmpl, err = tmpl.ParseFS(content, "embed/"+name)
+	} else if _, err := content.Open(name); err == nil {
+		tmpl, err = tmpl.ParseFS(content, name)
 		if err != nil {
 			return err
 		}
@@ -227,6 +253,7 @@ func Execute(wr io.Writer, name string, fm template.FuncMap, lctx *LayoutContext
 	}
 
 	if ccfg != nil && len(ccfg.TemplatePartials) > 0 {
+		var err error
 		tmpl, err = tmpl.ParseFiles(ccfg.TemplatePartials...)
 		if err != nil {
 			return err

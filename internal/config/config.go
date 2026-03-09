@@ -193,6 +193,8 @@ type Config struct {
 		WithoutBorders  bool    `yaml:"without-borders"`
 	} `yaml:"qrcode"`
 
+	BaseTemplate string `yaml:"base-template"`
+
 	file string
 	ts   time.Time
 }
