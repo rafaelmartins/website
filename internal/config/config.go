@@ -193,6 +193,7 @@ type Config struct {
 		WithoutBorders  bool    `yaml:"without-borders"`
 	} `yaml:"qrcode"`
 
+	Search       bool   `yaml:"search"`
 	BaseTemplate string `yaml:"base-template"`
 
 	file string
