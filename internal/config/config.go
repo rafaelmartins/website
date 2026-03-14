@@ -112,10 +112,12 @@ type Config struct {
 
 	Pages []*struct {
 		Sources []*struct {
-			Slug      string `yaml:"slug"`
-			File      string `yaml:"file"`
-			License   string `yaml:"license"`
-			OpenGraph struct {
+			Title       string `yaml:"title"`
+			Description string `yaml:"description"`
+			Slug        string `yaml:"slug"`
+			File        string `yaml:"file"`
+			License     string `yaml:"license"`
+			OpenGraph   struct {
 				Title       string `yaml:"title"`
 				Description string `yaml:"description"`
 				Image       string `yaml:"image"`

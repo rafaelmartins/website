@@ -84,6 +84,7 @@ type ProjectPage struct {
 	idx    int
 	name   string
 	title  string
+	etitle string
 	body   string
 	menu   string
 	src    string
@@ -162,26 +163,28 @@ func (pp *ProjectPage) read() error {
 		pp.images = img.([]string)
 	}
 
-	title := pp.meta.Title
-	if title == "" {
+	etitle := pp.meta.Title
+	if etitle == "" {
 		if t := pc.Get(pcTitleKey); t != nil {
-			title = t.(string)
+			etitle = t.(string)
 		}
 	}
-	pp.title = title
+	pp.etitle = etitle
 
-	pp.menu = title
+	pp.menu = etitle
 	if pp.meta.Menu != "" {
 		pp.menu = pp.meta.Menu
 	}
 
-	pp.otitle = title
-	if pp.otitle != "" && !pp.isRoot {
-		pp.otitle = pp.proj.Repo + ": " + pp.otitle
+	pp.title = etitle
+	if pp.title != "" && !pp.isRoot {
+		pp.title = pp.proj.Repo + ": " + pp.title
 	}
-	if pp.otitle == "" {
-		pp.otitle = pp.proj.Repo
+	if pp.title == "" {
+		pp.title = pp.proj.Repo
 	}
+
+	pp.otitle = pp.title
 	if pp.proj.OpenGraphTitle != "" {
 		pp.otitle = pp.proj.OpenGraphTitle
 	}
@@ -320,7 +323,7 @@ func (pp *ProjectPage) GetReader() (io.ReadCloser, error) {
 			Image:       ogimage.URL(purl),
 		},
 		Entry: &templates.ContentEntry{
-			Title:   pp.title,
+			Title:   pp.etitle,
 			Body:    pp.body,
 			Project: tmpl,
 		},

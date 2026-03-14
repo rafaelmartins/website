@@ -11,6 +11,8 @@ import (
 
 type pageTaskImpl struct {
 	baseDestination   string
+	title             string
+	description       string
 	slug              string
 	source            string
 	license           string
@@ -46,9 +48,11 @@ func (t *pageTaskImpl) GetGenerator() (runner.Generator, error) {
 	}
 
 	return &generators.Content{
-		URL:     url,
-		Slug:    t.slug,
-		License: t.license,
+		Title:       t.title,
+		Description: t.description,
+		URL:         url,
+		Slug:        t.slug,
+		License:     t.license,
 		Sources: []*generators.ContentSource{
 			{
 				File: t.source,
@@ -71,9 +75,11 @@ func (t *pageTaskImpl) GetGenerator() (runner.Generator, error) {
 }
 
 type PageSource struct {
-	Slug    string
-	File    string
-	License string
+	Title       string
+	Description string
+	Slug        string
+	File        string
+	License     string
 
 	OpenGraphTitle         string
 	OpenGraphDescription   string
@@ -119,6 +125,8 @@ func (p *Pages) GetTasks() ([]*runner.Task, error) {
 			runner.NewTask(p,
 				&pageTaskImpl{
 					baseDestination:   p.BaseDestination,
+					title:             v.Title,
+					description:       v.Description,
 					slug:              v.Slug,
 					source:            v.File,
 					license:           v.License,

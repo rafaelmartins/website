@@ -82,7 +82,7 @@ func (c *cDocs) GetReader() (io.ReadCloser, error) {
 		return nil, err
 	}
 
-	title := fmt.Sprintf("API Documentation: %s", c.proj.Repo)
+	title := fmt.Sprintf("%s: API Documentation", c.proj.Repo)
 
 	c.otitle = title
 	if c.proj.CDocsOpenGraphTitle != "" {

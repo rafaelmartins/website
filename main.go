@@ -194,9 +194,11 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 			}
 
 			src = append(src, &tasks.PageSource{
-				Slug:    s.Slug,
-				File:    s.File,
-				License: s.License,
+				Title:       s.Title,
+				Description: s.Description,
+				Slug:        s.Slug,
+				File:        s.File,
+				License:     s.License,
 
 				OpenGraphTitle:         s.OpenGraph.Title,
 				OpenGraphDescription:   s.OpenGraph.Description,

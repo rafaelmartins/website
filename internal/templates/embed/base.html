@@ -163,7 +163,7 @@
 </html>
 {{- end }}
 
-{{ define "title" }}{{ required .Config.Title }}{{ end }}
+{{ define "title" }}{{ required .Content.Title }} - {{ required .Config.Title }}{{ end }}
 
 {{ define "extra_head" }}{{ end }}
 

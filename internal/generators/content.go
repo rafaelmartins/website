@@ -129,7 +129,7 @@ func (h *Content) GetReader() (io.ReadCloser, error) {
 		entry.Extra = metadata.Extra
 
 		if h.Pagination == nil {
-			if h.Title == "" {
+			if ctx.Title == "" {
 				ctx.Title = entry.Title
 			}
 			ctx.Entry = entry

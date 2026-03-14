@@ -1,7 +1,3 @@
-{{ define "title" }}{{ if .Content.Entry.Project.IsRoot }}{{ required .Content.Entry.Project.Repo }}{{
-  else }}{{ required .Content.Entry.Project.Repo }}: {{ required .Content.Title }}{{
-  end }} - {{ required .Config.Title }}{{ end }}
-
 {{ define "extra_head" -}}
 <link href="{{ assetsUrl }}/project.css" rel="stylesheet">
 {{- if and .Content.Entry.Project.GoImport .Content.Entry.Project.IsRoot }}
