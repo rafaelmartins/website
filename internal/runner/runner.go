@@ -20,7 +20,11 @@ import (
 	"golang.org/x/sync/semaphore"
 	"rafaelmartins.com/p/website/internal/github"
 	"rafaelmartins.com/p/website/internal/postproc"
+	"rafaelmartins.com/p/website/internal/utils"
+	"rafaelmartins.com/p/website/internal/webserver"
 )
+
+var mayReload = false
 
 type GeneratorByProduct struct {
 	Filename string
@@ -74,64 +78,81 @@ func (t *Task) generator() (Generator, error) {
 	return t.gen, nil
 }
 
-func (t *Task) outdated(basedir string, cfg Config, force bool) (bool, error) {
+type tst struct {
+	t time.Time
+	e bool
+}
+
+func (t *Task) outdated(basedir string, cfg Config, force bool) (bool, bool, error) {
 	if force {
-		return true, nil
+		return true, false, nil
 	}
 
 	gen, err := t.generator()
 	if err != nil {
-		return false, err
+		return false, false, err
 	}
 
 	dts := time.Time{}
 	if st, err := os.Stat(t.destination(basedir)); err == nil {
 		if gen.GetImmutable() {
-			return false, nil
+			return false, false, nil
 		}
 		dts = st.ModTime().UTC()
 	} else {
-		return true, nil
+		return true, false, nil
 	}
 
-	ts := []time.Time{}
+	ts := []*tst{}
 	cts, err := cfg.GetTimeStamp()
 	if err != nil {
-		return false, err
+		return false, false, err
 	}
-	ts = append(ts, cts)
+	ts = append(ts, &tst{
+		t: cts,
+	})
 
 	paths, err := gen.GetPaths()
 	if err != nil {
-		return false, err
+		return false, false, err
 	}
 	slices.Sort(paths)
-	cpaths := slices.Compact(paths)
 
-	for _, p := range cpaths {
+	for _, p := range slices.Compact(paths) {
 		st, err := os.Stat(p)
 		if err != nil {
-			return false, err
+			return false, false, err
 		}
 
 		if st.IsDir() {
 			if err := filepath.Walk(p, func(path string, info fs.FileInfo, err error) error {
-				ts = append(ts, info.ModTime().UTC())
+				ts = append(ts, &tst{
+					t: info.ModTime().UTC(),
+					e: p == utils.Executable(),
+				})
 				return nil
 			}); err != nil {
-				return false, err
+				return false, false, err
 			}
 			continue
 		}
-		ts = append(ts, st.ModTime().UTC())
+		ts = append(ts, &tst{
+			t: st.ModTime().UTC(),
+			e: p == utils.Executable(),
+		})
 	}
 
+	outdated := false
+	isExe := false
 	for _, e := range ts {
-		if e.After(dts) {
-			return true, nil
+		if e.t.After(dts) {
+			outdated = true
+			if e.e {
+				isExe = true
+			}
 		}
 	}
-	return false, nil
+	return outdated, isExe, nil
 }
 
 func (t *Task) run(basedir string) error {
@@ -208,14 +229,22 @@ type Config interface {
 }
 
 type taskJob struct {
-	task *Task
-	err  error
+	task     *Task
+	outdated bool
+	err      error
 }
 
-func Run(groups []*TaskGroup, basedir string, cfg Config, force bool) error {
+func Run(groups []*TaskGroup, basedir string, cfg Config, runserver bool, force bool) error {
+	defer func() {
+		mayReload = true
+	}()
+
 	queue := make(chan *taskJob, 100)
 
 	go func() {
+		defer close(queue)
+
+		prequeue := []*taskJob{}
 		for _, group := range groups {
 			if group == nil || group.impl == nil {
 				continue
@@ -234,16 +263,47 @@ func Run(groups []*TaskGroup, basedir string, cfg Config, force bool) error {
 				queue <- &taskJob{
 					err: err,
 				}
-				break
+				return
 			}
 
 			for _, task := range tasks {
+				if mayReload {
+					outd, isExe, err := task.outdated(basedir, cfg, force)
+					if err != nil {
+						queue <- &taskJob{
+							err: err,
+						}
+						return
+					}
+					if !outd {
+						continue
+					}
+
+					if isExe && runserver {
+						if err := webserver.ReExec(); err != nil {
+							queue <- &taskJob{
+								err: err,
+							}
+						}
+						return
+					}
+
+					prequeue = append(prequeue, &taskJob{
+						task:     task,
+						outdated: true,
+					})
+					continue
+				}
+
 				queue <- &taskJob{
 					task: task,
 				}
 			}
 		}
-		close(queue)
+
+		for _, task := range prequeue {
+			queue <- task
+		}
 	}()
 
 	ctx := context.Background()
@@ -264,21 +324,23 @@ func Run(groups []*TaskGroup, basedir string, cfg Config, force bool) error {
 		go func(task *Task) {
 			defer sem.Release(1)
 
-			outd, err := task.outdated(basedir, cfg, force)
-			if err != nil {
-				queue <- &taskJob{
-					err: err,
-				}
-				return
-			}
-
-			if outd {
-				if err := task.run(basedir); err != nil {
+			if !job.outdated {
+				outd, _, err := task.outdated(basedir, cfg, force)
+				if err != nil {
 					failures.Add(1)
 					log.Printf("  %-8s  %s: %s", "[ERROR]", task.destination(basedir), err)
-				} else {
-					outdated.Add(1)
+					return
 				}
+				if !outd {
+					return
+				}
+			}
+
+			if err := task.run(basedir); err != nil {
+				failures.Add(1)
+				log.Printf("  %-8s  %s: %s", "[ERROR]", task.destination(basedir), err)
+			} else {
+				outdated.Add(1)
 			}
 		}(job.task)
 	}

@@ -163,11 +163,7 @@ func GetPaths(name string) ([]string, error) {
 	if ccfg != nil && ccfg.BaseTemplate != "" {
 		rv = append(rv, ccfg.BaseTemplate)
 	} else {
-		v, err := utils.Executables()
-		if err != nil {
-			return nil, err
-		}
-		rv = append(rv, v...)
+		rv = append(rv, utils.Executable())
 	}
 
 	if _, err := os.Stat(name); err == nil {

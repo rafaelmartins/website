@@ -5,20 +5,28 @@ import (
 	"path/filepath"
 )
 
-func Executables() ([]string, error) {
+var exe = func() string {
 	lexe, err := os.Executable()
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 
 	exe, err := filepath.EvalSymlinks(lexe)
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 
 	aexe, err := filepath.Abs(exe)
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
-	return []string{aexe}, nil
+	return aexe
+}()
+
+func Executable() string {
+	return exe
+}
+
+func Executables() ([]string, error) {
+	return []string{exe}, nil
 }

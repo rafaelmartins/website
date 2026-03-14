@@ -451,7 +451,7 @@ func build() error {
 		}
 		taskGroups = tg
 	}
-	err := runner.Run(taskGroups, *fBuildDir, cfg, force)
+	err := runner.Run(taskGroups, *fBuildDir, cfg, *fRunServer, force)
 	if force {
 		// force only first time
 		force = false
@@ -473,7 +473,7 @@ func buildKicad() error {
 		}
 		taskGroups = tg
 	}
-	err := runner.Run(taskGroups, *fBuildDir, kcfg, force)
+	err := runner.Run(taskGroups, *fBuildDir, kcfg, *fRunServer, force)
 	if force {
 		// force only first time
 		force = false

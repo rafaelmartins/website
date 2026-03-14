@@ -5,7 +5,6 @@ import (
 	"io/fs"
 	"log"
 	"net/http"
-	"runtime"
 	"time"
 
 	"github.com/cenkalti/backoff/v4"
@@ -54,7 +53,6 @@ func (f *fsWrapper) Open(name string) (http.File, error) {
 
 func ListenAndServeWithReloader(addr string, dir string, cb func() error) error {
 	exit := make(chan error)
-	reload := make(chan bool)
 
 	mux := http.NewServeMux()
 	mux.Handle("/", http.FileServer(&fsWrapper{
@@ -80,19 +78,10 @@ func ListenAndServeWithReloader(addr string, dir string, cb func() error) error 
 		}
 	}()
 
-	if runtime.GOOS == "linux" || runtime.GOOS == "darwin" {
-		go watchExec(func() {
-			server.Close()
-			close(reload)
-		})
-	}
-
 	return backoff.Retry(func() error {
 		if err := func() error {
 			for {
 				select {
-				case <-reload:
-					return backoff.Permanent(reExec())
 				case err := <-exit:
 					return backoff.Permanent(err)
 				default:
