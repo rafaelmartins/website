@@ -140,12 +140,13 @@ type context struct {
 	Generator *meta.Metadata
 	Layout    *LayoutContext
 	Content   *ContentContext
+	Extra     map[string]any
 	Time      time.Time
 }
 
 func SetConfig(cfg *config.Config) {
 	ccfg = cfg
-	if ccfg.BaseTemplate == "" {
+	if ccfg.Template == nil {
 		var err error
 		content, err = fs.Sub(embedded, "embed")
 		if err != nil {
@@ -160,8 +161,8 @@ func SetAssetsDir(assetsDir string) {
 
 func GetPaths(name string) ([]string, error) {
 	rv := []string{}
-	if ccfg != nil && ccfg.BaseTemplate != "" {
-		rv = append(rv, ccfg.BaseTemplate)
+	if ccfg != nil && ccfg.Template != nil {
+		rv = append(rv, *ccfg.Template)
 	} else {
 		rv = append(rv, utils.Executable())
 	}
@@ -218,12 +219,11 @@ func Execute(wr io.Writer, name string, fm template.FuncMap, lctx *LayoutContext
 	fm["requiredAttr"] = requiredAttr
 
 	var tmpl *template.Template
-	if ccfg != nil && ccfg.BaseTemplate != "" {
-		if _, err := os.Stat(ccfg.BaseTemplate); err == nil {
-			tmpl, err = template.New("base").Funcs(fm).ParseFiles(ccfg.BaseTemplate)
-			if err != nil {
-				return err
-			}
+	if ccfg != nil && ccfg.Template != nil {
+		var err error
+		tmpl, err = template.New("base").Funcs(fm).ParseFiles(*ccfg.Template)
+		if err != nil {
+			return err
 		}
 	}
 	if tmpl == nil {
@@ -279,6 +279,7 @@ func Execute(wr io.Writer, name string, fm template.FuncMap, lctx *LayoutContext
 		Generator: gen,
 		Layout:    llctx,
 		Content:   lcctx,
+		Extra:     ccfg.TemplateCtx,
 		Time:      time.Now().UTC(),
 	})
 }

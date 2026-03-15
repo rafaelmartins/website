@@ -18,7 +18,9 @@ type Config struct {
 		Email string `yaml:"email"`
 	} `yaml:"author"`
 
-	TemplatePartials []string `yaml:"template-partials"`
+	Template         *string        `yaml:"template"`
+	TemplatePartials []string       `yaml:"template-partials"`
+	TemplateCtx      map[string]any `yaml:"template-context"`
 
 	OpenGraphImageGen struct {
 		Template     string   `yaml:"template"`
@@ -194,8 +196,6 @@ type Config struct {
 		BackgroundColor *string `yaml:"background-color"`
 		WithoutBorders  bool    `yaml:"without-borders"`
 	} `yaml:"qrcode"`
-
-	BaseTemplate string `yaml:"base-template"`
 
 	file string
 	ts   time.Time

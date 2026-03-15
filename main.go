@@ -72,7 +72,7 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 
 	rv := []*runner.TaskGroup{}
 
-	if c.BaseTemplate == "" {
+	if c.Template == nil {
 		// assets embedded
 		rv = append(rv,
 			runner.NewTaskGroup(
