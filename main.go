@@ -397,6 +397,17 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 		)
 	}
 
+	for _, j := range c.Json {
+		rv = append(rv,
+			runner.NewTaskGroup(
+				&tasks.Json{
+					Data:            j.Data,
+					DestinationFile: j.DestinationFile,
+				},
+			),
+		)
+	}
+
 	for _, pj := range c.Projects {
 		for _, repo := range pj.Repositories {
 			localDir := (*string)(nil)

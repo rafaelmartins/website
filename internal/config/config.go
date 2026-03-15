@@ -199,6 +199,11 @@ type Config struct {
 		WithoutBorders  bool    `yaml:"without-borders"`
 	} `yaml:"qrcode"`
 
+	Json []struct {
+		Data            any    `yaml:"data"`
+		DestinationFile string `yaml:"destination-file"`
+	} `yaml:"json"`
+
 	file string
 	ts   time.Time
 }
