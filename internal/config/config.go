@@ -22,6 +22,8 @@ type Config struct {
 	TemplatePartials []string       `yaml:"template-partials"`
 	TemplateCtx      map[string]any `yaml:"template-context"`
 
+	Search bool `yaml:"search"`
+
 	OpenGraphImageGen struct {
 		Template     string   `yaml:"template"`
 		DefaultColor *string  `yaml:"default-color"`

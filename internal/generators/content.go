@@ -27,6 +27,7 @@ type Content struct {
 	URL               string
 	Slug              string
 	License           string
+	Search            *bool
 	Sources           []*ContentSource
 	IsPost            bool
 	ExtraDependencies []string
@@ -63,6 +64,7 @@ func (h *Content) GetReader() (io.ReadCloser, error) {
 		URL:         h.URL,
 		Slug:        h.Slug,
 		License:     h.License,
+		Search:      true,
 		OpenGraph: templates.OpenGraphEntry{
 			Title:       h.OpenGraphTitle,
 			Description: h.OpenGraphDescription,
@@ -71,6 +73,9 @@ func (h *Content) GetReader() (io.ReadCloser, error) {
 		Atom:       &templates.AtomContentEntry{},
 		Pagination: h.Pagination,
 		Extra:      h.TemplateCtx,
+	}
+	if h.Search != nil {
+		ctx.Search = *h.Search
 	}
 
 	if ctx.OpenGraph.Title == "" {
@@ -136,6 +141,10 @@ func (h *Content) GetReader() (io.ReadCloser, error) {
 			if metadata.License != "" {
 				ctx.License = metadata.License
 			}
+			if metadata.Search != nil {
+				ctx.Search = *metadata.Search
+			}
+
 			h.metadata = metadata
 			break
 		}

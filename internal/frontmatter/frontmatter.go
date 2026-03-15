@@ -52,7 +52,8 @@ type FrontMatter struct {
 			Size  *float64 `yaml:"size"`
 		} `yaml:"image-gen"`
 	} `yaml:"opengraph"`
-	Extra map[string]any `yaml:"extra"`
+	Search *bool          `yaml:"search"`
+	Extra  map[string]any `yaml:"extra"`
 }
 
 func Parse(src []byte) (*FrontMatter, []byte, error) {

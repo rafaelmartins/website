@@ -13,6 +13,7 @@ import (
 	"rafaelmartins.com/p/website/internal/kicad"
 	"rafaelmartins.com/p/website/internal/meta"
 	"rafaelmartins.com/p/website/internal/ogimage"
+	"rafaelmartins.com/p/website/internal/pagefind"
 	"rafaelmartins.com/p/website/internal/project"
 	"rafaelmartins.com/p/website/internal/runner"
 	"rafaelmartins.com/p/website/internal/tasks"
@@ -69,15 +70,64 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 		assetsDir = "assets"
 	}
 	templates.SetAssetsDir(assetsDir)
+	pagefind.SetGlobals(c.Search, assetsDir)
 
 	rv := []*runner.TaskGroup{}
 
 	if c.Template == nil {
-		// assets embedded
+		// search specific assets embedded
+		if c.Search {
+			rv = append(rv,
+				runner.NewTaskGroup(
+					&tasks.Embed{
+						FS:              assets.Search,
+						BaseDestination: assetsDir,
+					},
+				),
+			)
+		}
+
+		// project specific assets embedded
+		if len(c.Projects) > 0 {
+			rv = append(rv,
+				runner.NewTaskGroup(
+					&tasks.Embed{
+						FS:              assets.Project,
+						BaseDestination: assetsDir,
+					},
+				),
+			)
+		}
+
+		// cdocs specific assets embedded
+		withCDocs := false
+		for _, p := range c.Projects {
+			for _, r := range p.Repositories {
+				if len(r.CDocs.Headers) > 0 {
+					withCDocs = true
+					break
+				}
+			}
+			if withCDocs {
+				break
+			}
+		}
+		if withCDocs {
+			rv = append(rv,
+				runner.NewTaskGroup(
+					&tasks.Embed{
+						FS:              assets.CDocs,
+						BaseDestination: assetsDir,
+					},
+				),
+			)
+		}
+
+		// standard assets embedded
 		rv = append(rv,
 			runner.NewTaskGroup(
 				&tasks.Embed{
-					FS:              assets.Assets,
+					FS:              assets.Main,
 					BaseDestination: assetsDir,
 				},
 			),

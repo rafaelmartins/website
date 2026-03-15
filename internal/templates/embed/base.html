@@ -23,6 +23,9 @@
     {{- if .Content.OpenGraph.Image }}
     <meta name="twitter:image" content="{{ requiredAttr .Config.URL }}{{ requiredAttr .Content.OpenGraph.Image }}">
     {{- end }}
+    {{- if and .Config.Search .Content.Search }}
+    <meta itemprop="search-title" content="{{ required .Content.Title }}" data-pagefind-meta="title[content]">
+    {{- end }}
     <title>{{ template "title" . }}</title>
     <link rel="canonical" href="{{ requiredAttr .Config.URL }}{{ requiredAttr .Content.URL }}">
     <link href="{{ assetsUrl }}/bulma/css/versions/bulma-no-dark-mode.css" rel="stylesheet">
@@ -32,6 +35,9 @@
     <link href="{{ assetsUrl }}/@fontsource-variable/atkinson-hyperlegible-mono/wght-italic.css" rel="stylesheet">
     <link href="{{ assetsUrl }}/@fortawesome/fontawesome-free/css/all.css" rel="stylesheet">
     <link href="{{ assetsUrl }}/glightbox/dist/css/glightbox.css" rel="stylesheet">
+    {{- if .Config.Search }}
+    <link href="{{ assetsUrl }}/search.css" rel="stylesheet">
+    {{- end }}
     <link href="{{ assetsUrl }}/main.css" rel="stylesheet">
     {{- if .Config.Posts.PostsPerPageAtom }}
     <link href="{{ if .Config.Posts.BaseDestination }}/{{ requiredAttr .Config.Posts.BaseDestination }}{{
@@ -88,6 +94,19 @@
             <a class="navbar-item" href="{{ requiredAttr .URL }}">{{ required .Title }}</a>
             {{- end }}
             {{- end }}
+            {{- if .Config.Search }}
+            <div class="navbar-item navbar-search" id="navbar-search" role="search">
+              <label class="icon search-toggle is-hidden-touch" for="navbar-search-input" aria-label="Open search">
+                <i class="fa-lg fa-solid fa-magnifying-glass"></i>
+              </label>
+              <div class="control has-icons-left search-control">
+                <input class="input is-small" type="search" id="navbar-search-input" placeholder="Search..." aria-label="Search" autocomplete="off">
+                <span class="icon is-small is-left">
+                  <i class="fa-solid fa-magnifying-glass"></i>
+                </span>
+              </div>
+            </div>
+            {{- end }}
           </div>
           <div class="navbar-end">
             {{- range .Config.SocialLinks }}
@@ -100,10 +119,15 @@
           </div>
         </div>
       </div>
+      {{- if .Config.Search }}
+      <div id="search-results" class="navbar-search-results" data-pagefind="{{ assetsUrl }}/pagefind/pagefind.js">
+        <div class="container is-max-desktop"></div>
+      </div>
+      {{- end }}
     </nav>
     <div class="mx-3 mt-5">
       <div class="container is-max-desktop">
-        <div class="columns">
+        <div class="columns"{{ if and .Config.Search .Content.Search }} data-pagefind-body{{ end }}>
           <div class="mb-6 content column {{ if .Layout.WithSidebar }}is-8{{ else }}is-12{{ end }}">
 {{ template "main" . }}
           </div>
@@ -131,33 +155,10 @@
     </footer>
     <script src="{{ assetsUrl }}/anchor-js/anchor.js"></script>
     <script src="{{ assetsUrl }}/glightbox/dist/js/glightbox.js"></script>
-    <script>
-      document.addEventListener('DOMContentLoaded', () => {
-        anchors.add('.anchor h2, .anchor h3, .anchor h4, .anchor h5, .anchor h6');
-        document.querySelectorAll('.content figure:not(.image) > img').forEach(img => {
-          const figcaption = img.closest('figure')?.querySelector('figcaption');
-          if (figcaption) {
-            img.dataset.title = figcaption.textContent.trim();
-          }
-        });
-        GLightbox({
-          touchNavigation: true,
-          selector: '.content figure:not(.image) > img',
-        });
-        document.querySelectorAll('.navbar-burger').forEach(element => {
-          element.addEventListener('click', () => {
-            element.classList.toggle('is-active');
-            document.getElementById(element.dataset.target).classList.toggle('is-active');
-          });
-        });
-        document.querySelectorAll('.content table').forEach(table => {
-          const wrapper = document.createElement('div');
-          wrapper.className = 'table-container';
-          table.parentNode.insertBefore(wrapper, table);
-          wrapper.appendChild(table);
-        });
-      });
-    </script>
+    {{- if .Config.Search }}
+    <script src="{{ assetsUrl }}/search.js" defer></script>
+    {{- end }}
+    <script src="{{ assetsUrl }}/main.js"></script>
 {{ template "extra_body" . }}
   </body>
 </html>

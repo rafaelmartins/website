@@ -125,6 +125,7 @@ type ContentContext struct {
 	URL         string
 	Slug        string
 	License     string
+	Search      bool
 	OpenGraph   OpenGraphEntry
 	Entry       *ContentEntry
 	Entries     []*ContentEntry

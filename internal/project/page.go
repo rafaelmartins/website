@@ -317,6 +317,7 @@ func (pp *ProjectPage) GetReader() (io.ReadCloser, error) {
 		Description: pp.proj.proj.Description,
 		URL:         purl,
 		License:     pp.proj.license,
+		Search:      true, // FIXME ???
 		OpenGraph: templates.OpenGraphEntry{
 			Title:       pp.otitle,
 			Description: pp.odesc,

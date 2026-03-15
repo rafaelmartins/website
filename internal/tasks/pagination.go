@@ -55,6 +55,7 @@ func (t *paginationTaskImpl) GetGenerator() (runner.Generator, error) {
 		Description: t.description,
 		URL:         path.Join("/", t.baseDestination, t.slug) + "/",
 		Slug:        t.slug,
+		Search:      new(false),
 		Sources:     t.sources,
 		IsPost:      true,
 		Template:    t.template,

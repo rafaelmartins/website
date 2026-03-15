@@ -98,6 +98,7 @@ func (c *cDocs) GetReader() (io.ReadCloser, error) {
 		Title:   title,
 		URL:     c.proj.cdocsUrl,
 		License: c.proj.license,
+		Search:  true, // FIXME ???
 		OpenGraph: templates.OpenGraphEntry{
 			Title:       c.otitle,
 			Description: c.proj.CDocsOpenGraphDescription,

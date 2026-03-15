@@ -19,6 +19,7 @@ import (
 
 	"golang.org/x/sync/semaphore"
 	"rafaelmartins.com/p/website/internal/github"
+	"rafaelmartins.com/p/website/internal/pagefind"
 	"rafaelmartins.com/p/website/internal/postproc"
 	"rafaelmartins.com/p/website/internal/utils"
 	"rafaelmartins.com/p/website/internal/webserver"
@@ -351,6 +352,15 @@ func Run(groups []*TaskGroup, basedir string, cfg Config, runserver bool, force 
 
 	if f := failures.Load(); f > 0 {
 		return fmt.Errorf("runner: %d tasks failed", f)
+	}
+
+	if pagefind.Outdated(basedir, outdated.Load()) {
+		log.Printf("  %-8s  %s", pagefind.GetID(), pagefind.GetDestination(basedir))
+
+		if err := pagefind.GenerateIndex(basedir); err != nil {
+			return err
+		}
+		outdated.Add(1)
 	}
 
 	if outdated.Load() > 0 {

@@ -20,6 +20,7 @@ opengraph:
   title: OG Title
   description: OG Description
   image: /path/to/image.png
+search: false
 extra:
   custom_field: custom_value
 ---
@@ -71,6 +72,13 @@ This is the content.
 
 	if metadata.Extra["custom_field"] != "custom_value" {
 		t.Errorf("extra.custom_field=%q, want %q", metadata.Extra["custom_field"], "custom_value")
+	}
+
+	if metadata.Search == nil {
+		t.Fatal("search should not be nil")
+	}
+	if *metadata.Search != false {
+		t.Errorf("search=%v, want false", *metadata.Search)
 	}
 
 	if metadata.Published.Time != time.Date(2025, 1, 28, 0, 0, 0, 0, time.UTC) {
@@ -166,6 +174,10 @@ This is content without frontmatter.
 
 	if metadata.Title != "" {
 		t.Errorf("title should be empty, got %q", metadata.Title)
+	}
+
+	if metadata.Search != nil {
+		t.Errorf("search should be nil when no frontmatter, got %v", *metadata.Search)
 	}
 }
 
@@ -360,6 +372,55 @@ func TestParseWithWindowsLineEndings(t *testing.T) {
 
 	if string(rest) != "Content\r\n" {
 		t.Errorf("rest=%q, want %q", string(rest), "Content\r\n")
+	}
+}
+
+func TestParseWithSearchField(t *testing.T) {
+	tests := []struct {
+		name       string
+		src        []byte
+		wantNil    bool
+		wantSearch bool
+	}{
+		{
+			name:    "search not set",
+			src:     []byte("---\ntitle: Test\n---\ncontent\n"),
+			wantNil: true,
+		},
+		{
+			name:       "search true",
+			src:        []byte("---\ntitle: Test\nsearch: true\n---\ncontent\n"),
+			wantNil:    false,
+			wantSearch: true,
+		},
+		{
+			name:       "search false",
+			src:        []byte("---\ntitle: Test\nsearch: false\n---\ncontent\n"),
+			wantNil:    false,
+			wantSearch: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			metadata, _, err := Parse(tt.src)
+			if err != nil {
+				t.Fatalf("Parse failed: %v", err)
+			}
+
+			if tt.wantNil {
+				if metadata.Search != nil {
+					t.Errorf("search should be nil, got %v", *metadata.Search)
+				}
+			} else {
+				if metadata.Search == nil {
+					t.Fatal("search should not be nil")
+				}
+				if *metadata.Search != tt.wantSearch {
+					t.Errorf("search=%v, want %v", *metadata.Search, tt.wantSearch)
+				}
+			}
+		})
 	}
 }
 
