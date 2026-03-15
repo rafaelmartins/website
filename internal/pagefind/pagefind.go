@@ -84,6 +84,7 @@ func GenerateIndex(outputDir string) error {
 	}
 
 	for _, f := range []string{
+		"pagefind-highlight.js",
 		"pagefind-modular-ui.css",
 		"pagefind-modular-ui.js",
 		"pagefind-ui.css",
