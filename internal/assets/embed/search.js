@@ -64,10 +64,13 @@
   });
 
   input.addEventListener('focus', () => {
-    input.scrollIntoView({
-      behavior: 'smooth',
-      block: 'start',
-    });
+    const burger = document.querySelector('.navbar-burger');
+    if (burger && getComputedStyle(burger).display !== 'none') {
+      input.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }
   });
 
   input.addEventListener('blur', () => {
