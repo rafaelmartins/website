@@ -17,7 +17,7 @@ The code is somewhat generic (writing code that way is just stronger than me), b
 - JavaScript/CSS assets downloaded directly from CDN to be hosted locally.
 - Runner can rebuild output files when the binary is rebuilt or any source file changes.
 - Supports groups of posts.
-- Automatic generation of OpenGraph metadata and images.
+- Automatic generation of OpenGraph metadata and images from a Gimp XCF template.
 - Atom feeds for the main blog and every group of posts.
 - QR Code encoder.
 - Go vanity import paths.

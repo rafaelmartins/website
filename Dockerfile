@@ -14,7 +14,6 @@ RUN apk add --no-cache \
     CGO_ENABLED=0 go build && \
     wget \
         --output-document - \
-        --quiet \
         "https://github.com/Pagefind/pagefind/releases/download/v${PAGEFIND_VERSION}/pagefind-v${PAGEFIND_VERSION}-x86_64-unknown-linux-musl.tar.gz" \
     | \
     tar \
