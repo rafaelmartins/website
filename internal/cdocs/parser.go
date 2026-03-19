@@ -75,8 +75,6 @@ var (
 )
 
 type Header struct {
-	Pos lexer.Position
-
 	Entries []Entry `parser:"@@*"`
 }
 
@@ -85,8 +83,6 @@ func (h *Header) Dump(w io.Writer) {
 }
 
 type Entry struct {
-	Pos lexer.Position
-
 	Comment      *Comment      `parser:"  @@"`
 	Include      *Include      `parser:"| @@"`
 	Define       *Define       `parser:"| @@"`
@@ -96,8 +92,6 @@ type Entry struct {
 }
 
 type Comment struct {
-	Pos lexer.Position
-
 	Lines []CommentLine `parser:"@@+"`
 }
 
@@ -112,30 +106,25 @@ type CommentLine struct {
 }
 
 type Include struct {
-	Pos lexer.Position
-
 	Local  *string `parser:"'#' 'include' IncludeWhitespace (  @IncludeLocal      (?= IncludeFile IncludeLocal )"`
 	System *string `parser:"                                 | @IncludeSystemOpen (?= IncludeFile IncludeSystemClose ) )"`
 	File   string  `parser:"@IncludeFile (IncludeLocal | IncludeSystemClose) PreProcessorNewLine"`
 }
 
 type Define struct {
-	Pos lexer.Position
+	Pos    lexer.Position
+	EndPos lexer.Position
 
 	Name  string   `parser:"'#' 'define' DefineWhitespace @DefineName"`
 	Lines []string `parser:"(@PreProcessorValue? (PreProcessorNewLine|PreProcessorContinuation))*"`
 }
 
 type PreProcessor struct {
-	Pos lexer.Position
-
 	Name  string   `parser:"'#' (@PreProcessorNameNoValue PreProcessorNewLine|(@PreProcessorName"`
 	Lines []string `parser:"(@PreProcessorValue (PreProcessorNewLine|PreProcessorContinuation))+))"`
 }
 
 type Declaration struct {
-	Pos lexer.Position
-
 	Struct       *Struct       `parser:"  @@"`
 	Enum         *Enum         `parser:"| @@"`
 	FunctionType *FunctionType `parser:"| @@"`
@@ -143,7 +132,8 @@ type Declaration struct {
 }
 
 type Struct struct {
-	Pos lexer.Position
+	Pos    lexer.Position
+	EndPos lexer.Position
 
 	PreMembers  string `parser:"@'typedef' @Whitespace+ @'struct' (@Ident|@Whitespace|@ArgsOpen|@ArgsClose|@Comma)* @BracesOpen"`
 	Members     string `parser:"@Members"`
@@ -153,7 +143,8 @@ type Struct struct {
 }
 
 type Enum struct {
-	Pos lexer.Position
+	Pos    lexer.Position
+	EndPos lexer.Position
 
 	PreMembers  string `parser:"@'typedef' @Whitespace+ @'enum' (@Ident|@Whitespace|@ArgsOpen|@ArgsClose|@Comma)* @BracesOpen"`
 	Members     string `parser:"@Members"`
@@ -163,14 +154,13 @@ type Enum struct {
 }
 
 type Member struct {
-	Pos lexer.Position
-
 	Member  string  `parser:"@NewLine? @Member"`
 	Comment *string `parser:"(MemberComment @CommentValue (?= NewLine))?"`
 }
 
 type FunctionType struct {
-	Pos lexer.Position
+	Pos    lexer.Position
+	EndPos lexer.Position
 
 	PreName  string `parser:"@'typedef' @Whitespace+ (@Ident @Star* @Whitespace+ @Star* @Whitespace* @Dot*)+ @ArgsOpen @Star"`
 	Name     string `parser:"@Ident"`
@@ -180,7 +170,8 @@ type FunctionType struct {
 }
 
 type Function struct {
-	Pos lexer.Position
+	Pos    lexer.Position
+	EndPos lexer.Position
 
 	PreName  string `parser:"(?= (Ident Star* Whitespace+ Star* Whitespace*)+ Ident ArgsOpen) (@Ident @Star* @Whitespace+ @Star* @Whitespace* @Dot*)+"`
 	Name     string `parser:"@Ident"`

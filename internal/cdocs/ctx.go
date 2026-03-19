@@ -297,8 +297,12 @@ func NewTemplateCtx(headers []*TemplateCtxHeader) (*TemplateCtx, error) {
 			ID:   id(hdr.Filename),
 		}
 
-		link := func(line int) string {
-			return fmt.Sprintf("%s#L%d", hdr.GithubUrl, line)
+		link := func(start int, end int) string {
+			rv := fmt.Sprintf("%s#L%d", hdr.GithubUrl, start)
+			if end != start {
+				rv += fmt.Sprintf("-L%d", end)
+			}
+			return rv
 		}
 
 		section := (*SectionCtx)(nil)
@@ -499,7 +503,8 @@ func NewTemplateCtx(headers []*TemplateCtxHeader) (*TemplateCtx, error) {
 					Name:        def.Name,
 					Proto:       proto,
 					Description: pendingDescription,
-					Link:        link(def.Pos.Line),
+					// will always end next line, cause parser needs to consume the last newline
+					Link: link(def.Pos.Line, def.EndPos.Line-1),
 				}
 				pendingDescription = ""
 				if section != nil {
@@ -537,7 +542,7 @@ func NewTemplateCtx(headers []*TemplateCtxHeader) (*TemplateCtx, error) {
 						Name:        st.Name,
 						Proto:       proto,
 						Description: pendingDescription,
-						Link:        link(st.Pos.Line),
+						Link:        link(st.Pos.Line, st.EndPos.Line),
 					}
 					pendingDescription = ""
 					if section != nil {
@@ -560,7 +565,7 @@ func NewTemplateCtx(headers []*TemplateCtxHeader) (*TemplateCtx, error) {
 						Name:        en.Name,
 						Proto:       proto,
 						Description: pendingDescription,
-						Link:        link(en.Pos.Line),
+						Link:        link(en.Pos.Line, en.EndPos.Line),
 					}
 					pendingDescription = ""
 					if section != nil {
@@ -583,7 +588,7 @@ func NewTemplateCtx(headers []*TemplateCtxHeader) (*TemplateCtx, error) {
 						Name:        fn.Name,
 						Proto:       proto,
 						Description: pendingDescription,
-						Link:        link(fn.Pos.Line),
+						Link:        link(fn.Pos.Line, fn.EndPos.Line),
 					}
 					pendingDescription = ""
 					if section != nil {
@@ -606,7 +611,7 @@ func NewTemplateCtx(headers []*TemplateCtxHeader) (*TemplateCtx, error) {
 						Name:        fnt.Name,
 						Proto:       proto,
 						Description: pendingDescription,
-						Link:        link(fnt.Pos.Line),
+						Link:        link(fnt.Pos.Line, fnt.EndPos.Line),
 					}
 					pendingDescription = ""
 					if section != nil {
