@@ -59,7 +59,7 @@
 
 {{ define "main" -}}
 <article>
-  <h1 class="mb-5">{{ required .Content.Title }}</h1>
+  <h1 class="title is-3">{{ required .Content.Title }}</h1>
   <div class="message is-dark is-small is-hidden-tablet">
     <div class="message-body">
       This page is best viewed on a larger screen.
@@ -69,7 +69,7 @@
     {{ template "cdocs_toc" . }}
   </div>
   {{- range .Content.Entry.CDocs.Headers }}
-  <div class="box">
+  <article class="box content">
     <h2 id="{{ requiredAttr .ID }}">Header: <code>{{ required .Name }}</code></h2>
     {{ .Description }}
     <h3>Included Headers</h3>
@@ -123,7 +123,7 @@
     {{ template "cdocs_entry" . }}
     {{- end }}
     {{- end }}
-  </div>
+  </article>
   {{- end }}
 </article>
 {{- end }}

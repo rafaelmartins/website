@@ -1,6 +1,6 @@
 {{ define "main" -}}
-<article>
-  <h1 class="mb-5">{{ required .Content.Title }}</h1>
+<section>
+  <h1 class="title is-3">{{ required .Content.Title }}</h1>
   {{- if .Content.Description }}
   <div class="notification">
 {{ template "pagination_description" . }}
@@ -17,7 +17,7 @@
     </a>
   </div>
   {{- end }}
-  <dl class="mb-6">
+  <dl class="content mb-6">
     {{- range .Content.Entries }}
     <dt class="is-size-4 has-text-weight-bold">
       <a class="has-text-link-dark" href="{{ requiredAttr .URL }}">
@@ -39,7 +39,7 @@
     <a{{ if .Content.Pagination.LinkNext }} href="{{ requiredAttr .Content.Pagination.LinkNext }}"{{ end }} class="pagination-next{{ if not .Content.Pagination.LinkNext }} is-disabled{{ end }}">Next</a>
   </nav>
   {{- end }}
-</article>
+</section>
 {{- end }}
 
 {{ define "pagination_description" -}}

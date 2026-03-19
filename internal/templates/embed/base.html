@@ -128,11 +128,11 @@
     <div class="mx-3 mt-5">
       <div class="container is-max-desktop">
         <div class="columns"{{ if and .Config.Search .Content.Search }} data-pagefind-body{{ end }}>
-          <div class="mb-6 content column {{ if .Layout.WithSidebar }}is-8{{ else }}is-12{{ end }}">
+          <div class="mb-6 column {{ if .Layout.WithSidebar }}is-8{{ else }}is-12{{ end }}">
 {{ template "main" . }}
           </div>
           {{- if .Layout.WithSidebar }}
-          <div class="mb-6 column">
+          <div class="mb-6 column is-4">
 {{ template "sidebar" . }}
           </div>
           {{- end }}

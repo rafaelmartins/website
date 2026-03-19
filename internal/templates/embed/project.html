@@ -6,8 +6,8 @@
 {{- end }}
 
 {{ define "main" -}}
-<article class="anchor">
-  <h1 class="title">{{ required .Content.Entry.Project.Repo }}</h1>
+<article>
+  <h1 class="title is-3">{{ required .Content.Entry.Project.Repo }}</h1>
   {{- if gt (len .Content.Entry.Project.Menus) 1 }}
   <div class="tabs">
     <ul class="m-0">
@@ -17,15 +17,19 @@
     </ul>
   </div>
   {{- if .Content.Entry.Title }}
-  <h1 class="title">{{ required .Content.Entry.Title }}</h1>
+  <h1 class="title is-3">{{ required .Content.Entry.Title }}</h1>
   {{- end }}
   {{- end }}
+  <section class="content">
 {{ .Content.Entry.Body }}
+  </section>
 </article>
 {{- if .Content.Entry.Project.LatestRelease }}
-<article class="anchor mt-6">
-  <h1 class="title"><i class="fa-solid fa-sm fa-rocket"></i> {{ .Content.Entry.Project.LatestRelease.Name }}</h1>
+<article class="mt-6">
+  <h1 class="title is-3"><i class="fa-solid fa-sm fa-rocket"></i> {{ .Content.Entry.Project.LatestRelease.Name }}</h1>
+  <section class="content">
 {{ .Content.Entry.Project.LatestRelease.Body }}
+  </section>
 </article>
 {{- end }}
 {{- end }}
