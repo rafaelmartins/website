@@ -89,12 +89,8 @@ func (c *cDocs) GetReader() (io.ReadCloser, error) {
 		c.otitle = c.proj.CDocsOpenGraphTitle
 	}
 
-	lctx := &templates.LayoutContext{
-		WithSidebar: true,
-	}
-
 	buf := &bytes.Buffer{}
-	if err := templates.Execute(buf, c.getTemplate(), nil, lctx, &templates.ContentContext{
+	if err := templates.Execute(buf, c.getTemplate(), nil, nil, &templates.ContentContext{
 		Title:   title,
 		URL:     c.proj.cdocsUrl,
 		License: c.proj.license,

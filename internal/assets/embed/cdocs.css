@@ -9,3 +9,9 @@
 .card-content pre {
   background-color: var(--bulma-background) !important;
 }
+
+details .menu-label {
+  text-transform: none;
+  font-weight: bold;
+  --bulma-menu-label-font-size: 0.9em;
+}

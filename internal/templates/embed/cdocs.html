@@ -24,39 +24,6 @@
 </div>
 {{- end }}
 
-{{ define "cdocs_toc" -}}
-<aside class="menu">
-  <p class="menu-label">Table of Contents</p>
-  <ul class="menu-list">
-    {{- range .Content.Entry.CDocs.Headers }}
-    <li>
-      <a class="has-text-weight-bold" href="#{{ requiredAttr .ID }}">Header: <code>{{ required .Name }}</code></a>
-      <ul>
-        {{ range .Sections -}}
-        <li><a href="#{{ requiredAttr .ID }}">{{ required .Name }}</a></li>
-        {{- end }}
-        {{- if .Structs }}
-        <li><a href="#struct-{{ requiredAttr .ID }}">Struct Definitions</a></li>
-        {{- end }}
-        {{- if .Enums }}
-        <li><a href="#enum-{{ requiredAttr .ID }}">Enumeration Definitions</a></li>
-        {{- end }}
-        {{- if .Defines }}
-        <li><a href="#define-{{ requiredAttr .ID }}">Macro Definitions</a></li>
-        {{- end }}
-        {{- if .Functions }}
-        <li><a href="#function-{{ requiredAttr .ID }}">Function Definitions</a></li>
-        {{- end }}
-        {{- if .FunctionTypes }}
-        <li><a href="#functiontype-{{ requiredAttr .ID }}">Function Type Definitions</a></li>
-        {{- end }}
-      </ul>
-    </li>
-    {{- end }}
-  </ul>
-</aside>
-{{- end }}
-
 {{ define "main" -}}
 <article>
   <h1 class="title is-3">{{ required .Content.Title }}</h1>
@@ -65,11 +32,38 @@
       This page is best viewed on a larger screen.
     </div>
   </div>
-  <div class="is-hidden-tablet">
-    {{ template "cdocs_toc" . }}
+  <div>
+    <details class="mb-5">
+      <summary class="has-text-weight-bold">Table of contents</summary>
+      <aside class="menu m-4">
+        {{- range .Content.Entry.CDocs.Headers }}
+        <a class="menu-label" href="#{{ requiredAttr .ID }}">Header: <code>{{ required .Name }}</code></a>
+        <ul class="menu-list">
+          {{ range .Sections -}}
+          <li><a href="#{{ requiredAttr .ID }}">{{ required .Name }}</a></li>
+          {{- end }}
+          {{- if .Structs }}
+          <li><a href="#struct-{{ requiredAttr .ID }}">Struct Definitions</a></li>
+          {{- end }}
+          {{- if .Enums }}
+          <li><a href="#enum-{{ requiredAttr .ID }}">Enumeration Definitions</a></li>
+          {{- end }}
+          {{- if .Defines }}
+          <li><a href="#define-{{ requiredAttr .ID }}">Macro Definitions</a></li>
+          {{- end }}
+          {{- if .Functions }}
+          <li><a href="#function-{{ requiredAttr .ID }}">Function Definitions</a></li>
+          {{- end }}
+          {{- if .FunctionTypes }}
+          <li><a href="#functiontype-{{ requiredAttr .ID }}">Function Type Definitions</a></li>
+          {{- end }}
+        </ul>
+        {{- end }}
+      </aside>
+    </details>
   </div>
   {{- range .Content.Entry.CDocs.Headers }}
-  <article class="box content">
+  <article class="content">
     <h2 id="{{ requiredAttr .ID }}">Header: <code>{{ required .Name }}</code></h2>
     {{ .Description }}
     <h3>Included Headers</h3>
@@ -126,14 +120,4 @@
   </article>
   {{- end }}
 </article>
-{{- end }}
-
-{{ define "sidebar" -}}
-<div class="is-hidden-mobile">
-  {{ template "cdocs_toc" . }}
-</div>
-<div class="has-text-centered is-size-7">
-  <strong class="has-text-grey-light">Updated:</strong>
-  <time class="has-text-grey-light" datetime="{{ .Time.Format "2006-01-02T15:04:05Z" }}">{{ .Time.Format "2006-01-02 15:04:05" }} UTC</time>
-</div>
 {{- end }}
