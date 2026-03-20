@@ -135,16 +135,6 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 			// assets required by embedded templates
 			runner.NewTaskGroup(
 				&tasks.NpmPackage{
-					Name:    "anchor-js",
-					Version: "5.0.0",
-					Files: []string{
-						"anchor.js",
-					},
-					BaseDestination: assetsDir,
-				},
-			),
-			runner.NewTaskGroup(
-				&tasks.NpmPackage{
 					Name:    "bulma",
 					Version: "1.0.4",
 					Files: []string{
@@ -249,6 +239,7 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 				Slug:        s.Slug,
 				File:        s.File,
 				License:     s.License,
+				Toc:         s.Toc,
 
 				OpenGraphTitle:         s.OpenGraph.Title,
 				OpenGraphDescription:   s.OpenGraph.Description,
@@ -292,6 +283,7 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 				Dir:             ps.SourceDir,
 				BaseDestination: ps.BaseDestination,
 			},
+			Toc:         ps.Toc,
 			Template:    ps.Template,
 			TemplateCtx: ps.TemplateCtx,
 			WithSidebar: ps.WithSidebar,
@@ -441,6 +433,8 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 
 						GoImport: repo.Go.Import,
 						GoRepo:   repo.Go.Repo,
+
+						Toc: repo.Toc,
 
 						Force:                  *fForce,
 						LocalDirectory:         localDir,

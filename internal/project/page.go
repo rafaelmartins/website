@@ -85,6 +85,7 @@ type ProjectPage struct {
 	name   string
 	title  string
 	etitle string
+	toc    string
 	body   string
 	menu   string
 	src    string
@@ -143,12 +144,18 @@ func (pp *ProjectPage) read() error {
 		return err
 	}
 
+	withToc := pp.proj.Toc
+	if meta.Toc != nil {
+		withToc = *meta.Toc
+	}
+
 	pc := parser.NewContext()
 	pc.Set(pcProjectKey, pp.proj)
 	pc.Set(pcBaseUrlKey, "https://github.com/"+pp.proj.Owner+"/"+pp.proj.Repo+"/blob/"+pp.proj.proj.Head)
 	pc.Set(pcCurrentPageKey, pp.name)
+	pc.Set(markdown.PcTocEnable, &withToc)
 
-	body, err := markdown.Render(gmMarkdown, data, pc)
+	toc, body, err := markdown.Render(gmMarkdown, data, pc)
 	if err != nil {
 		return err
 	}
@@ -156,6 +163,7 @@ func (pp *ProjectPage) read() error {
 		return err.(error)
 	}
 	pp.meta = meta
+	pp.toc = toc
 	pp.body = body
 
 	pp.images = nil
@@ -264,7 +272,7 @@ func (pp *ProjectPage) GetReader() (io.ReadCloser, error) {
 		pc.Set(pcBaseUrlKey, "https://github.com/"+pp.proj.Owner+"/"+pp.proj.Repo+"/blob/"+pp.proj.proj.LatestRelease.Tag)
 		pc.Set(pcCurrentPageKey, pp.name)
 
-		body, err := markdown.Render(gmMarkdown, []byte(pp.proj.proj.LatestRelease.Description), pc)
+		_, body, err := markdown.Render(gmMarkdown, []byte(pp.proj.proj.LatestRelease.Description), pc)
 		if err != nil {
 			return nil, err
 		}
@@ -317,6 +325,7 @@ func (pp *ProjectPage) GetReader() (io.ReadCloser, error) {
 		Description: pp.proj.proj.Description,
 		URL:         purl,
 		License:     pp.proj.license,
+		Toc:         pp.toc,
 		Search:      true, // FIXME ???
 		OpenGraph: templates.OpenGraphEntry{
 			Title:       pp.otitle,

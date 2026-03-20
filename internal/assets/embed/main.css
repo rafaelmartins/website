@@ -84,3 +84,34 @@ html {
 .spoiler:not(:hover) > * {
   opacity: 0;
 }
+
+.toc-anchor {
+  font-size: .75em;
+  opacity: 0;
+  text-decoration: none;
+  margin-left: .1875em;
+  padding: 0 .1875em;
+}
+
+* > .toc-anchor:first-of-type {
+  margin-left: 1em;
+}
+
+:hover > .toc-anchor, .toc-anchor:focus {
+  opacity: 1;
+}
+
+#__toc__ {
+  background-color: var(--bulma-light);
+  margin-bottom: 1.5em;
+  padding: .5em;
+}
+
+#__toc__ summary {
+  font-weight: bold;
+}
+
+#__toc__ ul {
+  list-style: disc outside;
+  margin-inline-start: 2em;
+}

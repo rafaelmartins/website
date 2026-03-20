@@ -32,14 +32,14 @@
       This page is best viewed on a larger screen.
     </div>
   </div>
-  <div>
-    <details class="mb-5">
-      <summary class="has-text-weight-bold">Table of contents</summary>
-      <aside class="menu m-4">
-        {{- range .Content.Entry.CDocs.Headers }}
-        <a class="menu-label" href="#{{ requiredAttr .ID }}">Header: <code>{{ required .Name }}</code></a>
-        <ul class="menu-list">
-          {{ range .Sections -}}
+  <details id="__toc__">
+    <summary>Table of contents</summary>
+    <ul>
+      {{- range .Content.Entry.CDocs.Headers }}
+      <li><a href="#{{ requiredAttr .ID }}">Header: <code>{{ required .Name }}</code></a>
+        <ul>
+          <li><a href="#includes-{{ requiredAttr .ID }}">Included Headers</a></li>
+          {{- range .Sections }}
           <li><a href="#{{ requiredAttr .ID }}">{{ required .Name }}</a></li>
           {{- end }}
           {{- if .Structs }}
@@ -58,18 +58,18 @@
           <li><a href="#functiontype-{{ requiredAttr .ID }}">Function Type Definitions</a></li>
           {{- end }}
         </ul>
-        {{- end }}
-      </aside>
-    </details>
-  </div>
+      </li>
+      {{- end }}
+    </ul>
+  </details>
   {{- range .Content.Entry.CDocs.Headers }}
   <article class="content">
-    <h2 id="{{ requiredAttr .ID }}">Header: <code>{{ required .Name }}</code></h2>
+    <h2 id="{{ requiredAttr .ID }}">Header: <code>{{ required .Name }}</code><a href="#{{ requiredAttr .ID }}" class="toc-anchor has-text-link-light fa-solid fa-paragraph"></a><a href="#__toc__" class="toc-anchor has-text-link-light fa-solid fa-arrow-turn-up"></a></h2>
     {{ .Description }}
-    <h3>Included Headers</h3>
+    <h3 id="includes-{{ requiredAttr .ID }}">Included Headers<a href="#includes-{{ requiredAttr .ID }}" class="toc-anchor has-text-link-light fa-solid fa-paragraph"></a><a href="#__toc__" class="toc-anchor has-text-link-light fa-solid fa-arrow-turn-up"></a></h3>
     {{ template "cdocs_includes" .Includes }}
     {{ range .Sections -}}
-    <h3 id="{{ requiredAttr .ID }}">{{ required .Name }}</h3>
+    <h3 id="{{ requiredAttr .ID }}">{{ required .Name }}<a href="#{{ requiredAttr .ID }}" class="toc-anchor has-text-link-light fa-solid fa-paragraph"></a><a href="#__toc__" class="toc-anchor has-text-link-light fa-solid fa-arrow-turn-up"></a></h3>
     {{ .Description }}
     {{- range .Structs }}
     {{ template "cdocs_entry" . }}
@@ -88,31 +88,31 @@
     {{- end }}
     {{- end }}
     {{- if .Structs }}
-    <h3 id="struct-{{ requiredAttr .ID }}">Struct Definitions</h3>
+    <h3 id="struct-{{ requiredAttr .ID }}">Struct Definitions<a href="#struct-{{ requiredAttr .ID }}" class="toc-anchor has-text-link-light fa-solid fa-paragraph"></a><a href="#__toc__" class="toc-anchor has-text-link-light fa-solid fa-arrow-turn-up"></a></h3>
     {{- range .Structs }}
     {{ template "cdocs_entry" . }}
     {{- end }}
     {{- end }}
     {{- if .Enums }}
-    <h3 id="enum-{{ requiredAttr .ID }}">Enumeration Definitions</h3>
+    <h3 id="enum-{{ requiredAttr .ID }}">Enumeration Definitions<a href="#enum-{{ requiredAttr .ID }}" class="toc-anchor has-text-link-light fa-solid fa-paragraph"></a><a href="#__toc__" class="toc-anchor has-text-link-light fa-solid fa-arrow-turn-up"></a></h3>
     {{- range .Enums }}
     {{ template "cdocs_entry" . }}
     {{- end }}
     {{- end }}
     {{- if .Defines }}
-    <h3 id="define-{{ requiredAttr .ID }}">Macro Definitions</h3>
+    <h3 id="define-{{ requiredAttr .ID }}">Macro Definitions<a href="#define-{{ requiredAttr .ID }}" class="toc-anchor has-text-link-light fa-solid fa-paragraph"></a><a href="#__toc__" class="toc-anchor has-text-link-light fa-solid fa-arrow-turn-up"></a></h3>
     {{- range .Defines }}
     {{ template "cdocs_entry" . }}
     {{- end }}
     {{- end }}
     {{- if .Functions }}
-    <h3 id="function-{{ requiredAttr .ID }}">Function Definitions</h3>
+    <h3 id="function-{{ requiredAttr .ID }}">Function Definitions<a href="#function-{{ requiredAttr .ID }}" class="toc-anchor has-text-link-light fa-solid fa-paragraph"></a><a href="#__toc__" class="toc-anchor has-text-link-light fa-solid fa-arrow-turn-up"></a></h3>
     {{- range .Functions }}
     {{ template "cdocs_entry" . }}
     {{- end }}
     {{- end }}
     {{- if .FunctionTypes }}
-    <h3 id="functiontype-{{ requiredAttr .ID }}">Function Type Definitions</h3>
+    <h3 id="functiontype-{{ requiredAttr .ID }}">Function Type Definitions<a href="#functiontype-{{ requiredAttr .ID }}" class="toc-anchor has-text-link-light fa-solid fa-paragraph"></a><a href="#__toc__" class="toc-anchor has-text-link-light fa-solid fa-arrow-turn-up"></a></h3>
     {{- range .FunctionTypes }}
     {{ template "cdocs_entry" . }}
     {{- end }}

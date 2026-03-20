@@ -69,6 +69,7 @@ type Config struct {
 				SpdxId string `yaml:"spdx-id"`
 				Title  string `yaml:"title"`
 			} `yaml:"licenses"`
+			Toc   bool     `yaml:"toc"`
 			Files []string `yaml:"files"`
 			CDocs struct {
 				Destination   string   `yaml:"destination"`
@@ -121,6 +122,7 @@ type Config struct {
 			Slug        string `yaml:"slug"`
 			File        string `yaml:"file"`
 			License     string `yaml:"license"`
+			Toc         bool   `yaml:"toc"`
 			OpenGraph   struct {
 				Title       string `yaml:"title"`
 				Description string `yaml:"description"`
@@ -167,6 +169,7 @@ type Config struct {
 			Title              string         `yaml:"title"`
 			Description        string         `yaml:"description"`
 			SourceDir          string         `yaml:"source-dir"`
+			Toc                bool           `yaml:"toc"`
 			PostsPerPage       int            `yaml:"posts-per-page"`
 			PostsPerPageAtom   int            `yaml:"posts-per-page-atom"`
 			SortReverse        *bool          `yaml:"sort-reverse"`

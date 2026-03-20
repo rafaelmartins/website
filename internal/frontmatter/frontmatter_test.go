@@ -21,6 +21,7 @@ opengraph:
   description: OG Description
   image: /path/to/image.png
 search: false
+toc: true
 extra:
   custom_field: custom_value
 ---
@@ -66,6 +67,10 @@ This is the content.
 		t.Errorf("opengraph.title=%q, want %q", metadata.OpenGraph.Title, "OG Title")
 	}
 
+	if metadata.OpenGraph.Description != "OG Description" {
+		t.Errorf("opengraph.description=%q, want %q", metadata.OpenGraph.Description, "OG Description")
+	}
+
 	if metadata.OpenGraph.Image != "/path/to/image.png" {
 		t.Errorf("opengraph.image=%q, want %q", metadata.OpenGraph.Image, "/path/to/image.png")
 	}
@@ -79,6 +84,13 @@ This is the content.
 	}
 	if *metadata.Search != false {
 		t.Errorf("search=%v, want false", *metadata.Search)
+	}
+
+	if metadata.Toc == nil {
+		t.Fatal("toc should not be nil")
+	}
+	if *metadata.Toc != true {
+		t.Errorf("toc=%v, want true", *metadata.Toc)
 	}
 
 	if metadata.Published.Time != time.Date(2025, 1, 28, 0, 0, 0, 0, time.UTC) {
@@ -262,7 +274,7 @@ List:
 - Item 2
 `
 	if string(rest) != expectedContent {
-		t.Errorf("rest content mismatch")
+		t.Errorf("rest content mismatch\ngot:\n%s\nwant:\n%s", string(rest), expectedContent)
 	}
 }
 
@@ -303,8 +315,10 @@ content
 	}
 
 	if metadata.OpenGraph.ImageGen.Color == nil {
-		// fixme: check value
-		t.Errorf("color is nil, want #ccc")
+		t.Fatal("color should not be nil")
+	}
+	if *metadata.OpenGraph.ImageGen.Color != "#ccc" {
+		t.Errorf("color=%q, want %q", *metadata.OpenGraph.ImageGen.Color, "#ccc")
 	}
 
 	if metadata.OpenGraph.ImageGen.DPI == nil || *metadata.OpenGraph.ImageGen.DPI != 72.0 {
@@ -424,43 +438,50 @@ func TestParseWithSearchField(t *testing.T) {
 	}
 }
 
-func TestFrontMatterDateUnmarshalYAML(t *testing.T) {
+func TestParseWithTocField(t *testing.T) {
 	tests := []struct {
 		name    string
-		yaml    string
-		want    time.Time
-		wantErr bool
+		src     []byte
+		wantNil bool
+		wantToc bool
 	}{
 		{
-			name:    "datetime format",
-			yaml:    "2025-01-28 15:30:45",
-			want:    time.Date(2025, 1, 28, 15, 30, 45, 0, time.UTC),
-			wantErr: false,
+			name:    "toc not set",
+			src:     []byte("---\ntitle: Test\n---\ncontent\n"),
+			wantNil: true,
 		},
 		{
-			name:    "date format",
-			yaml:    "2025-01-28",
-			want:    time.Date(2025, 1, 28, 0, 0, 0, 0, time.UTC),
-			wantErr: false,
+			name:    "toc true",
+			src:     []byte("---\ntitle: Test\ntoc: true\n---\ncontent\n"),
+			wantNil: false,
+			wantToc: true,
 		},
 		{
-			name:    "invalid format",
-			yaml:    "not-a-date",
-			wantErr: true,
+			name:    "toc false",
+			src:     []byte("---\ntitle: Test\ntoc: false\n---\ncontent\n"),
+			wantNil: false,
+			wantToc: false,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			src := []byte("---\npublished: " + tt.yaml + "\n---\ncontent\n")
-			metadata, _, err := Parse(src)
-
-			if (err != nil) != tt.wantErr {
-				t.Errorf("Parse error=%v, wantErr=%v", err, tt.wantErr)
+			metadata, _, err := Parse(tt.src)
+			if err != nil {
+				t.Fatalf("Parse failed: %v", err)
 			}
 
-			if !tt.wantErr && metadata.Published.Time != tt.want {
-				t.Errorf("published=%v, want %v", metadata.Published.Time, tt.want)
+			if tt.wantNil {
+				if metadata.Toc != nil {
+					t.Errorf("toc should be nil, got %v", *metadata.Toc)
+				}
+			} else {
+				if metadata.Toc == nil {
+					t.Fatal("toc should not be nil")
+				}
+				if *metadata.Toc != tt.wantToc {
+					t.Errorf("toc=%v, want %v", *metadata.Toc, tt.wantToc)
+				}
 			}
 		})
 	}

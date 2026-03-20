@@ -24,6 +24,7 @@ func New(style string, ext ...goldmark.Extender) goldmark.Markdown {
 				[]goldmark.Extender{
 					&admonitions{},
 					&spoilers{},
+					&toc{},
 					extension.GFM,
 					extension.DefinitionList,
 					extension.Footnote,
@@ -43,14 +44,15 @@ func New(style string, ext ...goldmark.Extender) goldmark.Markdown {
 	)
 }
 
-func Render(mkd goldmark.Markdown, src []byte, pc parser.Context) (string, error) {
-	if pc == nil {
-		pc = parser.NewContext()
-	}
-
+func Render(mkd goldmark.Markdown, src []byte, pc parser.Context) (string, string, error) {
 	buf := &bytes.Buffer{}
 	if err := mkd.Convert(src, buf, parser.WithContext(pc)); err != nil {
-		return "", err
+		return "", "", err
 	}
-	return buf.String(), nil
+
+	t, err := tocRender(pc)
+	if err != nil {
+		return "", "", err
+	}
+	return t, buf.String(), nil
 }

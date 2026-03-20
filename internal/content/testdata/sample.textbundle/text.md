@@ -6,6 +6,8 @@ date: 2025-01-15
 
 # Main Heading
 
+## Sub Heading
+
 This is a test textbundle file with content and assets.
 
 ![Test Image](assets/image.png)

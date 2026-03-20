@@ -53,6 +53,7 @@ type FrontMatter struct {
 		} `yaml:"image-gen"`
 	} `yaml:"opengraph"`
 	Search *bool          `yaml:"search"`
+	Toc    *bool          `yaml:"toc"`
 	Extra  map[string]any `yaml:"extra"`
 }
 

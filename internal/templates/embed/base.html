@@ -153,7 +153,6 @@
 {{ template "footer" . }}
       </div>
     </footer>
-    <script src="{{ assetsUrl }}/anchor-js/anchor.js"></script>
     <script src="{{ assetsUrl }}/glightbox/dist/js/glightbox.js"></script>
     {{- if .Config.Search }}
     <script src="{{ assetsUrl }}/search.js" defer></script>
@@ -163,6 +162,16 @@
   </body>
 </html>
 {{- end }}
+
+{{ define "main" -}}
+<article>
+  <h1 class="title is-3">{{ template "main_content_title" . }}</h1>
+{{ .Content.Toc }}
+{{ template "main_content" . }}
+</article>
+{{- end }}
+
+{{ define "main_content_title" }}{{ required .Content.Title }}{{ end }}
 
 {{ define "title" }}{{ required .Content.Title }} - {{ required .Config.Title }}{{ end }}
 

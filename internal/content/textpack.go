@@ -21,10 +21,10 @@ func (*textPack) IsSupported(f string) bool {
 	return filepath.Ext(f) == ".textpack"
 }
 
-func (*textPack) Render(f string, baseurl string) (string, *frontmatter.FrontMatter, error) {
+func (*textPack) Render(f string, baseurl string, withToc *bool) (*frontmatter.FrontMatter, string, string, error) {
 	r, err := zip.OpenReader(f)
 	if err != nil {
-		return "", nil, err
+		return nil, "", "", err
 	}
 	defer r.Close()
 
@@ -32,48 +32,48 @@ func (*textPack) Render(f string, baseurl string) (string, *frontmatter.FrontMat
 	src := (*zip.File)(nil)
 	for _, f := range r.File {
 		if m, err := filepath.Match(path.Join("*.textbundle", "info.json"), f.Name); err != nil {
-			return "", nil, err
+			return nil, "", "", err
 		} else if m {
 			info = f
 		}
 
 		if m, err := filepath.Match(path.Join("*.textbundle", "text.*"), f.Name); err != nil {
-			return "", nil, err
+			return nil, "", "", err
 		} else if m {
 			if src != nil {
-				return "", nil, errors.New("content: textpack: more than one text file found")
+				return nil, "", "", errors.New("content: textpack: more than one text file found")
 			}
 			src = f
 		}
 	}
 
 	if info == nil {
-		return "", nil, errors.New("content: textpack: no info.json file found")
+		return nil, "", "", errors.New("content: textpack: no info.json file found")
 	}
 	ifp, err := info.Open()
 	if err != nil {
-		return "", nil, err
+		return nil, "", "", err
 	}
 	defer ifp.Close()
 
 	idata, err := io.ReadAll(ifp)
 	if err != nil {
-		return "", nil, err
+		return nil, "", "", err
 	}
 	if err := tbValidate(idata); err != nil {
-		return "", nil, err
+		return nil, "", "", err
 	}
 
 	if src == nil {
-		return "", nil, errors.New("content: textpack: no text file found")
+		return nil, "", "", errors.New("content: textpack: no text file found")
 	}
 	fp, err := src.Open()
 	if err != nil {
-		return "", nil, err
+		return nil, "", "", err
 	}
 	defer fp.Close()
 
-	return tbRender(fp, baseurl)
+	return tbRender(fp, baseurl, withToc)
 }
 
 func (*textPack) GetTimeStamps(f string) ([]time.Time, error) {

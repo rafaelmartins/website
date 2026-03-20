@@ -52,6 +52,7 @@ func (p *PostsSources) List() ([]*generators.ContentSource, error) {
 type postTaskImpl struct {
 	baseDestination string
 	slug            string
+	toc             bool
 	source          *generators.ContentSource
 	template        string
 	templateCtx     map[string]any
@@ -71,6 +72,7 @@ func (t *postTaskImpl) GetGenerator() (runner.Generator, error) {
 	return &generators.Content{
 		URL:         url,
 		Slug:        t.slug,
+		Toc:         t.toc,
 		Sources:     []*generators.ContentSource{t.source},
 		IsPost:      true,
 		Template:    t.template,
@@ -83,6 +85,7 @@ func (t *postTaskImpl) GetGenerator() (runner.Generator, error) {
 
 type Posts struct {
 	SourceDir   PostsSources
+	Toc         bool
 	Template    string
 	TemplateCtx map[string]any
 	WithSidebar bool
@@ -116,6 +119,7 @@ func (p *Posts) GetTasks() ([]*runner.Task, error) {
 				&postTaskImpl{
 					baseDestination: p.SourceDir.BaseDestination,
 					slug:            slug,
+					toc:             p.Toc,
 					source:          src,
 					template:        tmpl,
 					templateCtx:     p.TemplateCtx,

@@ -17,23 +17,23 @@ func (*html) IsSupported(f string) bool {
 	return e == ".htm" || e == ".html"
 }
 
-func (*html) Render(f string, baseurl string) (string, *frontmatter.FrontMatter, error) {
+func (*html) Render(f string, baseurl string, withToc *bool) (*frontmatter.FrontMatter, string, string, error) {
 	fp, err := os.Open(f)
 	if err != nil {
-		return "", nil, err
+		return nil, "", "", err
 	}
 	defer fp.Close()
 
 	src, err := io.ReadAll(fp)
 	if err != nil {
-		return "", nil, err
+		return nil, "", "", err
 	}
 
 	meta, src, err := frontmatter.Parse(src)
 	if err != nil {
-		return "", nil, err
+		return nil, "", "", err
 	}
-	return string(src), meta, nil
+	return meta, "", string(src), nil
 }
 
 func (*html) GetTimeStamps(f string) ([]time.Time, error) {

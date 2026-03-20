@@ -53,29 +53,33 @@ func (*tbExtension) Transform(node *ast.Document, reader text.Reader, pc parser.
 	})
 }
 
-func tbRender(r io.Reader, baseurl string) (string, *frontmatter.FrontMatter, error) {
+func tbRender(r io.Reader, baseurl string, withToc *bool) (*frontmatter.FrontMatter, string, string, error) {
 	src, err := io.ReadAll(r)
 	if err != nil {
-		return "", nil, err
+		return nil, "", "", err
 	}
 
 	meta, src, err := frontmatter.Parse(src)
 	if err != nil {
-		return "", nil, err
+		return nil, "", "", err
+	}
+	if withToc != nil && meta.Toc != nil {
+		withToc = meta.Toc
 	}
 
 	pc := parser.NewContext()
 	pc.Set(pcBaseUrl, baseurl)
-	rendered, err := markdown.Render(gmTextBundle, src, pc)
+	pc.Set(markdown.PcTocEnable, withToc)
+	t, rendered, err := markdown.Render(gmTextBundle, src, pc)
 	if err != nil {
-		return "", nil, err
+		return nil, "", "", err
 	}
 
 	if title, ok := pc.Get(pcTitleKey).(string); ok && title != "" {
 		meta.Title = title
 	}
 
-	return rendered, meta, nil
+	return meta, t, rendered, nil
 }
 
 func tbValidate(info []byte) error {
@@ -125,27 +129,27 @@ func (*textBundle) getSource(f string) (string, error) {
 	return srcs[0], nil
 }
 
-func (tb *textBundle) Render(f string, baseurl string) (string, *frontmatter.FrontMatter, error) {
+func (tb *textBundle) Render(f string, baseurl string, withToc *bool) (*frontmatter.FrontMatter, string, string, error) {
 	info, err := os.ReadFile(filepath.Join(f, "info.json"))
 	if err != nil {
-		return "", nil, err
+		return nil, "", "", err
 	}
 	if err := tbValidate(info); err != nil {
-		return "", nil, err
+		return nil, "", "", err
 	}
 
 	srcf, err := tb.getSource(f)
 	if err != nil {
-		return "", nil, err
+		return nil, "", "", err
 	}
 
 	fp, err := os.Open(srcf)
 	if err != nil {
-		return "", nil, err
+		return nil, "", "", err
 	}
 	defer fp.Close()
 
-	return tbRender(fp, baseurl)
+	return tbRender(fp, baseurl, withToc)
 }
 
 func (tb *textBundle) GetTimeStamps(f string) ([]time.Time, error) {

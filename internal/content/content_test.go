@@ -50,7 +50,7 @@ func TestRender(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			html, meta, err := Render(tt.file, "")
+			meta, toc, html, err := Render(tt.file, "", nil)
 			if err != nil {
 				t.Fatalf("render failed: %v", err)
 			}
@@ -67,6 +67,10 @@ func TestRender(t *testing.T) {
 				t.Errorf("description=%q, want %q", meta.Description, tt.wantDesc)
 			}
 
+			if toc != "" {
+				t.Errorf("toc should be empty with withToc=nil, got %q", toc)
+			}
+
 			if html == "" {
 				t.Error("rendered HTML is empty")
 			}
@@ -75,6 +79,77 @@ func TestRender(t *testing.T) {
 				t.Errorf("rendered HTML missing expected content: %q", tt.containsText)
 			}
 		})
+	}
+}
+
+func TestRenderWithToc(t *testing.T) {
+	tests := []struct {
+		name        string
+		file        string
+		tocContains string
+	}{
+		{"markdown", testdataPath("sample.md"), `<a href="#main-heading">Main Heading</a>`},
+		{"textbundle", testdataPath("sample.textbundle"), `<a href="#sub-heading">Sub Heading</a>`},
+		{"textpack", testdataPath("sample.textpack"), `<a href="#sub-heading">Sub Heading</a>`},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, toc, _, err := Render(tt.file, "", new(true))
+			if err != nil {
+				t.Fatalf("render failed: %v", err)
+			}
+
+			if !bytes.Contains([]byte(toc), []byte(tt.tocContains)) {
+				t.Errorf("toc missing expected content %q, got %q", tt.tocContains, toc)
+			}
+		})
+	}
+}
+
+func TestRenderTocFrontmatterOverride(t *testing.T) {
+	_, toc, _, err := Render(testdataPath("sample.md"), "", new(false))
+	if err != nil {
+		t.Fatalf("render failed: %v", err)
+	}
+	if toc != "" {
+		t.Errorf("toc should be empty when withToc=false and no frontmatter override, got %q", toc)
+	}
+
+	for _, tt := range []struct {
+		file        string
+		tocContains string
+	}{
+		{"sample-toc.md", `<a href="#heading">Heading</a>`},
+		{"sample-toc.textbundle", `<a href="#sub-heading">Sub Heading</a>`},
+	} {
+		_, toc, _, err = Render(testdataPath(tt.file), "", new(false))
+		if err != nil {
+			t.Fatalf("render %s failed: %v", tt.file, err)
+		}
+		if !bytes.Contains([]byte(toc), []byte(tt.tocContains)) {
+			t.Errorf("%s: frontmatter toc:true should override withToc=false, got toc=%q", tt.file, toc)
+		}
+	}
+
+	for _, f := range []string{"sample-notoc.md", "sample-notoc.textbundle"} {
+		_, toc, _, err = Render(testdataPath(f), "", new(true))
+		if err != nil {
+			t.Fatalf("render %s failed: %v", f, err)
+		}
+		if toc != "" {
+			t.Errorf("%s: frontmatter toc:false should override withToc=true, got toc=%q", f, toc)
+		}
+	}
+
+	for _, f := range []string{"sample-toc.md", "sample-toc.textbundle"} {
+		_, toc, _, err = Render(testdataPath(f), "", nil)
+		if err != nil {
+			t.Fatalf("render %s failed: %v", f, err)
+		}
+		if toc != "" {
+			t.Errorf("%s: withToc=nil should force toc off even with frontmatter toc:true, got toc=%q", f, toc)
+		}
 	}
 }
 
@@ -91,7 +166,7 @@ func TestRenderWithBaseURL(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			html, _, err := Render(tt.file, tt.baseurl)
+			_, _, html, err := Render(tt.file, tt.baseurl, nil)
 			if err != nil {
 				t.Fatalf("render failed: %v", err)
 			}
@@ -104,7 +179,7 @@ func TestRenderWithBaseURL(t *testing.T) {
 }
 
 func TestRenderUnsupported(t *testing.T) {
-	_, _, err := Render("file.txt", "")
+	_, _, _, err := Render("file.txt", "", nil)
 	if err == nil {
 		t.Error("render should return error for unsupported file")
 	}

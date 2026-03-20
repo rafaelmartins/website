@@ -26,6 +26,8 @@ type Project struct {
 	GoImport string
 	GoRepo   string
 
+	Toc bool
+
 	Force                  bool
 	LocalDirectory         *string
 	BaseDestination        string

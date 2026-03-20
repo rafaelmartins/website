@@ -27,6 +27,7 @@ type Content struct {
 	URL               string
 	Slug              string
 	License           string
+	Toc               bool
 	Search            *bool
 	Sources           []*ContentSource
 	IsPost            bool
@@ -97,7 +98,12 @@ func (h *Content) GetReader() (io.ReadCloser, error) {
 			continue
 		}
 
-		body, metadata, err := content.Render(src.File, h.URL)
+		var withToc *bool
+		if h.Pagination == nil {
+			withToc = &h.Toc
+		}
+
+		metadata, toc, body, err := content.Render(src.File, h.URL, withToc)
 		if err != nil {
 			return nil, err
 		}
@@ -138,6 +144,7 @@ func (h *Content) GetReader() (io.ReadCloser, error) {
 				ctx.Title = entry.Title
 			}
 			ctx.Entry = entry
+			ctx.Toc = toc
 			if metadata.License != "" {
 				ctx.License = metadata.License
 			}

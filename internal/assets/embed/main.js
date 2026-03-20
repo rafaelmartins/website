@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-  anchors.add('.content h1, .content h2, .content h3, .content h4, .content h5, .content h6');
   document.querySelectorAll('.content figure:not(.image) > img').forEach(img => {
     const figcaption = img.closest('figure')?.querySelector('figcaption');
     if (figcaption) {
