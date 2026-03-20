@@ -18,7 +18,7 @@
   </div>
   {{- end }}
   <article>
-    {{- if .Content.Entry.Title }}
+    {{- if and .Content.Entry.Title (ne .Content.Entry.Title .Content.Entry.Project.Repo) }}
     <h1 class="title is-3">{{ required .Content.Entry.Title }}</h1>
     {{- end }}
 {{ .Content.Toc }}
