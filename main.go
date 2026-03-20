@@ -233,13 +233,18 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 				gen = false
 			}
 
+			toc := pg.Toc
+			if s.Toc != nil {
+				toc = *s.Toc
+			}
+
 			src = append(src, &tasks.PageSource{
 				Title:       s.Title,
 				Description: s.Description,
 				Slug:        s.Slug,
 				File:        s.File,
 				License:     s.License,
-				Toc:         s.Toc,
+				Toc:         toc,
 
 				OpenGraphTitle:         s.OpenGraph.Title,
 				OpenGraphDescription:   s.OpenGraph.Description,

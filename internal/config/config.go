@@ -122,7 +122,7 @@ type Config struct {
 			Slug        string `yaml:"slug"`
 			File        string `yaml:"file"`
 			License     string `yaml:"license"`
-			Toc         bool   `yaml:"toc"`
+			Toc         *bool  `yaml:"toc"`
 			OpenGraph   struct {
 				Title       string `yaml:"title"`
 				Description string `yaml:"description"`
@@ -135,6 +135,7 @@ type Config struct {
 				} `yaml:"image-gen"`
 			} `yaml:"opengraph"`
 		} `yaml:"sources"`
+		Toc               bool           `yaml:"toc"`
 		ExtraDependencies []string       `yaml:"extra-dependencies"`
 		PrettyURL         *bool          `yaml:"pretty-url"`
 		BaseDestination   string         `yaml:"base-destination"`
