@@ -229,10 +229,15 @@ func Execute(wr io.Writer, name string, fm template.FuncMap, lctx *LayoutContext
 		}
 	}
 	if tmpl == nil {
-		var err error
-		tmpl, err = template.New("base").Funcs(fm).ParseFS(content, "base.html")
-		if err != nil {
-			return err
+		tmpl = template.New("base").Funcs(fm)
+
+		// autoload base unless it is the main template
+		if name != "base.html" {
+			t, err := tmpl.ParseFS(content, "base.html")
+			if err != nil {
+				return err
+			}
+			tmpl = t
 		}
 	}
 

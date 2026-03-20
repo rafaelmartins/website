@@ -173,6 +173,23 @@
 
 {{ define "main_content_title" }}{{ required .Content.Title }}{{ end }}
 
+{{ define "main_content" -}}
+<section class="content">
+{{ .Content.Entry.Body }}
+</section>
+{{- if .Content.Entry.Post }}
+<section class="has-text-grey-light mt-6">
+  Published by {{ if .Content.Entry.Post.Author.Name }}{{ .Content.Entry.Post.Author.Name }}{{
+    else }}{{ .Config.Author.Name }}{{ end }} on <time datetime="{{
+    .Content.Entry.Post.Published.Format "2006-01-02T15:04:05Z" }}">{{
+    .Content.Entry.Post.Published.Format "January 02, 2006" }}</time>{{
+    if not .Content.Entry.Post.Updated.IsZero }} and modified on <time datetime="{{
+    .Content.Entry.Post.Updated.Format "2006-01-02T15:04:05Z" }}">{{
+    .Content.Entry.Post.Updated.Format "January 02, 2006" }}</time>{{ end }}.
+</section>
+{{- end }}
+{{- end }}
+
 {{ define "title" }}{{ required .Content.Title }} - {{ required .Config.Title }}{{ end }}
 
 {{ define "extra_head" }}{{ end }}

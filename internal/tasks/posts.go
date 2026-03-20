@@ -102,7 +102,7 @@ func (p *Posts) GetTasks() ([]*runner.Task, error) {
 
 	tmpl := p.Template
 	if tmpl == "" {
-		tmpl = "entry.html"
+		tmpl = "base.html"
 	}
 
 	srcs, err := p.SourceDir.List()

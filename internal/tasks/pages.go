@@ -113,7 +113,7 @@ func (p *Pages) GetBaseDestination() string {
 func (p *Pages) GetTasks() ([]*runner.Task, error) {
 	tmpl := p.Template
 	if tmpl == "" {
-		tmpl = "entry.html"
+		tmpl = "base.html"
 	}
 
 	deps := []string{}
