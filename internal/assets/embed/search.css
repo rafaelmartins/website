@@ -9,6 +9,8 @@ nav.navbar {
 .navbar-search .search-toggle {
   cursor: pointer;
   color: var(--bulma-navbar-item-color);
+  overflow: hidden;
+  transition: opacity 0.2s ease, width 0.2s ease 0.05s;
 }
 
 .navbar-search .search-toggle:hover {
@@ -19,15 +21,16 @@ nav.navbar {
   width: 0;
   opacity: 0;
   overflow: hidden;
-  transition: width 0.3s ease, opacity 0.3s ease;
+  transition: width 0.3s ease, opacity 0.2s ease 0.1s;
 }
 
 .navbar-search:focus-within .search-toggle {
-  display: none;
+  opacity: 0;
+  width: 0;
 }
 
 .navbar-search:focus-within .search-control {
-  width: 100px;
+  width: 200px;
   opacity: 1;
 }
 

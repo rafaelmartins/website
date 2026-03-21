@@ -60,13 +60,6 @@
           <a class="navbar-item" href="/">
             <h1 class="title">{{ requiredAttr .Config.Title }}</h1>
           </a>
-          {{- range .Config.SocialLinks }}
-          <a class="navbar-item is-hidden-desktop is-hidden-mobile" href="{{ requiredAttr .URL }}" aria-label="{{ requiredAttr .Label }}">
-            <span class="icon">
-              <i class="fa-lg fa-brands fa-{{ requiredAttr .Icon }}"></i>
-            </span>
-          </a>
-          {{- end }}
           <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navMenu">
             <span aria-hidden="true"></span>
             <span aria-hidden="true"></span>
@@ -94,6 +87,8 @@
             <a class="navbar-item" href="{{ requiredAttr .URL }}">{{ required .Title }}</a>
             {{- end }}
             {{- end }}
+          </div>
+          <div class="navbar-end">
             {{- if .Config.Search }}
             <div class="navbar-item navbar-search" id="navbar-search" role="search">
               <label class="icon search-toggle is-hidden-touch" for="navbar-search-input" aria-label="Open search">
@@ -106,15 +101,6 @@
                 </span>
               </div>
             </div>
-            {{- end }}
-          </div>
-          <div class="navbar-end">
-            {{- range .Config.SocialLinks }}
-            <a class="navbar-item is-hidden-touch" href="{{ requiredAttr .URL }}" aria-label="{{ requiredAttr .Label }}">
-              <span class="icon">
-                <i class="fa-lg fa-brands fa-{{ requiredAttr .Icon }}"></i>
-              </span>
-            </a>
             {{- end }}
           </div>
         </div>
@@ -141,7 +127,7 @@
     </div>
     <footer class="footer has-background-light">
       <div class="content has-text-centered">
-        <p class="mb-6 is-hidden-tablet">
+        <p class="mb-6">
           {{- range .Config.SocialLinks }}
           <a href="{{ requiredAttr .URL }}" aria-label="{{ requiredAttr .Label }}">
             <span class="icon is-large has-text-grey-dark">
