@@ -10,6 +10,7 @@ import (
 	"rafaelmartins.com/p/website/internal/assets"
 	"rafaelmartins.com/p/website/internal/cdocs"
 	"rafaelmartins.com/p/website/internal/config"
+	"rafaelmartins.com/p/website/internal/govanitychecker"
 	"rafaelmartins.com/p/website/internal/kicad"
 	"rafaelmartins.com/p/website/internal/meta"
 	"rafaelmartins.com/p/website/internal/ogimage"
@@ -47,15 +48,16 @@ func stringSlice(name string, usage string) *stringMapFlag {
 }
 
 var (
-	fBuildDir   = flag.String("d", "_build", "build directory")
-	fConfigFile = flag.String("c", "config.yml", "configuration file")
-	fListenAddr = flag.String("a", ":3000", "development web server listen address")
-	fCDocs      = flag.String("x", "", "dump cdocs ast and template context for given header and exit")
-	fLocalDir   = stringSlice("l", "use local git repository for given project (format \"owner/repo=dir\")")
-	fRunServer  = flag.Bool("r", false, "run development server")
-	fForce      = flag.Bool("f", false, "force re-running all tasks")
-	fKicad      = flag.Bool("k", false, "kicad assets mode")
-	fVersion    = flag.Bool("v", false, "show version and exit")
+	fBuildDir        = flag.String("d", "_build", "build directory")
+	fConfigFile      = flag.String("c", "config.yml", "configuration file")
+	fListenAddr      = flag.String("a", ":3000", "development web server listen address")
+	fCDocs           = flag.String("x", "", "dump cdocs ast and template context for given header and exit")
+	fLocalDir        = stringSlice("l", "use local git repository for given project (format \"owner/repo=dir\")")
+	fRunServer       = flag.Bool("r", false, "run development server")
+	fForce           = flag.Bool("f", false, "force re-running all tasks")
+	fGoVanityChecker = flag.Bool("g", false, "test go vanity urls and exit")
+	fKicad           = flag.Bool("k", false, "kicad assets mode")
+	fVersion         = flag.Bool("v", false, "show version and exit")
 
 	cfg        *config.Config      = nil
 	kcfg       *kicad.Config       = nil
@@ -552,6 +554,13 @@ func main() {
 			log.Fatalf("error: %s", err)
 		}
 		fmt.Printf("%s\n", md)
+		return
+	}
+
+	if *fGoVanityChecker {
+		if err := govanitychecker.Run(*fConfigFile); err != nil {
+			log.Fatalf("error: %s", err)
+		}
 		return
 	}
 

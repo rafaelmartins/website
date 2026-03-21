@@ -1,0 +1,26 @@
+name: 'Check Go vanity URLs published by a rafaelmartins.com/p/website website'
+description: 'Check Go vanity URLs published by a rafaelmartins.com/p/website website'
+
+inputs:
+  source:
+    description: 'Directory where the source files reside.'
+    required: false
+    default: .
+
+  configuration:
+    description: 'Configuration file.'
+    required: false
+    default: config.yml
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setup Go
+      uses: actions/setup-go@v6
+      with:
+        go-version: stable
+
+    - name: Run test
+      run: go run rafaelmartins.com/p/website@main -g -c "${{ inputs.configuration }}"
+      working-directory: ${{ inputs.source }}
+      shell: bash
