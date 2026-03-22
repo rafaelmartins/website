@@ -19,6 +19,7 @@ runs:
       uses: actions/setup-go@v6
       with:
         go-version: stable
+        cache: false
 
     - name: Run test
       run: go run rafaelmartins.com/p/website@main -g -c "${{ inputs.configuration }}"
