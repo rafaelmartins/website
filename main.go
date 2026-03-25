@@ -15,6 +15,7 @@ import (
 	"rafaelmartins.com/p/website/internal/meta"
 	"rafaelmartins.com/p/website/internal/ogimage"
 	"rafaelmartins.com/p/website/internal/pagefind"
+	"rafaelmartins.com/p/website/internal/postproc"
 	"rafaelmartins.com/p/website/internal/project"
 	"rafaelmartins.com/p/website/internal/runner"
 	"rafaelmartins.com/p/website/internal/tasks"
@@ -55,6 +56,7 @@ var (
 	fLocalDir        = stringSlice("l", "use local git repository for given project (format \"owner/repo=dir\")")
 	fRunServer       = flag.Bool("r", false, "run development server")
 	fForce           = flag.Bool("f", false, "force re-running all tasks")
+	fDebug           = flag.Bool("b", false, "debug mode: disable post-processing and dynamic strings")
 	fGoVanityChecker = flag.Bool("g", false, "test go vanity urls and exit")
 	fKicad           = flag.Bool("k", false, "kicad assets mode")
 	fVersion         = flag.Bool("v", false, "show version and exit")
@@ -72,7 +74,7 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 		assetsDir = "assets"
 	}
 	templates.SetAssetsDir(assetsDir)
-	pagefind.SetGlobals(c.Search, assetsDir)
+	pagefind.SetGlobals(c.Search && !*fDebug, assetsDir)
 
 	rv := []*runner.TaskGroup{}
 
@@ -587,6 +589,9 @@ func main() {
 	}
 
 	force = *fForce
+
+	templates.SetDebug(*fDebug)
+	postproc.SetDebug(*fDebug)
 
 	buildFunc := build
 	if *fKicad {

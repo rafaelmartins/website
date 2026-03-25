@@ -6,6 +6,12 @@ import (
 	"path/filepath"
 )
 
+var debug = false
+
+func SetDebug(d bool) {
+	debug = d
+}
+
 type Processor interface {
 	Supported(ext string) bool
 	Run(dstFn string, dst io.Writer, src io.Reader) error
@@ -40,7 +46,7 @@ func PostProc(dst string, src io.ReadCloser) error {
 		}
 	}
 
-	if pproc != nil {
+	if pproc != nil && !debug {
 		return pproc.Run(dst, fp, src)
 	}
 	_, err = io.Copy(fp, src)

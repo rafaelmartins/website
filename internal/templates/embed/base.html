@@ -4,7 +4,9 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    {{- if not .Debug }}
     <meta name="generator" content="{{ required .Generator }}">
+    {{- end }}
     <meta name="description" content="{{ requiredAttr .Content.OpenGraph.Description }}">
     <meta property="og:site_name" content="{{ requiredAttr .Config.Title }}">
     <meta property="og:type" content="website">

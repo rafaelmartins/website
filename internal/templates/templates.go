@@ -26,6 +26,7 @@ var (
 
 	ccfg       *config.Config
 	cassetsDir string
+	debug      bool
 )
 
 type LayoutContext struct {
@@ -144,6 +145,7 @@ type context struct {
 	Content   *ContentContext
 	Extra     map[string]any
 	Time      time.Time
+	Debug     bool
 }
 
 func SetConfig(cfg *config.Config) {
@@ -159,6 +161,10 @@ func SetConfig(cfg *config.Config) {
 
 func SetAssetsDir(assetsDir string) {
 	cassetsDir = assetsDir
+}
+
+func SetDebug(d bool) {
+	debug = d
 }
 
 func GetPaths(name string) ([]string, error) {
@@ -212,6 +218,13 @@ func requiredAttr(v reflect.Value) (reflect.Value, error) {
 	return v, nil
 }
 
+func volatile(v any, ondebug any) any {
+	if debug {
+		return ondebug
+	}
+	return v
+}
+
 func Execute(wr io.Writer, name string, fm template.FuncMap, lctx *LayoutContext, cctx *ContentContext) error {
 	if fm == nil {
 		fm = template.FuncMap{}
@@ -219,6 +232,7 @@ func Execute(wr io.Writer, name string, fm template.FuncMap, lctx *LayoutContext
 	fm["assetsUrl"] = assetsUrl
 	fm["required"] = required
 	fm["requiredAttr"] = requiredAttr
+	fm["volatile"] = volatile
 
 	var tmpl *template.Template
 	if ccfg != nil && ccfg.Template != nil {
@@ -288,5 +302,6 @@ func Execute(wr io.Writer, name string, fm template.FuncMap, lctx *LayoutContext
 		Content:   lcctx,
 		Extra:     ccfg.TemplateCtx,
 		Time:      time.Now().UTC(),
+		Debug:     debug,
 	})
 }
