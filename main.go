@@ -13,7 +13,7 @@ import (
 	"rafaelmartins.com/p/website/internal/govanitychecker"
 	"rafaelmartins.com/p/website/internal/kicad"
 	"rafaelmartins.com/p/website/internal/meta"
-	"rafaelmartins.com/p/website/internal/ogimage"
+	"rafaelmartins.com/p/website/internal/opengraph"
 	"rafaelmartins.com/p/website/internal/pagefind"
 	"rafaelmartins.com/p/website/internal/postproc"
 	"rafaelmartins.com/p/website/internal/project"
@@ -75,6 +75,11 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 	}
 	templates.SetAssetsDir(assetsDir)
 	pagefind.SetGlobals(c.Search && !*fDebug, assetsDir)
+
+	ogimage, err := opengraph.NewImageGen(c.OpenGraphImageGen)
+	if err != nil {
+		return nil, err
+	}
 
 	rv := []*runner.TaskGroup{}
 
@@ -232,11 +237,6 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 	for _, pg := range c.Pages {
 		src := []*tasks.PageSource{}
 		for _, s := range pg.Sources {
-			gen := true
-			if s.OpenGraph.ImageGen.Generate != nil && !*s.OpenGraph.ImageGen.Generate {
-				gen = false
-			}
-
 			toc := pg.Toc
 			if s.Toc != nil {
 				toc = *s.Toc
@@ -249,14 +249,7 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 				File:        s.File,
 				License:     s.License,
 				Toc:         toc,
-
-				OpenGraphTitle:         s.OpenGraph.Title,
-				OpenGraphDescription:   s.OpenGraph.Description,
-				OpenGraphImage:         s.OpenGraph.Image,
-				OpenGraphImageGenerate: gen,
-				OpenGraphImageGenColor: s.OpenGraph.ImageGen.Color,
-				OpenGraphImageGenDPI:   s.OpenGraph.ImageGen.DPI,
-				OpenGraphImageGenSize:  s.OpenGraph.ImageGen.Size,
+				OpenGraph:   s.OpenGraph,
 			})
 		}
 
@@ -275,6 +268,7 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 					Template:          pg.Template,
 					TemplateCtx:       pg.TemplateCtx,
 					WithSidebar:       pg.WithSidebar,
+					OpenGraphImageGen: ogimage,
 				},
 			),
 		)
@@ -292,10 +286,11 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 				Dir:             ps.SourceDir,
 				BaseDestination: ps.BaseDestination,
 			},
-			Toc:         ps.Toc,
-			Template:    ps.Template,
-			TemplateCtx: ps.TemplateCtx,
-			WithSidebar: ps.WithSidebar,
+			Toc:               ps.Toc,
+			Template:          ps.Template,
+			TemplateCtx:       ps.TemplateCtx,
+			WithSidebar:       ps.WithSidebar,
+			OpenGraphImageGen: ogimage,
 		}
 		postsSources := &tasks.PostsSources{
 			Dir:             ps.SourceDir,
@@ -317,12 +312,8 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 					TemplateCtx:     ps.TemplateCtx,
 					WithSidebar:     ps.WithSidebar,
 
-					OpenGraphTitle:         ps.OpenGraph.Title,
-					OpenGraphDescription:   ps.OpenGraph.Description,
-					OpenGraphImage:         ps.OpenGraph.Image,
-					OpenGraphImageGenColor: ps.OpenGraph.ImageGen.Color,
-					OpenGraphImageGenDPI:   ps.OpenGraph.ImageGen.DPI,
-					OpenGraphImageGenSize:  ps.OpenGraph.ImageGen.Size,
+					OpenGraph:         ps.OpenGraph,
+					OpenGraphImageGen: ogimage,
 				},
 			),
 			runner.NewTaskGroup(
@@ -359,12 +350,8 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 				TemplateCtx:     c.Posts.TemplateCtx,
 				WithSidebar:     c.Posts.WithSidebar,
 
-				OpenGraphTitle:         c.Posts.OpenGraph.Title,
-				OpenGraphDescription:   c.Posts.OpenGraph.Description,
-				OpenGraphImage:         c.Posts.OpenGraph.Image,
-				OpenGraphImageGenColor: c.Posts.OpenGraph.ImageGen.Color,
-				OpenGraphImageGenDPI:   c.Posts.OpenGraph.ImageGen.DPI,
-				OpenGraphImageGenSize:  c.Posts.OpenGraph.ImageGen.Size,
+				OpenGraph:         c.Posts.OpenGraph,
+				OpenGraphImageGen: ogimage,
 			},
 		),
 		runner.NewTaskGroup(
@@ -445,28 +432,19 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 
 						Toc: repo.Toc,
 
-						Force:                  *fForce,
-						LocalDirectory:         localDir,
-						BaseDestination:        pj.BaseDestination,
-						Template:               pj.Template,
-						Immutable:              immutable,
-						OpenGraphTitle:         repo.OpenGraph.Title,
-						OpenGraphDescription:   repo.OpenGraph.Description,
-						OpenGraphImage:         repo.OpenGraph.Image,
-						OpenGraphImageGenColor: repo.OpenGraph.ImageGen.Color,
-						OpenGraphImageGenDPI:   repo.OpenGraph.ImageGen.DPI,
-						OpenGraphImageGenSize:  repo.OpenGraph.ImageGen.Size,
+						Force:             *fForce,
+						LocalDirectory:    localDir,
+						BaseDestination:   pj.BaseDestination,
+						Template:          pj.Template,
+						Immutable:         immutable,
+						OpenGraph:         repo.OpenGraph,
+						OpenGraphImageGen: ogimage,
 
-						CDocsDestination:            repo.CDocs.Destination,
-						CDocsHeaders:                repo.CDocs.Headers,
-						CDocsBaseDirectory:          repo.CDocs.BaseDirectory,
-						CDocsTemplate:               repo.CDocs.Template,
-						CDocsOpenGraphTitle:         repo.CDocs.OpenGraph.Title,
-						CDocsOpenGraphDescription:   repo.CDocs.OpenGraph.Description,
-						CDocsOpenGraphImage:         repo.CDocs.OpenGraph.Image,
-						CDocsOpenGraphImageGenColor: repo.CDocs.OpenGraph.ImageGen.Color,
-						CDocsOpenGraphImageGenDPI:   repo.CDocs.OpenGraph.ImageGen.DPI,
-						CDocsOpenGraphImageGenSize:  repo.CDocs.OpenGraph.ImageGen.Size,
+						CDocsDestination:   repo.CDocs.Destination,
+						CDocsHeaders:       repo.CDocs.Headers,
+						CDocsBaseDirectory: repo.CDocs.BaseDirectory,
+						CDocsTemplate:      repo.CDocs.Template,
+						CDocsOpenGraph:     repo.CDocs.OpenGraph,
 					},
 				),
 			)
@@ -501,15 +479,6 @@ func build() error {
 			return err
 		}
 		templates.SetConfig(cfg)
-
-		if err := ogimage.SetGlobals(
-			cfg.OpenGraphImageGen.Template,
-			cfg.OpenGraphImageGen.DefaultColor,
-			cfg.OpenGraphImageGen.DefaultDPI,
-			cfg.OpenGraphImageGen.DefaultSize,
-		); err != nil {
-			return err
-		}
 
 		tg, err := getTaskGroups(cfg)
 		if err != nil {

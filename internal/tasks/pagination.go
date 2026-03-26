@@ -10,7 +10,7 @@ import (
 
 	"rafaelmartins.com/p/website/internal/content"
 	"rafaelmartins.com/p/website/internal/generators"
-	"rafaelmartins.com/p/website/internal/ogimage"
+	"rafaelmartins.com/p/website/internal/opengraph"
 	"rafaelmartins.com/p/website/internal/runner"
 	"rafaelmartins.com/p/website/internal/templates"
 )
@@ -32,14 +32,9 @@ type paginationTaskImpl struct {
 	pagination      *templates.ContentPagination
 	layoutCtx       *templates.LayoutContext
 
-	openGraphTitle         string
-	openGraphDescription   string
-	openGraphImage         string
-	openGraphImageURL      string
-	openGraphImageGenerate bool
-	openGraphImageGenColor *string
-	openGraphImageGenDPI   *float64
-	openGraphImageGenSize  *float64
+	openGraph                    *opengraph.Config
+	openGraphImageGen            *opengraph.OpenGraphImageGen
+	openGraphPregeneratedBaseUrl string
 }
 
 func (t *paginationTaskImpl) GetDestination() string {
@@ -51,27 +46,21 @@ func (t *paginationTaskImpl) GetDestination() string {
 
 func (t *paginationTaskImpl) GetGenerator() (runner.Generator, error) {
 	return &generators.Content{
-		Title:       t.title,
-		Description: t.description,
-		URL:         path.Join("/", t.baseDestination, t.slug) + "/",
-		Slug:        t.slug,
-		Toc:         false,
-		Search:      new(false),
-		Sources:     t.sources,
-		IsPost:      true,
-		Template:    t.template,
-		TemplateCtx: t.templateCtx,
-		Pagination:  t.pagination,
-		LayoutCtx:   t.layoutCtx,
-
-		OpenGraphTitle:         t.openGraphTitle,
-		OpenGraphDescription:   t.openGraphDescription,
-		OpenGraphImage:         t.openGraphImage,
-		OpenGraphImageURL:      t.openGraphImageURL,
-		OpenGraphImageGenerate: t.openGraphImageGenerate,
-		OpenGraphImageGenColor: t.openGraphImageGenColor,
-		OpenGraphImageGenDPI:   t.openGraphImageGenDPI,
-		OpenGraphImageGenSize:  t.openGraphImageGenSize,
+		Title:                        t.title,
+		Description:                  t.description,
+		URL:                          path.Join("/", t.baseDestination, t.slug) + "/",
+		Slug:                         t.slug,
+		Toc:                          false,
+		Search:                       new(false),
+		Sources:                      t.sources,
+		IsPost:                       true,
+		Template:                     t.template,
+		TemplateCtx:                  t.templateCtx,
+		Pagination:                   t.pagination,
+		LayoutCtx:                    t.layoutCtx,
+		OpenGraph:                    t.openGraph,
+		OpenGraphImageGen:            t.openGraphImageGen,
+		OpenGraphPregeneratedBaseUrl: t.openGraphPregeneratedBaseUrl,
 	}, nil
 }
 
@@ -87,12 +76,8 @@ type Pagination struct {
 	TemplateCtx     map[string]any
 	WithSidebar     bool
 
-	OpenGraphTitle         string
-	OpenGraphDescription   string
-	OpenGraphImage         string
-	OpenGraphImageGenColor *string
-	OpenGraphImageGenDPI   *float64
-	OpenGraphImageGenSize  *float64
+	OpenGraph         *opengraph.Config
+	OpenGraphImageGen *opengraph.OpenGraphImageGen
 }
 
 func (p *Pagination) GetBaseDestination() string {
@@ -150,6 +135,11 @@ func (p *Pagination) GetTasks() ([]*runner.Task, error) {
 		WithSidebar: p.WithSidebar,
 	}
 
+	imageGen := p.OpenGraphImageGen
+	if p.Atom {
+		imageGen = nil
+	}
+
 	page := 1
 	total := int(math.Ceil(float64(len(posts)) / float64(ppp)))
 
@@ -169,15 +159,9 @@ func (p *Pagination) GetTasks() ([]*runner.Task, error) {
 						Enabled: p.PostsPerPage > 0,
 						AtomURL: path.Join("/", p.BaseDestination, "atom.xml"),
 					},
-					layoutCtx: layoutCtx,
-
-					openGraphImageGenerate: !p.Atom,
-					openGraphTitle:         p.OpenGraphTitle,
-					openGraphDescription:   p.OpenGraphDescription,
-					openGraphImage:         p.OpenGraphImage,
-					openGraphImageGenColor: p.OpenGraphImageGenColor,
-					openGraphImageGenDPI:   p.OpenGraphImageGenDPI,
-					openGraphImageGenSize:  p.OpenGraphImageGenSize,
+					layoutCtx:         layoutCtx,
+					openGraph:         p.OpenGraph,
+					openGraphImageGen: imageGen,
 				},
 			),
 		}, nil
@@ -208,24 +192,18 @@ func (p *Pagination) GetTasks() ([]*runner.Task, error) {
 			rv = append(rv,
 				runner.NewTask(p,
 					&paginationTaskImpl{
-						atom:            p.Atom,
-						baseDestination: p.BaseDestination,
-						title:           p.Title,
-						description:     p.Description,
-						sources:         srcs,
-						slug:            "",
-						template:        tmpl,
-						templateCtx:     p.TemplateCtx,
-						pagination:      pagination,
-						layoutCtx:       layoutCtx,
-
-						openGraphImageGenerate: !p.Atom,
-						openGraphTitle:         p.OpenGraphTitle,
-						openGraphDescription:   p.OpenGraphDescription,
-						openGraphImage:         p.OpenGraphImage,
-						openGraphImageGenColor: p.OpenGraphImageGenColor,
-						openGraphImageGenDPI:   p.OpenGraphImageGenDPI,
-						openGraphImageGenSize:  p.OpenGraphImageGenSize,
+						atom:              p.Atom,
+						baseDestination:   p.BaseDestination,
+						title:             p.Title,
+						description:       p.Description,
+						sources:           srcs,
+						slug:              "",
+						template:          tmpl,
+						templateCtx:       p.TemplateCtx,
+						pagination:        pagination,
+						layoutCtx:         layoutCtx,
+						openGraph:         p.OpenGraph,
+						openGraphImageGen: imageGen,
 					},
 				),
 			)
@@ -241,21 +219,19 @@ func (p *Pagination) GetTasks() ([]*runner.Task, error) {
 		rv = append(rv,
 			runner.NewTask(p,
 				&paginationTaskImpl{
-					atom:            p.Atom,
-					baseDestination: p.BaseDestination,
-					title:           p.Title,
-					description:     p.Description,
-					sources:         srcs,
-					slug:            path.Join("page", strconv.FormatInt(int64(page), 10)),
-					template:        tmpl,
-					templateCtx:     p.TemplateCtx,
-					pagination:      pagination,
-					layoutCtx:       layoutCtx,
-
-					openGraphImageGenerate: false,
-					openGraphImageURL:      ogimage.URL(iurl),
-					openGraphTitle:         p.OpenGraphTitle,
-					openGraphDescription:   p.OpenGraphDescription,
+					atom:                         p.Atom,
+					baseDestination:              p.BaseDestination,
+					title:                        p.Title,
+					description:                  p.Description,
+					sources:                      srcs,
+					slug:                         path.Join("page", strconv.FormatInt(int64(page), 10)),
+					template:                     tmpl,
+					templateCtx:                  p.TemplateCtx,
+					pagination:                   pagination,
+					layoutCtx:                    layoutCtx,
+					openGraph:                    p.OpenGraph,
+					openGraphImageGen:            p.OpenGraphImageGen,
+					openGraphPregeneratedBaseUrl: iurl,
 				},
 			),
 		)

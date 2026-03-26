@@ -15,6 +15,7 @@ import (
 	"rafaelmartins.com/p/website/internal/cdocs"
 	"rafaelmartins.com/p/website/internal/config"
 	"rafaelmartins.com/p/website/internal/meta"
+	"rafaelmartins.com/p/website/internal/opengraph"
 	"rafaelmartins.com/p/website/internal/utils"
 )
 
@@ -128,7 +129,7 @@ type ContentContext struct {
 	License     string
 	Toc         string
 	Search      bool
-	OpenGraph   OpenGraphEntry
+	OpenGraph   opengraph.TemplateContext
 	Entry       *ContentEntry
 	Entries     []*ContentEntry
 	Atom        *AtomContentEntry

@@ -15,7 +15,7 @@ import (
 	"rafaelmartins.com/p/website/internal/frontmatter"
 	"rafaelmartins.com/p/website/internal/github"
 	"rafaelmartins.com/p/website/internal/markdown"
-	"rafaelmartins.com/p/website/internal/ogimage"
+	"rafaelmartins.com/p/website/internal/opengraph"
 	"rafaelmartins.com/p/website/internal/runner"
 	"rafaelmartins.com/p/website/internal/templates"
 )
@@ -96,8 +96,7 @@ type ProjectPage struct {
 	meta     *frontmatter.FrontMatter
 	resolver *projectPageResolver
 
-	otitle string
-	odesc  string
+	og     *opengraph.OpenGraph
 	images []string
 }
 
@@ -190,25 +189,6 @@ func (pp *ProjectPage) read() error {
 	}
 	if pp.title == "" {
 		pp.title = pp.proj.Repo
-	}
-
-	pp.otitle = pp.title
-	if pp.proj.OpenGraphTitle != "" {
-		pp.otitle = pp.proj.OpenGraphTitle
-	}
-
-	pp.odesc = pp.proj.proj.Description
-	if pp.proj.OpenGraphDescription != "" {
-		pp.odesc = pp.proj.OpenGraphDescription
-	}
-
-	if pp.meta != nil {
-		if pp.meta.OpenGraph.Title != "" {
-			pp.otitle = pp.meta.OpenGraph.Title
-		}
-		if pp.meta.OpenGraph.Description != "" {
-			pp.odesc = pp.meta.OpenGraph.Description
-		}
 	}
 	return nil
 }
@@ -319,6 +299,12 @@ func (pp *ProjectPage) GetReader() (io.ReadCloser, error) {
 		})
 	}
 
+	og, err := opengraph.New(pp.proj.OpenGraphImageGen, false, purl, pp.title, pp.proj.proj.Description, pp.proj.OpenGraph, pp.meta.Title, pp.meta.Description, pp.meta.OpenGraph)
+	if err != nil {
+		return nil, err
+	}
+	pp.og = og
+
 	buf := &bytes.Buffer{}
 	if err := templates.Execute(buf, pp.getTemplate(), nil, lctx, &templates.ContentContext{
 		Title:       pp.title,
@@ -327,11 +313,7 @@ func (pp *ProjectPage) GetReader() (io.ReadCloser, error) {
 		License:     pp.proj.license,
 		Toc:         pp.toc,
 		Search:      true, // FIXME ???
-		OpenGraph: templates.OpenGraphEntry{
-			Title:       pp.otitle,
-			Description: pp.odesc,
-			Image:       ogimage.URL(purl),
-		},
+		OpenGraph:   og.GetTemplateContext(),
 		Entry: &templates.ContentEntry{
 			Title:   pp.etitle,
 			Body:    pp.body,
@@ -362,11 +344,10 @@ func (pp *ProjectPage) GetPaths() ([]string, error) {
 		}
 	}
 
-	og, err := ogimage.GetPaths()
-	if err != nil {
-		return nil, err
+	if pp.proj.OpenGraphImageGen != nil {
+		rv = append(rv, pp.proj.OpenGraphImageGen.GetPaths()...)
 	}
-	return append(rv, og...), nil
+	return rv, nil
 }
 
 func (pp *ProjectPage) GetImmutable() bool {
@@ -374,28 +355,8 @@ func (pp *ProjectPage) GetImmutable() bool {
 }
 
 func (pp *ProjectPage) GetByProducts(ch chan *runner.GeneratorByProduct) {
-	if ch == nil {
-		return
+	if ch != nil {
+		pp.og.GenerateByProduct(ch, "")
+		close(ch)
 	}
-
-	image := pp.proj.OpenGraphImage
-	ccolor := pp.proj.OpenGraphImageGenColor
-	dpi := pp.proj.OpenGraphImageGenDPI
-	size := pp.proj.OpenGraphImageGenSize
-
-	if pp.meta != nil {
-		// FIXME: handle image
-		if pp.meta.OpenGraph.ImageGen.Color != nil {
-			ccolor = pp.meta.OpenGraph.ImageGen.Color
-		}
-		if pp.meta.OpenGraph.ImageGen.DPI != nil {
-			dpi = pp.meta.OpenGraph.ImageGen.DPI
-		}
-		if pp.meta.OpenGraph.ImageGen.Size != nil {
-			size = pp.meta.OpenGraph.ImageGen.Size
-		}
-	}
-
-	ogimage.GenerateByProduct(ch, pp.otitle, true, image, ccolor, dpi, size)
-	close(ch)
 }

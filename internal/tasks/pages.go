@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 
 	"rafaelmartins.com/p/website/internal/generators"
+	"rafaelmartins.com/p/website/internal/opengraph"
 	"rafaelmartins.com/p/website/internal/runner"
 	"rafaelmartins.com/p/website/internal/templates"
 )
@@ -24,13 +25,8 @@ type pageTaskImpl struct {
 	templateCtx       map[string]any
 	layoutCtx         *templates.LayoutContext
 
-	openGraphTitle         string
-	openGraphDescription   string
-	openGraphImage         string
-	openGraphImageGenerate bool
-	openGraphImageGenColor *string
-	openGraphImageGenDPI   *float64
-	openGraphImageGenSize  *float64
+	openGraph         *opengraph.Config
+	openGraphImageGen *opengraph.OpenGraphImageGen
 }
 
 func (t *pageTaskImpl) GetDestination() string {
@@ -68,13 +64,8 @@ func (t *pageTaskImpl) GetGenerator() (runner.Generator, error) {
 		TemplateCtx:       t.templateCtx,
 		LayoutCtx:         t.layoutCtx,
 
-		OpenGraphTitle:         t.openGraphTitle,
-		OpenGraphDescription:   t.openGraphDescription,
-		OpenGraphImage:         t.openGraphImage,
-		OpenGraphImageGenerate: t.openGraphImageGenerate,
-		OpenGraphImageGenColor: t.openGraphImageGenColor,
-		OpenGraphImageGenDPI:   t.openGraphImageGenDPI,
-		OpenGraphImageGenSize:  t.openGraphImageGenSize,
+		OpenGraph:         t.openGraph,
+		OpenGraphImageGen: t.openGraphImageGen,
 	}, nil
 }
 
@@ -86,14 +77,7 @@ type PageSource struct {
 	License     string
 	Toc         bool
 	Search      *bool
-
-	OpenGraphTitle         string
-	OpenGraphDescription   string
-	OpenGraphImage         string
-	OpenGraphImageGenerate bool
-	OpenGraphImageGenColor *string
-	OpenGraphImageGenDPI   *float64
-	OpenGraphImageGenSize  *float64
+	OpenGraph   *opengraph.Config
 }
 
 type Pages struct {
@@ -104,6 +88,7 @@ type Pages struct {
 	Template          string
 	TemplateCtx       map[string]any
 	WithSidebar       bool
+	OpenGraphImageGen *opengraph.OpenGraphImageGen
 }
 
 func (p *Pages) GetBaseDestination() string {
@@ -145,14 +130,8 @@ func (p *Pages) GetTasks() ([]*runner.Task, error) {
 					layoutCtx: &templates.LayoutContext{
 						WithSidebar: p.WithSidebar,
 					},
-
-					openGraphTitle:         v.OpenGraphTitle,
-					openGraphDescription:   v.OpenGraphDescription,
-					openGraphImage:         v.OpenGraphImage,
-					openGraphImageGenerate: v.OpenGraphImageGenerate,
-					openGraphImageGenColor: v.OpenGraphImageGenColor,
-					openGraphImageGenDPI:   v.OpenGraphImageGenDPI,
-					openGraphImageGenSize:  v.OpenGraphImageGenSize,
+					openGraph:         v.OpenGraph,
+					openGraphImageGen: p.OpenGraphImageGen,
 				},
 			),
 		)

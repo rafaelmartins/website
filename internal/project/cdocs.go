@@ -9,14 +9,14 @@ import (
 
 	"rafaelmartins.com/p/website/internal/cdocs"
 	"rafaelmartins.com/p/website/internal/github"
-	"rafaelmartins.com/p/website/internal/ogimage"
+	"rafaelmartins.com/p/website/internal/opengraph"
 	"rafaelmartins.com/p/website/internal/runner"
 	"rafaelmartins.com/p/website/internal/templates"
 )
 
 type cDocs struct {
-	proj   *Project
-	otitle string
+	proj *Project
+	og   *opengraph.OpenGraph
 }
 
 func (c *cDocs) GetDestination() string {
@@ -84,22 +84,19 @@ func (c *cDocs) GetReader() (io.ReadCloser, error) {
 
 	title := fmt.Sprintf("%s: API Documentation", c.proj.Repo)
 
-	c.otitle = title
-	if c.proj.CDocsOpenGraphTitle != "" {
-		c.otitle = c.proj.CDocsOpenGraphTitle
+	og, err := opengraph.New(c.proj.OpenGraphImageGen, false, c.proj.cdocsUrl, title, "", c.proj.CDocsOpenGraph, "", "", nil)
+	if err != nil {
+		return nil, err
 	}
+	c.og = og
 
 	buf := &bytes.Buffer{}
 	if err := templates.Execute(buf, c.getTemplate(), nil, nil, &templates.ContentContext{
-		Title:   title,
-		URL:     c.proj.cdocsUrl,
-		License: c.proj.license,
-		Search:  true, // FIXME ???
-		OpenGraph: templates.OpenGraphEntry{
-			Title:       c.otitle,
-			Description: c.proj.CDocsOpenGraphDescription,
-			Image:       ogimage.URL(c.proj.cdocsUrl),
-		},
+		Title:     title,
+		URL:       c.proj.cdocsUrl,
+		License:   c.proj.license,
+		Search:    true, // FIXME ???
+		OpenGraph: og.GetTemplateContext(),
 		Entry: &templates.ContentEntry{
 			Title: title,
 			CDocs: dctx,
@@ -126,11 +123,10 @@ func (c *cDocs) GetPaths() ([]string, error) {
 		}
 	}
 
-	og, err := ogimage.GetPaths()
-	if err != nil {
-		return nil, err
+	if c.proj.OpenGraphImageGen != nil {
+		rv = append(rv, c.proj.OpenGraphImageGen.GetPaths()...)
 	}
-	return append(rv, og...), nil
+	return rv, nil
 }
 
 func (c *cDocs) GetImmutable() bool {
@@ -138,6 +134,8 @@ func (c *cDocs) GetImmutable() bool {
 }
 
 func (c *cDocs) GetByProducts(ch chan *runner.GeneratorByProduct) {
-	ogimage.GenerateByProduct(ch, c.otitle, true, c.proj.CDocsOpenGraphImage, c.proj.CDocsOpenGraphImageGenColor, c.proj.CDocsOpenGraphImageGenDPI, c.proj.CDocsOpenGraphImageGenSize)
-	close(ch)
+	if ch != nil {
+		c.og.GenerateByProduct(ch, "")
+		close(ch)
+	}
 }

@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"go.yaml.in/yaml/v3"
+	"rafaelmartins.com/p/website/internal/opengraph"
 )
 
 type Config struct {
@@ -24,12 +25,7 @@ type Config struct {
 
 	Search bool `yaml:"search"`
 
-	OpenGraphImageGen struct {
-		Template     string   `yaml:"template"`
-		DefaultColor *string  `yaml:"default-color"`
-		DefaultDPI   *float64 `yaml:"default-dpi"`
-		DefaultSize  *float64 `yaml:"default-size"`
-	} `yaml:"opengraph-image-gen"`
+	OpenGraphImageGen *opengraph.ImageGenConfig `yaml:"opengraph-image-gen"`
 
 	Assets struct {
 		BaseDestination string `yaml:"base-destination"`
@@ -72,20 +68,11 @@ type Config struct {
 			Toc   bool     `yaml:"toc"`
 			Files []string `yaml:"files"`
 			CDocs struct {
-				Destination   string   `yaml:"destination"`
-				Headers       []string `yaml:"headers"`
-				BaseDirectory *string  `yaml:"base-directory"`
-				Template      string   `yaml:"template"`
-				OpenGraph     struct {
-					Title       string `yaml:"title"`
-					Description string `yaml:"description"`
-					Image       string `yaml:"image"`
-					ImageGen    struct {
-						Color *string  `yaml:"color"`
-						DPI   *float64 `yaml:"dpi"`
-						Size  *float64 `yaml:"size"`
-					} `yaml:"image-gen"`
-				} `yaml:"opengraph"`
+				Destination   string            `yaml:"destination"`
+				Headers       []string          `yaml:"headers"`
+				BaseDirectory *string           `yaml:"base-directory"`
+				Template      string            `yaml:"template"`
+				OpenGraph     *opengraph.Config `yaml:"opengraph"`
 			} `yaml:"c-docs"`
 			Kicad struct {
 				Destination string   `yaml:"destination"`
@@ -99,17 +86,8 @@ type Config struct {
 				Import string `yaml:"import"`
 				Repo   string `yaml:"repo"`
 			} `yaml:"go"`
-			OpenGraph struct {
-				Title       string `yaml:"title"`
-				Description string `yaml:"description"`
-				Image       string `yaml:"image"`
-				ImageGen    struct {
-					Color *string  `yaml:"color"`
-					DPI   *float64 `yaml:"dpi"`
-					Size  *float64 `yaml:"size"`
-				} `yaml:"image-gen"`
-			} `yaml:"opengraph"`
-			Immutable *bool `yaml:"immutable"`
+			OpenGraph *opengraph.Config `yaml:"opengraph"`
+			Immutable *bool             `yaml:"immutable"`
 		} `yaml:"repositories"`
 		BaseDestination string `yaml:"base-destination"`
 		Template        string `yaml:"template"`
@@ -117,23 +95,13 @@ type Config struct {
 
 	Pages []*struct {
 		Sources []*struct {
-			Title       string `yaml:"title"`
-			Description string `yaml:"description"`
-			Slug        string `yaml:"slug"`
-			File        string `yaml:"file"`
-			License     string `yaml:"license"`
-			Toc         *bool  `yaml:"toc"`
-			OpenGraph   struct {
-				Title       string `yaml:"title"`
-				Description string `yaml:"description"`
-				Image       string `yaml:"image"`
-				ImageGen    struct {
-					Generate *bool    `yaml:"generate"`
-					Color    *string  `yaml:"color"`
-					DPI      *float64 `yaml:"dpi"`
-					Size     *float64 `yaml:"size"`
-				} `yaml:"image-gen"`
-			} `yaml:"opengraph"`
+			Title       string            `yaml:"title"`
+			Description string            `yaml:"description"`
+			Slug        string            `yaml:"slug"`
+			File        string            `yaml:"file"`
+			License     string            `yaml:"license"`
+			Toc         *bool             `yaml:"toc"`
+			OpenGraph   *opengraph.Config `yaml:"opengraph"`
 		} `yaml:"sources"`
 		Toc               bool           `yaml:"toc"`
 		ExtraDependencies []string       `yaml:"extra-dependencies"`
@@ -145,51 +113,33 @@ type Config struct {
 	} `yaml:"pages"`
 
 	Posts struct {
-		Title              string         `yaml:"title"`
-		Description        string         `yaml:"description"`
-		PostsPerPage       int            `yaml:"posts-per-page"`
-		PostsPerPageAtom   int            `yaml:"posts-per-page-atom"`
-		SortReverse        *bool          `yaml:"sort-reverse"`
-		BaseDestination    string         `yaml:"base-destination"`
-		TemplateAtom       string         `yaml:"template-atom"`
-		TemplatePagination string         `yaml:"template-pagination"`
-		TemplateCtx        map[string]any `yaml:"template-context"`
-		WithSidebar        bool           `yaml:"with-sidebar"`
-		OpenGraph          struct {
-			Title       string `yaml:"title"`
-			Description string `yaml:"description"`
-			Image       string `yaml:"image"`
-			ImageGen    struct {
-				Color *string  `yaml:"color"`
-				DPI   *float64 `yaml:"dpi"`
-				Size  *float64 `yaml:"size"`
-			} `yaml:"image-gen"`
-		} `yaml:"opengraph"`
+		Title              string            `yaml:"title"`
+		Description        string            `yaml:"description"`
+		PostsPerPage       int               `yaml:"posts-per-page"`
+		PostsPerPageAtom   int               `yaml:"posts-per-page-atom"`
+		SortReverse        *bool             `yaml:"sort-reverse"`
+		BaseDestination    string            `yaml:"base-destination"`
+		TemplateAtom       string            `yaml:"template-atom"`
+		TemplatePagination string            `yaml:"template-pagination"`
+		TemplateCtx        map[string]any    `yaml:"template-context"`
+		WithSidebar        bool              `yaml:"with-sidebar"`
+		OpenGraph          *opengraph.Config `yaml:"opengraph"`
 
 		Groups []*struct {
-			Title              string         `yaml:"title"`
-			Description        string         `yaml:"description"`
-			SourceDir          string         `yaml:"source-dir"`
-			Toc                bool           `yaml:"toc"`
-			PostsPerPage       int            `yaml:"posts-per-page"`
-			PostsPerPageAtom   int            `yaml:"posts-per-page-atom"`
-			SortReverse        *bool          `yaml:"sort-reverse"`
-			BaseDestination    string         `yaml:"base-destination"`
-			Template           string         `yaml:"template"`
-			TemplateAtom       string         `yaml:"template-atom"`
-			TemplatePagination string         `yaml:"template-pagination"`
-			TemplateCtx        map[string]any `yaml:"template-context"`
-			WithSidebar        bool           `yaml:"with-sidebar"`
-			OpenGraph          struct {
-				Title       string `yaml:"title"`
-				Description string `yaml:"description"`
-				Image       string `yaml:"image"`
-				ImageGen    struct {
-					Color *string  `yaml:"color"`
-					DPI   *float64 `yaml:"dpi"`
-					Size  *float64 `yaml:"size"`
-				} `yaml:"image-gen"`
-			} `yaml:"opengraph"`
+			Title              string            `yaml:"title"`
+			Description        string            `yaml:"description"`
+			SourceDir          string            `yaml:"source-dir"`
+			Toc                bool              `yaml:"toc"`
+			PostsPerPage       int               `yaml:"posts-per-page"`
+			PostsPerPageAtom   int               `yaml:"posts-per-page-atom"`
+			SortReverse        *bool             `yaml:"sort-reverse"`
+			BaseDestination    string            `yaml:"base-destination"`
+			Template           string            `yaml:"template"`
+			TemplateAtom       string            `yaml:"template-atom"`
+			TemplatePagination string            `yaml:"template-pagination"`
+			TemplateCtx        map[string]any    `yaml:"template-context"`
+			WithSidebar        bool              `yaml:"with-sidebar"`
+			OpenGraph          *opengraph.Config `yaml:"opengraph"`
 		} `yaml:"groups"`
 	} `yaml:"posts"`
 

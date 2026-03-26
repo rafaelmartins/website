@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"rafaelmartins.com/p/website/internal/github"
+	"rafaelmartins.com/p/website/internal/opengraph"
 )
 
 type ProjectLicense struct {
@@ -28,28 +29,19 @@ type Project struct {
 
 	Toc bool
 
-	Force                  bool
-	LocalDirectory         *string
-	BaseDestination        string
-	Template               string
-	Immutable              bool
-	OpenGraphTitle         string
-	OpenGraphDescription   string
-	OpenGraphImage         string
-	OpenGraphImageGenColor *string
-	OpenGraphImageGenDPI   *float64
-	OpenGraphImageGenSize  *float64
+	Force             bool
+	LocalDirectory    *string
+	BaseDestination   string
+	Template          string
+	Immutable         bool
+	OpenGraph         *opengraph.Config
+	OpenGraphImageGen *opengraph.OpenGraphImageGen
 
-	CDocsDestination            string
-	CDocsHeaders                []string
-	CDocsBaseDirectory          *string
-	CDocsTemplate               string
-	CDocsOpenGraphTitle         string
-	CDocsOpenGraphDescription   string
-	CDocsOpenGraphImage         string
-	CDocsOpenGraphImageGenColor *string
-	CDocsOpenGraphImageGenDPI   *float64
-	CDocsOpenGraphImageGenSize  *float64
+	CDocsDestination   string
+	CDocsHeaders       []string
+	CDocsBaseDirectory *string
+	CDocsTemplate      string
+	CDocsOpenGraph     *opengraph.Config
 
 	proj             *github.Repository
 	subdir           string

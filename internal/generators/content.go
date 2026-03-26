@@ -4,14 +4,14 @@ import (
 	"bytes"
 	"errors"
 	"io"
+	"path"
 	"path/filepath"
 	"slices"
 	"text/template"
 	"time"
 
 	"rafaelmartins.com/p/website/internal/content"
-	"rafaelmartins.com/p/website/internal/frontmatter"
-	"rafaelmartins.com/p/website/internal/ogimage"
+	"rafaelmartins.com/p/website/internal/opengraph"
 	"rafaelmartins.com/p/website/internal/runner"
 	"rafaelmartins.com/p/website/internal/templates"
 )
@@ -37,17 +37,12 @@ type Content struct {
 	Pagination        *templates.ContentPagination
 	LayoutCtx         *templates.LayoutContext
 
-	OpenGraphTitle         string
-	OpenGraphDescription   string
-	OpenGraphImage         string
-	OpenGraphImageURL      string
-	OpenGraphImageGenerate bool
-	OpenGraphImageGenColor *string
-	OpenGraphImageGenDPI   *float64
-	OpenGraphImageGenSize  *float64
+	OpenGraph                    *opengraph.Config
+	OpenGraphImageGen            *opengraph.OpenGraphImageGen
+	OpenGraphPregeneratedBaseUrl string
 
-	ctx      *templates.ContentContext
-	metadata *frontmatter.FrontMatter
+	ctx *templates.ContentContext
+	og  *opengraph.OpenGraph
 }
 
 func (*Content) GetID() string {
@@ -56,7 +51,7 @@ func (*Content) GetID() string {
 
 func (h *Content) GetReader() (io.ReadCloser, error) {
 	if h.URL == "" {
-		return nil, errors.New("markdown: missing url")
+		return nil, errors.New("content: missing url")
 	}
 
 	ctx := &templates.ContentContext{
@@ -66,32 +61,20 @@ func (h *Content) GetReader() (io.ReadCloser, error) {
 		Slug:        h.Slug,
 		License:     h.License,
 		Search:      true,
-		OpenGraph: templates.OpenGraphEntry{
-			Title:       h.OpenGraphTitle,
-			Description: h.OpenGraphDescription,
-			Image:       h.OpenGraphImageURL,
-		},
-		Atom:       &templates.AtomContentEntry{},
-		Pagination: h.Pagination,
-		Extra:      h.TemplateCtx,
+		Atom:        &templates.AtomContentEntry{},
+		Pagination:  h.Pagination,
+		Extra:       h.TemplateCtx,
 	}
 	if h.Search != nil {
 		ctx.Search = *h.Search
-	}
-
-	if ctx.OpenGraph.Title == "" {
-		ctx.OpenGraph.Title = h.Title
-	}
-	if ctx.OpenGraph.Description == "" {
-		ctx.OpenGraph.Description = h.Description
-	}
-	if h.OpenGraphImageGenerate && ctx.OpenGraph.Image == "" {
-		ctx.OpenGraph.Image = ogimage.URL(h.URL)
 	}
 	h.ctx = ctx
 
 	atomUpdated := time.Time{}
 	entries := []*templates.ContentEntry{}
+	mt := ""
+	md := ""
+	var mog *opengraph.Config
 
 	for _, src := range h.Sources {
 		if src.File == "" {
@@ -113,13 +96,6 @@ func (h *Content) GetReader() (io.ReadCloser, error) {
 			URL:   src.URL,
 			Title: metadata.Title,
 			Body:  body,
-		}
-
-		if ctx.OpenGraph.Title == "" {
-			ctx.OpenGraph.Title = metadata.Title
-		}
-		if ctx.OpenGraph.Description == "" {
-			ctx.OpenGraph.Description = metadata.Description
 		}
 
 		if h.IsPost {
@@ -152,7 +128,9 @@ func (h *Content) GetReader() (io.ReadCloser, error) {
 				ctx.Search = *metadata.Search
 			}
 
-			h.metadata = metadata
+			mt = metadata.Title
+			md = metadata.Description
+			mog = metadata.OpenGraph
 			break
 		}
 
@@ -166,6 +144,20 @@ func (h *Content) GetReader() (io.ReadCloser, error) {
 			ctx.Atom.Updated = time.Unix(0, 0)
 		}
 	}
+
+	baseurl := h.URL
+	ogpregenerated := false
+	if h.OpenGraphPregeneratedBaseUrl != "" {
+		baseurl = h.OpenGraphPregeneratedBaseUrl
+		ogpregenerated = true
+	}
+	og, err := opengraph.New(h.OpenGraphImageGen, ogpregenerated, baseurl, ctx.Title, ctx.Description, h.OpenGraph, mt, md, mog)
+	if err != nil {
+		return nil, err
+	}
+	h.og = og
+
+	ctx.OpenGraph = h.og.GetTemplateContext()
 
 	funcMap := template.FuncMap{
 		"contentGetMetadata": content.GetMetadata,
@@ -184,11 +176,9 @@ func (h *Content) GetPaths() ([]string, error) {
 		return nil, err
 	}
 
-	og, err := ogimage.GetPaths()
-	if err != nil {
-		return nil, err
+	if h.OpenGraphImageGen != nil {
+		rv = append(rv, h.OpenGraphImageGen.GetPaths()...)
 	}
-	rv = append(rv, og...)
 
 	for _, src := range h.Sources {
 		if src.File == "" {
@@ -235,26 +225,13 @@ func (h *Content) GetByProducts(ch chan *runner.GeneratorByProduct) {
 		}
 	}
 
-	image := h.OpenGraphImage
-	ccolor := h.OpenGraphImageGenColor
-	dpi := h.OpenGraphImageGenDPI
-	size := h.OpenGraphImageGenSize
-
-	if h.metadata != nil {
-		if h.metadata.OpenGraph.Image != "" {
-			image = filepath.Join(filepath.Dir(h.Sources[0].File), h.metadata.OpenGraph.Image)
+	if h.og != nil {
+		basedir := ""
+		if len(h.Sources) > 0 {
+			basedir = path.Dir(h.Sources[0].File)
 		}
-		if h.metadata.OpenGraph.ImageGen.Color != nil {
-			ccolor = h.metadata.OpenGraph.ImageGen.Color
-		}
-		if h.metadata.OpenGraph.ImageGen.DPI != nil {
-			dpi = h.metadata.OpenGraph.ImageGen.DPI
-		}
-		if h.metadata.OpenGraph.ImageGen.Size != nil {
-			size = h.metadata.OpenGraph.ImageGen.Size
-		}
+		h.og.GenerateByProduct(ch, basedir)
 	}
 
-	ogimage.GenerateByProduct(ch, h.ctx.OpenGraph.Title, h.OpenGraphImageGenerate, image, ccolor, dpi, size)
 	close(ch)
 }

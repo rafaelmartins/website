@@ -10,6 +10,7 @@ import (
 
 	"rafaelmartins.com/p/website/internal/content"
 	"rafaelmartins.com/p/website/internal/generators"
+	"rafaelmartins.com/p/website/internal/opengraph"
 	"rafaelmartins.com/p/website/internal/runner"
 	"rafaelmartins.com/p/website/internal/templates"
 )
@@ -50,13 +51,14 @@ func (p *PostsSources) List() ([]*generators.ContentSource, error) {
 }
 
 type postTaskImpl struct {
-	baseDestination string
-	slug            string
-	toc             bool
-	source          *generators.ContentSource
-	template        string
-	templateCtx     map[string]any
-	layoutCtx       *templates.LayoutContext
+	baseDestination   string
+	slug              string
+	toc               bool
+	source            *generators.ContentSource
+	template          string
+	templateCtx       map[string]any
+	layoutCtx         *templates.LayoutContext
+	openGraphImageGen *opengraph.OpenGraphImageGen
 }
 
 func (t *postTaskImpl) GetDestination() string {
@@ -70,25 +72,25 @@ func (t *postTaskImpl) GetGenerator() (runner.Generator, error) {
 	}
 
 	return &generators.Content{
-		URL:         url,
-		Slug:        t.slug,
-		Toc:         t.toc,
-		Sources:     []*generators.ContentSource{t.source},
-		IsPost:      true,
-		Template:    t.template,
-		TemplateCtx: t.templateCtx,
-		LayoutCtx:   t.layoutCtx,
-
-		OpenGraphImageGenerate: true,
+		URL:               url,
+		Slug:              t.slug,
+		Toc:               t.toc,
+		Sources:           []*generators.ContentSource{t.source},
+		IsPost:            true,
+		Template:          t.template,
+		TemplateCtx:       t.templateCtx,
+		LayoutCtx:         t.layoutCtx,
+		OpenGraphImageGen: t.openGraphImageGen,
 	}, nil
 }
 
 type Posts struct {
-	SourceDir   PostsSources
-	Toc         bool
-	Template    string
-	TemplateCtx map[string]any
-	WithSidebar bool
+	SourceDir         PostsSources
+	Toc               bool
+	Template          string
+	TemplateCtx       map[string]any
+	WithSidebar       bool
+	OpenGraphImageGen *opengraph.OpenGraphImageGen
 }
 
 func (p *Posts) GetBaseDestination() string {
@@ -126,6 +128,7 @@ func (p *Posts) GetTasks() ([]*runner.Task, error) {
 					layoutCtx: &templates.LayoutContext{
 						WithSidebar: p.WithSidebar,
 					},
+					openGraphImageGen: p.OpenGraphImageGen,
 				},
 			),
 		)

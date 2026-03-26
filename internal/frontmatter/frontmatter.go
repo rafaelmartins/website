@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"go.yaml.in/yaml/v3"
+	"rafaelmartins.com/p/website/internal/opengraph"
 )
 
 type FrontMatterDate struct {
@@ -42,19 +43,10 @@ type FrontMatter struct {
 		Name  string `yaml:"name"`
 		Email string `yaml:"email"`
 	} `yaml:"author"`
-	OpenGraph struct {
-		Title       string `yaml:"title"`
-		Description string `yaml:"description"`
-		Image       string `yaml:"image"`
-		ImageGen    struct {
-			Color *string  `yaml:"color"`
-			DPI   *float64 `yaml:"dpi"`
-			Size  *float64 `yaml:"size"`
-		} `yaml:"image-gen"`
-	} `yaml:"opengraph"`
-	Search *bool          `yaml:"search"`
-	Toc    *bool          `yaml:"toc"`
-	Extra  map[string]any `yaml:"extra"`
+	OpenGraph *opengraph.Config `yaml:"opengraph"`
+	Search    *bool             `yaml:"search"`
+	Toc       *bool             `yaml:"toc"`
+	Extra     map[string]any    `yaml:"extra"`
 }
 
 func Parse(src []byte) (*FrontMatter, []byte, error) {
