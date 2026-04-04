@@ -65,15 +65,20 @@ type Config struct {
 				SpdxId string `yaml:"spdx-id"`
 				Title  string `yaml:"title"`
 			} `yaml:"licenses"`
-			Toc   bool     `yaml:"toc"`
-			Files []string `yaml:"files"`
-			CDocs struct {
+			RollingTag *string  `yaml:"rolling-tag"`
+			Toc        bool     `yaml:"toc"`
+			Files      []string `yaml:"files"`
+			CDocs      struct {
 				Destination   string            `yaml:"destination"`
 				Headers       []string          `yaml:"headers"`
 				BaseDirectory *string           `yaml:"base-directory"`
 				Template      string            `yaml:"template"`
 				OpenGraph     *opengraph.Config `yaml:"opengraph"`
 			} `yaml:"c-docs"`
+			Dfu struct {
+				Destination          string `yaml:"destination"`
+				ReleaseAssetsPattern string `yaml:"release-assets-pattern"`
+			} `yaml:"dfu"`
 			Kicad struct {
 				Destination string   `yaml:"destination"`
 				Projects    []string `yaml:"projects"`
@@ -92,6 +97,15 @@ type Config struct {
 		BaseDestination string `yaml:"base-destination"`
 		Template        string `yaml:"template"`
 	} `yaml:"projects"`
+
+	DfuFlasher *struct {
+		Title           string            `yaml:"title"`
+		Description     string            `yaml:"description"`
+		BaseDestination string            `yaml:"base-destination"`
+		Template        string            `yaml:"template"`
+		WithSidebar     bool              `yaml:"with-sidebar"`
+		OpenGraph       *opengraph.Config `yaml:"opengraph"`
+	} `yaml:"dfu-flasher"`
 
 	Pages []*struct {
 		Sources []*struct {

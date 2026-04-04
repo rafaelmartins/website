@@ -18,9 +18,10 @@ type ProjectLicense struct {
 }
 
 type Project struct {
-	Owner    string
-	Repo     string
-	Licenses []*ProjectLicense
+	Owner      string
+	Repo       string
+	Licenses   []*ProjectLicense
+	RollingTag string
 
 	Files []string
 
@@ -43,6 +44,9 @@ type Project struct {
 	CDocsTemplate      string
 	CDocsOpenGraph     *opengraph.Config
 
+	DfuDestination          string
+	DfuReleaseAssetsPattern string
+
 	proj             *github.Repository
 	subdir           string
 	pages            []*ProjectPage
@@ -50,7 +54,24 @@ type Project struct {
 	url              string
 	cdocsDestination string
 	cdocsUrl         string
+	dfuDestination   string
+	dfuUrl           string
 	license          string
+}
+
+func (p *Project) initDfu() {
+	p.dfuDestination = p.DfuDestination
+	if p.dfuDestination == "" {
+		p.dfuDestination = "dfu"
+	}
+
+	p.dfuUrl = ""
+	if p.DfuReleaseAssetsPattern != "" {
+		p.dfuUrl = path.Join("/", p.GetBaseDestination(), p.Repo, p.dfuDestination)
+		if p.dfuUrl != "/" {
+			p.dfuUrl += "/"
+		}
+	}
 }
 
 func (p *Project) init() error {
@@ -61,7 +82,7 @@ func (p *Project) init() error {
 		return p.reload()
 	}
 
-	proj, err := github.GetRepository(p.Owner, p.Repo, p.CDocsBaseDirectory, p.LocalDirectory)
+	proj, err := github.GetRepository(p.Owner, p.Repo, p.RollingTag, p.CDocsBaseDirectory, p.LocalDirectory)
 	if err != nil {
 		return err
 	}
@@ -84,6 +105,8 @@ func (p *Project) init() error {
 			p.cdocsUrl += "/"
 		}
 	}
+
+	p.initDfu()
 
 	p.license = ""
 	if len(p.Licenses) > 0 {
@@ -201,4 +224,12 @@ func (p *Project) handleLinkUrl(link string, currentPage string) (bool, string, 
 		}
 	}
 	return true, v, nil
+}
+
+func (p *Project) GetDfuIndexUrl() string {
+	p.initDfu()
+	if p.DfuReleaseAssetsPattern == "" {
+		return ""
+	}
+	return path.Join(p.dfuUrl, "index.json")
 }

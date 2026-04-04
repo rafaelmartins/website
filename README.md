@@ -13,6 +13,7 @@ The code is somewhat generic (writing code that way is just stronger than me), b
 ## Some cool features
 - Generation of project pages from GitHub READMEs.
 - Generation of project API documentation, similar to Doxygen, but simpler and focused on C.
+- A complete tool to provide firmware flashing via DFU for STM32 microcontrollers.
 - Embedded default templates.
 - JavaScript/CSS assets downloaded directly from CDN to be hosted locally.
 - Runner can rebuild output files when the binary is rebuilt or any source file changes.

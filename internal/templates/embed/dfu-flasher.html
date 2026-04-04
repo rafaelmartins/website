@@ -1,0 +1,85 @@
+{{ define "main_content" -}}
+<section class="content">
+{{ template "dfu_flasher_description" . }}
+</section>
+<noscript>
+  <article class="message is-danger">
+    <div class="message-body">
+      JavaScript is required for the DFU flasher to work.
+    </div>
+  </article>
+</noscript>
+<div id="dfu-flasher">
+  <article class="message is-danger" id="dfu-error" style="display: none">
+    <div class="message-body"><strong>Error:</strong> <span id="dfu-error-body"></span></div>
+  </article>
+  <div id="dfu-supported" style="display: none">
+    <div class="field">
+      <label class="label">Project</label>
+      <div class="control">
+        <div class="select">
+          <select id="dfu-project-select" disabled>
+            <option value="">Select a project</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="field">
+      <label class="label">Firmware</label>
+      <div class="control">
+        <div class="select">
+          <select id="dfu-firmware-select" disabled>
+            <option value="">Select a firmware</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="field" id="dfu-firmwareinfo" style="display: none">
+      <label class="label">Firmware Information</label>
+      <pre id="dfu-firmwareinfo-body"></pre>
+    </div>
+    <div class="field" id="dfu-deviceinfo" style="display: none">
+      <label class="label">Device Information</label>
+      <pre id="dfu-deviceinfo-body"></pre>
+    </div>
+    <div class="field" id="dfu-status" style="display: none">
+      <label class="label" id="dfu-status-label"></label>
+      <progress class="progress is-link" id="dfu-status-progress"></progress>
+    </div>
+    <div class="field" id="dfu-log" style="display: none">
+      <label class="label">Flash Log</label>
+      <pre id="dfu-log-body" style="min-height: 16em;"></pre>
+    </div>
+    <div class="field is-grouped my-5">
+      <div class="control">
+        <button class="button is-link" id="dfu-connection-btn" disabled>
+          <span class="icon"><i class="fa-solid fa-plug" id="dfu-connection-icon"></i></span>
+          <span id="dfu-connection-body">Connect</span>
+        </button>
+      </div>
+      <div class="control">
+        <button class="button is-danger" id="dfu-flash-btn" style="display: none">
+          <span class="icon"><i class="fa-solid fa-bolt"></i></span>
+          <span>Flash</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+{{- end }}
+
+{{ define "extra_body" -}}
+<script id="dfu-js" type="module" src="{{ assetsUrl }}/dfu-flasher.js" data-json="{{ .Content.Extra.projects }}"></script>
+{{- end }}
+
+{{ define "dfu_flasher_description" -}}
+<p>
+  <strong>Flash the firmware of USB DFU capable projects to your device
+  directly from the browser.</strong>
+</p>
+<p>
+  Select a project, then select a firmware and click <strong>Connect</strong>.
+  Your browser will prompt you to select the USB device. After selecting the
+  device, verify its details and click <strong>Flash</strong> to begin.
+</p>
+{{- end }}

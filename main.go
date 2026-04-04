@@ -132,6 +132,18 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 			)
 		}
 
+		// dfu-flasher specific assets embedded
+		if c.DfuFlasher != nil {
+			rv = append(rv,
+				runner.NewTaskGroup(
+					&tasks.Embed{
+						FS:              assets.DfuFlasher,
+						BaseDestination: assetsDir,
+					},
+				),
+			)
+		}
+
 		// standard assets embedded
 		rv = append(rv,
 			runner.NewTaskGroup(
@@ -396,6 +408,7 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 		)
 	}
 
+	dfuProjects := []string{}
 	for _, pj := range c.Projects {
 		for _, repo := range pj.Repositories {
 			localDir := (*string)(nil)
@@ -418,36 +431,50 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 				})
 			}
 
+			rolling := "rolling"
+			if repo.RollingTag != nil {
+				rolling = *repo.RollingTag
+			}
+
+			proj := &project.Project{
+				Owner:      repo.Owner,
+				Repo:       repo.Repo,
+				Licenses:   licenses,
+				RollingTag: rolling,
+
+				Files: repo.Files,
+
+				GoImport: repo.Go.Import,
+				GoRepo:   repo.Go.Repo,
+
+				Toc: repo.Toc,
+
+				Force:             *fForce,
+				LocalDirectory:    localDir,
+				BaseDestination:   pj.BaseDestination,
+				Template:          pj.Template,
+				Immutable:         immutable,
+				OpenGraph:         repo.OpenGraph,
+				OpenGraphImageGen: ogimage,
+
+				CDocsDestination:   repo.CDocs.Destination,
+				CDocsHeaders:       repo.CDocs.Headers,
+				CDocsBaseDirectory: repo.CDocs.BaseDirectory,
+				CDocsTemplate:      repo.CDocs.Template,
+				CDocsOpenGraph:     repo.CDocs.OpenGraph,
+
+				DfuDestination:          repo.Dfu.Destination,
+				DfuReleaseAssetsPattern: repo.Dfu.ReleaseAssetsPattern,
+			}
 			rv = append(rv,
 				runner.NewTaskGroup(
-					&project.Project{
-						Owner:    repo.Owner,
-						Repo:     repo.Repo,
-						Licenses: licenses,
-
-						Files: repo.Files,
-
-						GoImport: repo.Go.Import,
-						GoRepo:   repo.Go.Repo,
-
-						Toc: repo.Toc,
-
-						Force:             *fForce,
-						LocalDirectory:    localDir,
-						BaseDestination:   pj.BaseDestination,
-						Template:          pj.Template,
-						Immutable:         immutable,
-						OpenGraph:         repo.OpenGraph,
-						OpenGraphImageGen: ogimage,
-
-						CDocsDestination:   repo.CDocs.Destination,
-						CDocsHeaders:       repo.CDocs.Headers,
-						CDocsBaseDirectory: repo.CDocs.BaseDirectory,
-						CDocsTemplate:      repo.CDocs.Template,
-						CDocsOpenGraph:     repo.CDocs.OpenGraph,
-					},
+					proj,
 				),
 			)
+
+			if index := proj.GetDfuIndexUrl(); index != "" {
+				dfuProjects = append(dfuProjects, index)
+			}
 
 			for _, kicadProject := range repo.Kicad.Projects {
 				rv = append(rv,
@@ -467,6 +494,21 @@ func getTaskGroups(c *config.Config) ([]*runner.TaskGroup, error) {
 				)
 			}
 		}
+	}
+
+	if c.DfuFlasher != nil {
+		rv = append(rv, runner.NewTaskGroup(
+			&tasks.DfuFlasher{
+				Title:             c.DfuFlasher.Title,
+				Description:       c.DfuFlasher.Description,
+				Projects:          dfuProjects,
+				BaseDestination:   c.DfuFlasher.BaseDestination,
+				Template:          c.DfuFlasher.Template,
+				WithSidebar:       c.DfuFlasher.WithSidebar,
+				OpenGraph:         c.DfuFlasher.OpenGraph,
+				OpenGraphImageGen: ogimage,
+			},
+		))
 	}
 	return rv, nil
 }

@@ -40,6 +40,10 @@ func (p *Project) GetTasks() ([]*runner.Task, error) {
 		rv = append(rv, runner.NewTask(p, &cDocs{proj: p}))
 	}
 
+	if p.DfuReleaseAssetsPattern != "" {
+		rv = append(rv, runner.NewTask(p, &dfu{proj: p}))
+	}
+
 	slices.Sort(files)
 	for _, img := range slices.Compact(files) {
 		rv = append(rv, runner.NewTask(p, &fileTask{

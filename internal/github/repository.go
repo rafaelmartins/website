@@ -11,7 +11,7 @@ import (
 )
 
 var getRepository = `
-query GetRepository($owner: String!, $repo: String!, $readmeref: String, $docsref: String, $headersref: String) {
+query GetRepository($owner: String!, $repo: String!, $rollingtag: String!, $readmeref: String, $docsref: String, $headersref: String) {
 	repository(owner: $owner, name: $repo) {
 		description
 		homepageUrl
@@ -39,6 +39,16 @@ query GetRepository($owner: String!, $repo: String!, $readmeref: String, $docsre
 			tagName
 			url
 			description
+			releaseAssets(first: 100) {
+				nodes {
+					name
+					downloadUrl
+				}
+				totalCount
+			}
+		}
+		rolling: release(tagName: $rollingtag) {
+			tagName
 			releaseAssets(first: 100) {
 				nodes {
 					name
@@ -109,7 +119,7 @@ query GetRepository($owner: String!, $repo: String!, $readmeref: String, $docsre
 }
 `
 
-type RepositoryLatestReleaseAsset struct {
+type RepositoryReleaseAsset struct {
 	Name        string
 	DownloadUrl string
 }
@@ -119,7 +129,11 @@ type RepositoryLatestRelease struct {
 	Tag         string
 	Url         string
 	Description string
-	Assets      []RepositoryLatestReleaseAsset
+	Assets      []RepositoryReleaseAsset
+}
+
+type RepositoryRollingRelease struct {
+	Assets []RepositoryReleaseAsset
 }
 
 type RepositoryFile struct {
@@ -135,19 +149,20 @@ type RepositoryFile struct {
 }
 
 type Repository struct {
-	Description   string
-	HomepageUrl   string
-	DefaultBranch string
-	Head          string
-	Forks         int
-	Stars         int
-	Watchers      int
-	LicenseSpdx   string
-	LatestRelease *RepositoryLatestRelease
-	Releases      []string
-	Readme        *RepositoryFile
-	Docs          []*RepositoryFile
-	Headers       []*RepositoryFile
+	Description    string
+	HomepageUrl    string
+	DefaultBranch  string
+	Head           string
+	Forks          int
+	Stars          int
+	Watchers       int
+	LicenseSpdx    string
+	LatestRelease  *RepositoryLatestRelease
+	RollingRelease *RepositoryRollingRelease
+	Releases       []string
+	Readme         *RepositoryFile
+	Docs           []*RepositoryFile
+	Headers        []*RepositoryFile
 
 	owner      string
 	repo       string
@@ -206,7 +221,7 @@ func (r *RepositoryFile) Read() ([]byte, error) {
 	return rv, nil
 }
 
-func GetRepository(owner string, repo string, headersDir *string, localDir *string) (*Repository, error) {
+func GetRepository(owner string, repo string, rollingtag string, headersDir *string, localDir *string) (*Repository, error) {
 	o := struct {
 		Repository struct {
 			Description      string `json:"description"`
@@ -241,6 +256,16 @@ func GetRepository(owner string, repo string, headersDir *string, localDir *stri
 					TotalCount int `json:"totalCount"`
 				} `json:"releaseAssets"`
 			} `json:"latestRelease"`
+			Rolling *struct {
+				TagName       string `json:"tagName"`
+				ReleaseAssets struct {
+					Nodes []struct {
+						Name        string `json:"name"`
+						DownloadUrl string `json:"downloadUrl"`
+					} `json:"nodes"`
+					TotalCount int `json:"totalCount"`
+				} `json:"releaseAssets"`
+			} `json:"rolling"`
 			Releases struct {
 				Nodes []struct {
 					TagName      string `json:"tagName"`
@@ -275,8 +300,9 @@ func GetRepository(owner string, repo string, headersDir *string, localDir *stri
 	}{}
 
 	variables := map[string]any{
-		"owner": owner,
-		"repo":  repo,
+		"owner":      owner,
+		"repo":       repo,
+		"rollingtag": rollingtag,
 	}
 	if localDir == nil {
 		variables["readmeref"] = "HEAD:README.md"
@@ -304,6 +330,12 @@ func GetRepository(owner string, repo string, headersDir *string, localDir *stri
 	if o.Repository.LatestRelease != nil && o.Repository.LatestRelease.ReleaseAssets.TotalCount > 100 {
 		return nil, fmt.Errorf("github: repository: %s/%s: latest release with more than 100 assets: %d",
 			owner, repo, o.Repository.LatestRelease.ReleaseAssets.TotalCount,
+		)
+	}
+
+	if o.Repository.Rolling != nil && o.Repository.Rolling.ReleaseAssets.TotalCount > 100 {
+		return nil, fmt.Errorf("github: repository: %s/%s: rolling release with more than 100 assets: %d",
+			owner, repo, o.Repository.Rolling.ReleaseAssets.TotalCount,
 		)
 	}
 
@@ -336,7 +368,14 @@ func GetRepository(owner string, repo string, headersDir *string, localDir *stri
 			Description: o.Repository.LatestRelease.Description,
 		}
 		for _, asset := range o.Repository.LatestRelease.ReleaseAssets.Nodes {
-			rv.LatestRelease.Assets = append(rv.LatestRelease.Assets, RepositoryLatestReleaseAsset(asset))
+			rv.LatestRelease.Assets = append(rv.LatestRelease.Assets, RepositoryReleaseAsset(asset))
+		}
+	}
+
+	if o.Repository.Rolling != nil {
+		rv.RollingRelease = &RepositoryRollingRelease{}
+		for _, asset := range o.Repository.Rolling.ReleaseAssets.Nodes {
+			rv.RollingRelease.Assets = append(rv.RollingRelease.Assets, RepositoryReleaseAsset(asset))
 		}
 	}
 
